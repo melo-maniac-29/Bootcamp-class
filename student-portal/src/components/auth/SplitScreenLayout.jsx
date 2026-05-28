@@ -107,9 +107,8 @@ export default function SplitScreenLayout({ children, role = 'student' }) {
               >
                 {/* Large Title */}
                 {role === 'student' ? (
-                  <h2 className="text-5xl lg:text-6xl font-bold text-white mb-3 tracking-tight leading-tight">
-                    Welcome to<br />
-                    <span className="font-normal">student portal</span>
+                  <h2 className="text-5xl lg:text-6xl font-bold text-white mb-3 tracking-tight">
+                    Student Login
                   </h2>
                 ) : (
                   <h2 className="text-5xl lg:text-6xl font-bold text-white mb-3 tracking-tight">
