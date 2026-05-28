@@ -79,7 +79,7 @@ export default function SplitScreenLayout({ children, role = 'student' }) {
       </div>
 
       {/* Illustration Side (50% Width) - Lavender Purple Background for Student and Admin */}
-      <div className={`hidden lg:flex lg:w-1/2 relative ${(role === 'student' || role === 'admin') ? 'bg-[#9162F5]' : THEMES[role].bgInner} overflow-hidden items-center justify-center`}>
+      <div className={`hidden lg:flex lg:w-1/2 relative ${(role === 'student' || role === 'admin') ? 'bg-[#946DFE]' : THEMES[role].bgInner} overflow-hidden items-center justify-center`}>
         
         {/* Full Bleed Inner Container */}
         <div className="relative w-full h-full overflow-hidden flex flex-col">
