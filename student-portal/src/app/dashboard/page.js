@@ -59,11 +59,87 @@ export default function StudentDashboard() {
 
   if (loading || !bootcamp) {
     return (
-      <div className="w-full h-full flex items-center justify-center min-h-[50vh]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-8 h-8 rounded-full border-2 border-muted-foreground border-t-transparent animate-spin" />
+      <motion.div 
+        className="max-w-[80rem] mx-auto space-y-10 pb-16 pt-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+      >
+        {/* Header Skeleton */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="space-y-4 w-full">
+            <div className="flex gap-2">
+              <div className="w-16 h-6 rounded-md bg-secondary/40 animate-pulse" />
+              <div className="w-20 h-6 rounded-md bg-secondary/40 animate-pulse" />
+            </div>
+            <div className="w-2/3 max-w-[400px] h-12 rounded-lg bg-secondary/40 animate-pulse" />
+            <div className="w-1/2 max-w-[300px] h-6 rounded-lg bg-secondary/40 animate-pulse" />
+          </div>
+          <div className="w-40 h-10 rounded-lg bg-secondary/40 animate-pulse shrink-0" />
         </div>
-      </div>
+
+        {/* Stats Row Skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <motion.div 
+              key={i} 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              className="bg-card border border-border rounded-xl p-6 flex items-center gap-5"
+            >
+              <div className="w-12 h-12 rounded-lg bg-secondary/40 animate-pulse shrink-0" />
+              <div className="space-y-2 flex-1">
+                <div className="w-1/2 h-4 rounded bg-secondary/40 animate-pulse" />
+                <div className="w-1/3 h-8 rounded bg-secondary/40 animate-pulse" />
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Bottom Section Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:col-span-2 space-y-6"
+          >
+            <div className="w-32 h-8 rounded-lg bg-secondary/40 animate-pulse" />
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-[90px] bg-card border border-border rounded-xl p-5 flex flex-col justify-center">
+                  <div className="space-y-2">
+                    <div className="w-1/3 h-5 rounded bg-secondary/40 animate-pulse" />
+                    <div className="w-2/3 h-4 rounded bg-secondary/40 animate-pulse" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="space-y-6"
+          >
+            <div className="w-24 h-8 rounded-lg bg-secondary/40 animate-pulse" />
+            <div className="bg-card border border-border rounded-xl p-6 min-h-[300px]">
+               <div className="space-y-8">
+                 {[1, 2, 3, 4].map((i) => (
+                   <div key={i} className="flex gap-4 items-start">
+                     <div className="w-3 h-3 rounded-full bg-secondary/40 animate-pulse mt-1 shrink-0" />
+                     <div className="space-y-2 flex-1">
+                       <div className="w-1/2 h-4 rounded bg-secondary/40 animate-pulse" />
+                       <div className="w-1/3 h-3 rounded bg-secondary/40 animate-pulse" />
+                     </div>
+                   </div>
+                 ))}
+               </div>
+            </div>
+          </motion.div>
+        </div>
+      </motion.div>
     );
   }
 
