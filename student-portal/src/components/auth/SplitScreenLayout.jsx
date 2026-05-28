@@ -71,18 +71,18 @@ export default function SplitScreenLayout({ children, role = 'student' }) {
   return (
     <div className={`flex min-h-screen w-full bg-background overflow-hidden font-sans ${role === 'student' ? 'flex-row' : 'flex-row-reverse'}`}>
       
-      {/* LEFT SIDE: Login Form (50% Width) - Charcoal Grey Background for Student */}
-      <div className={`w-full lg:w-1/2 flex flex-col justify-center items-center p-6 sm:p-12 relative z-10 ${role === 'student' ? 'bg-[#121214]' : 'bg-[#0B0F19]'} shadow-[10px_0_40px_rgba(0,0,0,0.5)]`}>
+      {/* Form Side (50% Width) - Charcoal Grey Background for Student and Admin */}
+      <div className={`w-full lg:w-1/2 flex flex-col justify-center items-center p-6 sm:p-12 relative z-10 ${(role === 'student' || role === 'admin') ? 'bg-[#121214]' : 'bg-[#0B0F19]'} shadow-[10px_0_40px_rgba(0,0,0,0.5)]`}>
         <div className="w-full max-w-[400px] relative z-10">
           {children}
         </div>
       </div>
 
-      {/* RIGHT SIDE: Background Panel (50% Width) - Lavender Purple Background for Student */}
-      <div className={`hidden lg:flex lg:w-1/2 relative ${role === 'student' ? 'bg-[#9162F5]' : THEMES[role].bgOuter} overflow-hidden items-center justify-center p-8`}>
+      {/* Illustration Side (50% Width) - Lavender Purple Background for Student and Admin */}
+      <div className={`hidden lg:flex lg:w-1/2 relative ${(role === 'student' || role === 'admin') ? 'bg-[#9162F5]' : THEMES[role].bgOuter} overflow-hidden items-center justify-center p-8`}>
         
         {/* Large Inner Card */}
-        <div className={`relative w-full h-full max-h-[900px] rounded-3xl ${role === 'student' ? 'bg-[#9162F5]' : THEMES[role].bgInner} shadow-2xl overflow-hidden flex flex-col`}>
+        <div className={`relative w-full h-full max-h-[900px] rounded-3xl ${(role === 'student' || role === 'admin') ? 'bg-[#9162F5]' : THEMES[role].bgInner} shadow-2xl overflow-hidden flex flex-col`}>
           
           {/* Abstract Organic Blobs */}
           <motion.div 
@@ -98,18 +98,24 @@ export default function SplitScreenLayout({ children, role = 'student' }) {
 
           {/* Center Content */}
           <div className="relative z-10 w-full h-full flex flex-col items-center justify-center p-8 lg:p-16 text-center">
-            {role === 'student' ? (
+            {role === 'student' || role === 'admin' ? (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                 className="w-full max-w-[500px] flex flex-col items-start text-left"
               >
-                {/* Large Title from Image 2 */}
-                <h2 className="text-5xl lg:text-6xl font-bold text-white mb-3 tracking-tight leading-tight">
-                  Welcome to<br />
-                  <span className="font-normal">student portal</span>
-                </h2>
+                {/* Large Title */}
+                {role === 'student' ? (
+                  <h2 className="text-5xl lg:text-6xl font-bold text-white mb-3 tracking-tight leading-tight">
+                    Welcome to<br />
+                    <span className="font-normal">student portal</span>
+                  </h2>
+                ) : (
+                  <h2 className="text-5xl lg:text-6xl font-bold text-white mb-3 tracking-tight">
+                    Admin Login
+                  </h2>
+                )}
                 {/* Smaller Subtext */}
                 <p className="text-white/90 text-sm md:text-base mb-8 font-medium">
                   Login to access your account
@@ -118,8 +124,8 @@ export default function SplitScreenLayout({ children, role = 'student' }) {
                 {/* Proper High-End Illustration */}
                 <div className="w-full flex justify-center items-center mt-4">
                   <Image 
-                    src="/images/student_illustration.png" 
-                    alt="Student Portal Illustration" 
+                    src={role === 'student' ? "/images/student_illustration.png" : "/images/admin_illustration.png"} 
+                    alt={`${role === 'student' ? 'Student' : 'Admin'} Portal Illustration`} 
                     width={600} 
                     height={400} 
                     className="w-full h-auto object-contain drop-shadow-2xl rounded-2xl"
