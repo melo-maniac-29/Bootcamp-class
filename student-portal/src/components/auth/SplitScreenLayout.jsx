@@ -127,7 +127,7 @@ export default function SplitScreenLayout({ children, role = 'student' }) {
                     alt={`${role === 'student' ? 'Student' : 'Admin'} Portal Illustration`} 
                     width={600} 
                     height={400} 
-                    className="w-full h-auto object-contain drop-shadow-2xl rounded-2xl"
+                    className="w-full h-auto object-contain"
                     priority
                   />
                 </div>
