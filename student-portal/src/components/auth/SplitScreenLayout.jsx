@@ -123,7 +123,7 @@ export default function SplitScreenLayout({ children, role = 'student' }) {
                 {/* Proper High-End Illustration */}
                 <div className="w-full flex justify-center items-center mt-4">
                   <Image 
-                    src={role === 'student' ? "/images/student_illustration.png" : "/images/admin_illustration.png"} 
+                    src={role === 'student' ? "/images/student_lineart.png" : "/images/admin_illustration.png"} 
                     alt={`${role === 'student' ? 'Student' : 'Admin'} Portal Illustration`} 
                     width={600} 
                     height={400} 
