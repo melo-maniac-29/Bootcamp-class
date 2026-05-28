@@ -69,7 +69,7 @@ export default function SplitScreenLayout({ children, role = 'student' }) {
   }, [slides.length, role]);
 
   return (
-    <div className={`flex min-h-screen w-full bg-background overflow-hidden font-sans ${role === 'student' ? 'flex-row' : 'flex-row-reverse'}`}>
+    <div className={`flex h-screen w-full bg-background overflow-hidden font-sans ${role === 'student' ? 'flex-row' : 'flex-row-reverse'}`}>
       
       {/* Form Side (50% Width) - Charcoal Grey Background for Student and Admin */}
       <div className={`w-full lg:w-1/2 flex flex-col justify-center items-center p-6 sm:p-12 relative z-10 ${(role === 'student' || role === 'admin') ? 'bg-[#121214]' : 'bg-[#0B0F19]'} shadow-[10px_0_40px_rgba(0,0,0,0.5)]`}>
