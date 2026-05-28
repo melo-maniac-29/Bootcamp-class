@@ -121,13 +121,17 @@ export default function SplitScreenLayout({ children, role = 'student' }) {
                 </p>
 
                 {/* Proper High-End Illustration */}
-                <div className="w-full flex justify-center items-center mt-4">
+                <div className="w-full flex justify-center items-center mt-4 relative">
                   <Image 
                     src={role === 'student' ? "/images/student_lineart.png" : "/images/admin_illustration.png"} 
                     alt={`${role === 'student' ? 'Student' : 'Admin'} Portal Illustration`} 
                     width={600} 
                     height={400} 
                     className="w-full h-auto object-contain"
+                    style={{
+                      WebkitMaskImage: 'radial-gradient(ellipse at center, black 70%, transparent 100%)',
+                      maskImage: 'radial-gradient(ellipse at center, black 70%, transparent 100%)'
+                    }}
                     priority
                   />
                 </div>
