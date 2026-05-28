@@ -103,14 +103,15 @@ export default function SplitScreenLayout({ children, role = 'student' }) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                className="w-full max-w-[500px] flex flex-col items-center"
+                className="w-full max-w-[500px] flex flex-col items-start text-left"
               >
-                {/* Large Bold Title */}
-                <h2 className="text-4xl lg:text-5xl font-bold text-white mb-3 tracking-tight">
-                  Student Login
+                {/* Large Title from Image 2 */}
+                <h2 className="text-5xl lg:text-6xl font-bold text-white mb-3 tracking-tight leading-tight">
+                  Welcome to<br />
+                  <span className="font-normal">student portal</span>
                 </h2>
                 {/* Smaller Subtext */}
-                <p className="text-white/90 text-lg mb-8 font-medium">
+                <p className="text-white/90 text-sm md:text-base mb-8 font-medium">
                   Login to access your account
                 </p>
 
