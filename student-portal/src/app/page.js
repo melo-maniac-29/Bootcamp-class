@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
 import { loginUser } from '@/lib/auth';
-import { User, Lock, GraduationCap, ArrowRight, Loader2 } from 'lucide-react';
+import { GraduationCap, ArrowRight, Loader2, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,6 +19,7 @@ export default function StudentLoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
@@ -57,7 +58,7 @@ export default function StudentLoginPage() {
     } catch (err) {
       console.error('Login error:', err);
       if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-        setError('Invalid Participant ID or password');
+        setError('Invalid Username or password');
       } else {
         setError('Something went wrong. Please try again');
       }
@@ -78,58 +79,69 @@ export default function StudentLoginPage() {
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
         className="w-full"
       >
+        {/* Charcoal Panel Header */}
         <div className="mb-10">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-white mb-6 border border-white/10 shadow-sm">
-            <GraduationCap size={24} strokeWidth={1.5} />
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Welcome Back</h1>
-          <p className="text-slate-400 font-medium text-sm">Enter your Participant ID to continue your journey.</p>
+          <h1 className="text-4xl font-semibold tracking-tight text-white mb-2 font-sans">Login</h1>
+          <p className="text-white/60 text-sm font-normal">Enter your account details</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider" htmlFor="participantId">
-              Participant ID
+          {/* Username / Participant ID Line-style Field */}
+          <div className="space-y-2 relative">
+            <label className="text-xs font-semibold text-white/80 uppercase tracking-wider" htmlFor="participantId">
+              Username
             </label>
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <User className="h-4 w-4 text-slate-500 group-focus-within:text-white transition-colors" />
-              </div>
-              <Input
-                id="participantId"
-                type="text"
-                placeholder="e.g. CIRCUITRON-001"
-                className="pl-10 bg-[#0B0F19] border-white/10 focus-visible:ring-1 focus-visible:ring-white/20 focus-visible:border-white/20 h-12 text-white placeholder:text-slate-600 rounded-xl transition-all"
-                value={participantId}
-                onChange={(e) => setParticipantId(e.target.value)}
-                autoComplete="username"
-                autoCapitalize="characters"
-              />
-            </div>
+            <Input
+              id="participantId"
+              type="text"
+              placeholder="Username"
+              className="bg-transparent border-t-0 border-l-0 border-r-0 border-b border-white/20 rounded-none focus-visible:ring-0 focus-visible:border-white focus-visible:ring-offset-0 px-0 h-10 text-white placeholder:text-white/20 transition-all font-sans text-sm"
+              value={participantId}
+              onChange={(e) => setParticipantId(e.target.value)}
+              autoComplete="username"
+              autoCapitalize="characters"
+            />
           </div>
 
-          <div className="space-y-2">
+          {/* Password Line-style Field with Visibility Toggle */}
+          <div className="space-y-2 relative">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider" htmlFor="password">
+              <label className="text-xs font-semibold text-white/80 uppercase tracking-wider" htmlFor="password">
                 Password
               </label>
             </div>
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Lock className="h-4 w-4 text-slate-500 group-focus-within:text-white transition-colors" />
-              </div>
+            <div className="relative">
               <Input
                 id="password"
-                type="password"
-                placeholder="••••••••"
-                className="pl-10 bg-[#0B0F19] border-white/10 focus-visible:ring-1 focus-visible:ring-white/20 focus-visible:border-white/20 h-12 text-white placeholder:text-slate-600 rounded-xl transition-all"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Password"
+                className="bg-transparent border-t-0 border-l-0 border-r-0 border-b border-white/20 rounded-none focus-visible:ring-0 focus-visible:border-white focus-visible:ring-offset-0 px-0 pr-10 h-10 text-white placeholder:text-white/20 transition-all font-sans text-sm"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
               />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 flex items-center pr-1 text-white/60 hover:text-white transition-colors"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? (
+                  <EyeOff size={18} strokeWidth={2} className="text-white" />
+                ) : (
+                  <Eye size={18} strokeWidth={2} className="text-white" />
+                )}
+              </button>
             </div>
           </div>
 
+          {/* Forgot Password Link */}
+          <div className="flex justify-start text-xs pt-1">
+            <a href="#" className="text-white/60 hover:text-white transition-colors font-medium">
+              Forgot Password?
+            </a>
+          </div>
+
+          {/* Error Message Display */}
           <AnimatePresence>
             {visibleError && (
               <motion.div
@@ -143,24 +155,33 @@ export default function StudentLoginPage() {
             )}
           </AnimatePresence>
 
+          {/* Solid Lavender Login Button */}
           <Button
             type="submit"
-            className="w-full h-12 bg-white hover:bg-slate-200 hover:opacity-90 text-black font-medium rounded-xl transition-all shadow-sm"
+            className="w-full h-12 bg-[#9162F5] hover:bg-[#8152e5] text-white font-medium rounded-xl transition-all shadow-md mt-6 border-none"
             disabled={loading}
           >
             {loading ? (
-              <Loader2 className="h-5 w-5 animate-spin text-black" />
+              <Loader2 className="h-5 w-5 animate-spin text-white" />
             ) : (
-              <span className="flex items-center gap-2">
-                Sign In <ArrowRight className="h-4 w-4" />
-              </span>
+              "Login"
             )}
           </Button>
           
-          <div className="text-center mt-6">
-            <p className="text-sm text-slate-500">
-              Admin or Volunteer? <a href="/admin-login" className="text-white font-medium hover:underline">Log in here</a>
-            </p>
+          {/* Footer inside Left Panel: Don't have an account & Sign Up */}
+          <div className="flex items-center justify-between text-xs text-white/60 mt-10 border-t border-white/10 pt-6">
+            <span>Don't have an account?</span>
+            <button
+              type="button"
+              className="bg-[#27272A] border border-white/5 hover:bg-[#3F3F46] text-white text-xs px-4 py-2 rounded-lg font-medium transition-all"
+            >
+              Sign up
+            </button>
+          </div>
+
+          {/* Admin Switcher */}
+          <div className="text-center mt-4 text-[11px] text-white/40">
+            Admin or Volunteer? <a href="/admin-login" className="text-white/60 hover:text-white transition-all underline">Log in here</a>
           </div>
         </form>
       </motion.div>

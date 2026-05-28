@@ -53,31 +53,36 @@ const THEMES = {
   }
 };
 
+import StudentLoginIllustration from './StudentLoginIllustration';
+
 export default function SplitScreenLayout({ children, role = 'student' }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const slides = SLIDES[role] || SLIDES.student;
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 9000); // 9 seconds per slide for calmer reading
-    return () => clearInterval(timer);
-  }, [slides.length]);
+    if (role !== 'student') {
+      const timer = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % slides.length);
+      }, 9000);
+      return () => clearInterval(timer);
+    }
+  }, [slides.length, role]);
 
   return (
     <div className={`flex min-h-screen w-full bg-background overflow-hidden font-sans ${role === 'student' ? 'flex-row' : 'flex-row-reverse'}`}>
       
-      {/* LEFT SIDE: Login Form (50% Width) */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-6 sm:p-12 relative z-10 bg-[#0B0F19] shadow-[10px_0_40px_rgba(0,0,0,0.5)]">
+      {/* LEFT SIDE: Login Form (50% Width) - Charcoal Grey Background for Student */}
+      <div className={`w-full lg:w-1/2 flex flex-col justify-center items-center p-6 sm:p-12 relative z-10 ${role === 'student' ? 'bg-[#121214]' : 'bg-[#0B0F19]'} shadow-[10px_0_40px_rgba(0,0,0,0.5)]`}>
         <div className="w-full max-w-[400px] relative z-10">
           {children}
         </div>
       </div>
 
-      <div className={`hidden lg:flex lg:w-1/2 relative ${THEMES[role].bgOuter} overflow-hidden items-center justify-center p-8`}>
+      {/* RIGHT SIDE: Background Panel (50% Width) - Lavender Purple Background for Student */}
+      <div className={`hidden lg:flex lg:w-1/2 relative ${role === 'student' ? 'bg-[#9162F5]' : THEMES[role].bgOuter} overflow-hidden items-center justify-center p-8`}>
         
-        {/* Large Inner Card (Matching the reference image) */}
-        <div className={`relative w-full max-w-[800px] h-full max-h-[900px] rounded-3xl ${THEMES[role].bgInner} shadow-2xl overflow-hidden flex flex-col`}>
+        {/* Large Inner Card */}
+        <div className={`relative w-full h-full max-h-[900px] rounded-3xl ${role === 'student' ? 'bg-[#9162F5]' : THEMES[role].bgInner} shadow-2xl overflow-hidden flex flex-col`}>
           
           {/* Abstract Organic Blobs */}
           <motion.div 
@@ -91,56 +96,81 @@ export default function SplitScreenLayout({ children, role = 'student' }) {
             className={`absolute -bottom-[20%] -right-[10%] w-[80%] h-[70%] rounded-full ${THEMES[role].blob2} blur-3xl`}
           />
 
-          {/* Center Animated Content */}
-          <div className="relative z-10 w-full h-full flex flex-col items-center justify-center p-8 lg:p-16">
-            <AnimatePresence mode="wait">
+          {/* Center Content */}
+          <div className="relative z-10 w-full h-full flex flex-col items-center justify-center p-8 lg:p-16 text-center">
+            {role === 'student' ? (
               <motion.div
-                key={currentSlide}
-                initial={{ opacity: 0, x: 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -30 }}
-                transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-                className="w-full max-w-[480px]"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                className="w-full max-w-[480px] flex flex-col items-center"
               >
-                {/* Translucent Card matching the image */}
-                <div className="bg-white/5 rounded-3xl p-10 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.05)] border border-white/5">
-                  <div className="w-16 h-16 rounded-[1.25rem] bg-white flex items-center justify-center mb-8 shadow-sm">
-                    {(() => {
-                      const Icon = slides[currentSlide].icon;
-                      return <Icon size={32} strokeWidth={2} className={THEMES[role].accent} />;
-                    })()}
-                  </div>
-                  <h2 className="text-3xl font-bold text-white mb-4 leading-tight">
-                    {slides[currentSlide].title}
-                  </h2>
-                  <p className="text-white/80 text-lg leading-relaxed">
-                    {slides[currentSlide].subtitle}
-                  </p>
+                {/* Large Bold Title */}
+                <h2 className="text-4xl lg:text-5xl font-bold text-white mb-3 tracking-tight">
+                  Student Login
+                </h2>
+                {/* Smaller Subtext */}
+                <p className="text-white/90 text-lg mb-8 font-medium">
+                  Login to access your account
+                </p>
+
+                {/* Minimalist Line-Art Illustration */}
+                <div className="w-full flex justify-center items-center">
+                  <StudentLoginIllustration />
                 </div>
               </motion.div>
-            </AnimatePresence>
+            ) : (
+              <>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentSlide}
+                    initial={{ opacity: 0, x: 30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -30 }}
+                    transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+                    className="w-full max-w-[480px]"
+                  >
+                    {/* Translucent Card matching the image */}
+                    <div className="bg-white/5 rounded-3xl p-10 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.05)] border border-white/5 text-left">
+                      <div className="w-16 h-16 rounded-[1.25rem] bg-white flex items-center justify-center mb-8 shadow-sm">
+                        {(() => {
+                          const Icon = slides[currentSlide].icon;
+                          return <Icon size={32} strokeWidth={2} className={THEMES[role].accent} />;
+                        })()}
+                      </div>
+                      <h2 className="text-3xl font-bold text-white mb-4 leading-tight">
+                        {slides[currentSlide].title}
+                      </h2>
+                      <p className="text-white/80 text-lg leading-relaxed">
+                        {slides[currentSlide].subtitle}
+                      </p>
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
 
-            {/* Slide Indicators */}
-            <div className="absolute bottom-16 left-0 right-0 flex justify-center gap-2">
-              {slides.map((_, idx) => (
-                <div 
-                  key={idx} 
-                  className={`relative h-1.5 rounded-full transition-all duration-500 overflow-hidden ${
-                    currentSlide === idx ? 'w-10 bg-white/20' : 'w-10 bg-black/10'
-                  }`}
-                >
-                  {currentSlide === idx && (
-                    <motion.div
-                      layoutId="indicator"
-                      initial={{ x: '-100%' }}
-                      animate={{ x: '0%' }}
-                      transition={{ duration: 9, ease: "linear" }}
-                      className="absolute inset-0 bg-white rounded-full"
-                    />
-                  )}
+                {/* Slide Indicators */}
+                <div className="absolute bottom-16 left-0 right-0 flex justify-center gap-2">
+                  {slides.map((_, idx) => (
+                    <div 
+                      key={idx} 
+                      className={`relative h-1.5 rounded-full transition-all duration-500 overflow-hidden ${
+                        currentSlide === idx ? 'w-10 bg-white/20' : 'w-10 bg-black/10'
+                      }`}
+                    >
+                      {currentSlide === idx && (
+                        <motion.div
+                          layoutId="indicator"
+                          initial={{ x: '-100%' }}
+                          animate={{ x: '0%' }}
+                          transition={{ duration: 9, ease: "linear" }}
+                          className="absolute inset-0 bg-white rounded-full"
+                        />
+                      )}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </>
+            )}
           </div>
 
         </div>
@@ -148,3 +178,4 @@ export default function SplitScreenLayout({ children, role = 'student' }) {
     </div>
   );
 }
+
