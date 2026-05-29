@@ -145,7 +145,11 @@ export default function UnifiedLoginPage() {
 
       // Automatically log them in
       const userData = await loginUser(data.email, password);
-      router.push('/dashboard');
+      if (userData.role === 'admin') {
+        router.push('/admin');
+      } else {
+        router.push('/dashboard');
+      }
     } catch (err) {
       setError('Failed to setup account');
       setLoading(false);

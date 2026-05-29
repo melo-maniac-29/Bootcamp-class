@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { CheckCircle2, Loader2, Play } from 'lucide-react';
+import { CheckCircle2, Loader2 } from 'lucide-react';
 import { updateVideoProgress, getVideoProgress, updateUserProgress } from '@/lib/db';
+import { VIDEO_COMPLETION_THRESHOLD } from '@/shared/constants';
 
 function extractVideoId(url) {
   if (!url) return null;
@@ -21,6 +22,7 @@ export default function YouTubePlayer({ videoUrl, dayId, userId, onComplete }) {
   const [isCompleted, setIsCompleted] = useState(false);
   const [loading, setLoading] = useState(true);
   const intervalRef = useRef(null);
+  const isCompletedRef = useRef(false);
   const containerRef = useRef(null);
   const playerRef = useRef(null);
   const maxPercentRef = useRef(0);
@@ -37,7 +39,10 @@ export default function YouTubePlayer({ videoUrl, dayId, userId, onComplete }) {
           const pct = data.videoWatchPercent || 0;
           setMaxWatchPercent(pct);
           maxPercentRef.current = pct;
-          if (data.videoCompleted) setIsCompleted(true);
+          if (data.videoCompleted) {
+            setIsCompleted(true);
+            isCompletedRef.current = true;
+          }
         }
       } catch (err) { console.error('Failed to load video progress:', err); }
       setLoading(false);
@@ -118,13 +123,14 @@ export default function YouTubePlayer({ videoUrl, dayId, userId, onComplete }) {
   const saveProgress = async (percent) => {
     if (!userId || !dayId) return;
     try {
-      const completed = percent >= 50;
+      const completed = percent >= VIDEO_COMPLETION_THRESHOLD;
       await updateVideoProgress(userId, dayId, {
         videoWatchPercent: percent,
         videoCompleted: completed,
       });
-      if (completed && !isCompleted) {
+      if (completed && !isCompletedRef.current) {
         setIsCompleted(true);
+        isCompletedRef.current = true;
         await updateUserProgress(userId, dayId, { videoCompleted: true });
         onComplete?.();
       }
@@ -168,7 +174,7 @@ export default function YouTubePlayer({ videoUrl, dayId, userId, onComplete }) {
         <div className="flex items-center justify-between mb-2">
           <div>
             <p className="text-sm font-medium text-white">Video Progress</p>
-            <p className="text-xs text-white/40">Watch at least 50% to complete this section.</p>
+            <p className="text-xs text-white/40">{`Watch at least ${VIDEO_COMPLETION_THRESHOLD}% to complete this section.`}</p>
           </div>
           {isCompleted ? (
             <div className="flex items-center gap-1.5 text-emerald-400 text-sm font-medium">
@@ -188,8 +194,8 @@ export default function YouTubePlayer({ videoUrl, dayId, userId, onComplete }) {
             style={{ width: `${Math.min(maxWatchPercent, 100)}%` }}
           />
         </div>
-        {!isCompleted && maxWatchPercent > 0 && maxWatchPercent < 50 && (
-          <p className="text-xs text-white/30 mt-2">{50 - maxWatchPercent}% more to reach completion threshold</p>
+        {!isCompleted && maxWatchPercent > 0 && maxWatchPercent < VIDEO_COMPLETION_THRESHOLD && (
+          <p className="text-xs text-white/30 mt-2">{VIDEO_COMPLETION_THRESHOLD - maxWatchPercent}% more to reach completion threshold</p>
         )}
       </div>
     </div>

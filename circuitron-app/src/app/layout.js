@@ -16,14 +16,19 @@ export const metadata = {
   },
 };
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: '#0B0F19',
+};
+
 export default function RootLayout({ children }) {
   return (
     // Added suppressHydrationWarning to handle third-party browser attributes smoothly
     <html lang="en" suppressHydrationWarning className={`${inter.variable} font-sans`}>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-        <meta name="theme-color" content="#0B0F19" />
-      </head>
+
       <body suppressHydrationWarning className="antialiased bg-background text-foreground selection:bg-primary/30 selection:text-primary-foreground min-h-screen flex flex-col">
         <AuthProvider>
           <ThemeProvider>

@@ -13,7 +13,7 @@ import {
   onSnapshot,
   serverTimestamp,
   writeBatch,
-  increment,
+
 } from 'firebase/firestore';
 import { db } from './firebase';
 
@@ -359,7 +359,7 @@ export async function reviewSubmission(submissionId, reviewData) {
   if (reviewData.status === 'Needs Revision') {
     const progressId = `${submission.userId}_${submission.dayId}`;
     const progressRef = doc(db, 'userProgress', progressId);
-    batch.update(progressRef, { submissionCompleted: false, overallCompleted: false });
+    batch.set(progressRef, { submissionCompleted: false, overallCompleted: false }, { merge: true });
   }
 
   await batch.commit();

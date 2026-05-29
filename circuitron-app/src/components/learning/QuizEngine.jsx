@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, XCircle, Clock, Loader2, Trophy, RotateCcw } from 'lucide-react';
+import { CheckCircle2, XCircle, Clock, Loader2, Trophy } from 'lucide-react';
 import { getQuiz, getQuizAttempt, submitQuizAttempt } from '@/lib/db';
 import { QUIZ_CONFIG } from '@/shared/constants';
 

@@ -22,7 +22,7 @@ export async function verifyAuth(request) {
 
     const token = authHeader.substring(7);
 
-    if (!authAdmin) {
+    if (!authAdmin || !dbAdmin) {
       console.error('Firebase Admin Auth is not initialized');
       return NextResponse.json(
         { error: 'Server authentication not configured' },
