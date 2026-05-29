@@ -12,29 +12,29 @@ The platform is engineered using a robust technical stack:
 
 ## ⚙️ SYSTEM ROLES & ACCESS HIERARCHY
 
-The platform enforces strict Role-Based Access Control (RBAC) to govern the learning architecture.
+The platform enforces strict Role-Based Access Control (RBAC) to govern the learning architecture and protect system integrity.
 
 ### 01 // INITIATE (`student`)
 The standard operational tier assigned upon secure authentication.
 - **Cognitive Vault (`/dashboard`)**: A terminal command center tracking structural progression, node processing limits, and a real-time leaderboard for architectural supremacy.
 - **Architectural Roadmap (`/dashboard/days`)**: The central blueprint revealing operational nodes and daily logic sprints.
-- **Execution Terminal (`/dashboard/days/[dayId]`)**: The active interface where initiates analyze telemetry feeds (video), process raw architectural data (Markdown tasks), and upload logic states (submissions).
+- **Execution Terminal (`/dashboard/days/[dayId]`)**: The active interface where initiates analyze telemetry feeds (video tutorials), process raw architectural data (Markdown tasks), and upload logic states (submissions).
 - **Validation Engine (`/dashboard/days/[dayId]/quiz`)**: Interactive, granular evaluation tests that must be stabilized to proceed.
 
 ### 02 // LOGIC MENTOR (`volunteer`)
 An elevated operational tier designated for code review and structural optimization.
-- **Clearance Level**: Matches core administrative layers for grading node submissions, returning verdicts of `VERIFIED_STABLE` (Approved) or `NEEDS_RECALIBRATION` (Revision).
+- **Clearance Level**: Matches core administrative layers for grading node submissions, returning verdicts of `VERIFIED_STABLE` (Approved) or `NEEDS_RECALIBRATION` (Needs Revision).
 - *(Note: Access relies strictly on backend telemetry and isolated grading paths to ensure the core curriculum blueprint remains tamper-proof).*
 
 ### 03 // MAINFRAME ADMINISTRATOR (`admin`)
 The root-level engineers who configure the architectural matrix and govern the entire platform.
-- **Control Interface (`/admin`)**: The central nexus for platform diagnostics.
+- **Control Interface (`/admin`)**: The central nexus for platform diagnostics and configuration.
 - **Curriculum Architecture (`/admin/content`)**: 
   - Synthesize and compile Bootcamp "Operational Weeks".
   - Instantiate "Nodes" (Daily Learning modules).
   - Utilize the **Schematic Editor** to inject video coordinates, draft complex markdown schematics, and compile validation quizzes.
 - **User Node Management (`/admin/users`)**: 
-  - Trace all authenticated operatives.
+  - Trace all authenticated operatives in real-time.
   - Dynamically elevate an Initiate to a Mentor or Admin with immediate system feedback.
 - **Quality Assurance Review (`/admin/submissions`)**: 
   - Analyze raw output strings submitted by initiates.
@@ -47,14 +47,14 @@ The root-level engineers who configure the architectural matrix and govern the e
 The matrix cleanly segregates the Backend Processing (`convex/`) from the Frontend Visualizer (`src/`).
 
 ### BACKEND MAINFRAME (`convex/`)
-Handles all distributed processing and state persistence.
+Handles all distributed processing and state persistence securely on the server.
 - `schema.ts`: The strict relational architecture mapping Users, Sequences, Nodes, Memory states, and Input logs.
-- `auth.ts`: Authentication relay configuring cryptographic handshakes.
+- `auth.ts`: Authentication relay configuring cryptographic handshakes (Email/Password).
 - `content.ts`: Write protocols for editing the master blueprint (Root Access Required).
 - `submissions.ts`: Quality control mutations for evaluating operative performance (Root/Mentor Access Required).
 
 ### FRONTEND VISUALIZER (`src/`)
-Compiles UI topology and telemetry dashboards.
+Compiles UI topology, routing, and telemetry dashboards.
 - `app/admin/`: Shielded routes for the Mainframe Control Interface.
 - `app/dashboard/`: Shielded routes for the Initiate Cognitive Vault.
 - `components/`: Modular, reusable hardware components (e.g., `AppSidebar`, `AdminPortalLink`, and schematic visualization elements).
@@ -64,7 +64,7 @@ Compiles UI topology and telemetry dashboards.
 ## 🚀 INITIALIZATION PROTOCOL
 
 ### 1. Booting the Mainframe
-To boot the system locally, engage two parallel terminal threads:
+To boot the system locally, engage two parallel terminal threads from the root directory:
 
 **THREAD 01 (Database Engine - Convex):**
 ```bash
@@ -76,7 +76,7 @@ npx convex dev
 npm run dev
 ```
 
-The graphical user interface will mount at `http://localhost:3000`.
+The graphical user interface will mount and listen at `http://localhost:3000`.
 
 ### 2. Elevating to Root Access (Admin Creation)
 Due to strict cryptographic hashing, external state injection is prohibited. To configure your initial Root user:
@@ -86,5 +86,3 @@ Due to strict cryptographic hashing, external state injection is prohibited. To 
 npx convex run reset:makeAdmin
 ```
 3. Refresh the telemetry dashboard. The **Mainframe Admin Portal** will now be visible in your sidebar array.
-
-
