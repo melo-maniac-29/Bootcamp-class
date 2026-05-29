@@ -532,75 +532,77 @@ export default function LandingPage() {
             </div>
 
             {/* PANEL 03: CONQUEST */}
-            <div className="w-screen shrink-0 h-full flex flex-row items-center justify-between px-24 xl:px-36 py-20 relative select-none">
-              <div className="w-[40vw] space-y-8 pr-12">
-                <span className="font-mono text-xs uppercase tracking-[0.4em] text-gray-500">OPERATIONAL NODE // 03</span>
-                <h2 className="text-6xl xl:text-7xl font-display font-black tracking-tighter uppercase leading-none">
-                  PLATFORM <br />CONQUEST.
-                </h2>
-                <p className="text-gray-400 text-sm font-sans font-medium leading-relaxed max-w-md">
-                  Establish architectural hierarchy. Compete against global student cohorts in logical speed sprints, secure your streak multiplier, and ascend the ranks.
-                </p>
-              </div>
+            <div className="w-screen shrink-0 h-full flex flex-col relative select-none">
+              
+              {/* Main Content Area */}
+              <div className="flex-1 flex flex-row items-center justify-between px-24 xl:px-36 py-20 relative">
+                <div className="w-[40vw] space-y-8 pr-12">
+                  <span className="font-mono text-xs uppercase tracking-[0.4em] text-gray-500">OPERATIONAL NODE // 03</span>
+                  <h2 className="text-6xl xl:text-7xl font-display font-black tracking-tighter uppercase leading-none">
+                    PLATFORM <br />CONQUEST.
+                  </h2>
+                  <p className="text-gray-400 text-sm font-sans font-medium leading-relaxed max-w-md">
+                    Establish architectural hierarchy. Compete against global student cohorts in logical speed sprints, secure your streak multiplier, and ascend the ranks.
+                  </p>
+                </div>
 
-              {/* Right Side: 3D Isometric Ranking Staircase SVG */}
-              <div className="w-[45vw] flex items-center justify-center">
-                <svg width="100%" height="320" viewBox="0 0 500 320" fill="none" className="max-w-xl w-full">
-                  <rect width="100%" height="100%" rx="12" fill="#111" stroke="#333" strokeWidth="2" />
-                  
-                  <g stroke="#1F1F1F" strokeWidth="0.5">
-                    <line x1="50" y1="320" x2="300" y2="70" />
-                    <line x1="150" y1="320" x2="400" y2="70" />
-                    <line x1="250" y1="320" x2="500" y2="70" />
-                  </g>
-                  
-                  {/* Isometric Staircase blocks */}
-                  {/* Step 1 */}
-                  <path d="M 80 260 L 140 230 L 200 260 L 140 290 Z" fill="#1A1A1A" stroke="#333" strokeWidth="1.5" />
-                  <path d="M 80 260 L 80 290 L 140 320 L 140 290 Z" fill="#151515" stroke="#333" strokeWidth="1.5" />
-                  <path d="M 140 290 L 140 320 L 200 290 L 200 260 Z" fill="#222" stroke="#333" strokeWidth="1.5" />
-                  <text x="140" y="275" textAnchor="middle" fill="#666" className="font-mono text-[8px] font-bold">L_03</text>
-                  
-                  {/* Step 2 */}
-                  <path d="M 180 180 L 240 150 L 300 180 L 240 210 Z" fill="#252525" stroke="#333" strokeWidth="1.5" />
-                  <path d="M 180 180 L 180 210 L 240 240 L 240 210 Z" fill="#1E1E1E" stroke="#333" strokeWidth="1.5" />
-                  <path d="M 240 210 L 240 240 L 300 210 L 300 180 Z" fill="#2D2D2D" stroke="#333" strokeWidth="1.5" />
-                  <text x="240" y="195" textAnchor="middle" fill="#888" className="font-mono text-[8px] font-bold">L_02</text>
-                  
-                  {/* Step 3 (Active Top Step) */}
-                  <path d="M 280 100 L 340 70 L 400 100 L 340 130 Z" fill="#000" stroke="#4ADE80" strokeWidth="2" />
-                  <path d="M 280 100 L 280 130 L 340 160 L 340 130 Z" fill="#0A0A0A" stroke="#4ADE80" strokeWidth="1.5" />
-                  <path d="M 340 130 L 340 160 L 400 130 L 400 100 Z" fill="#151515" stroke="#4ADE80" strokeWidth="1.5" />
-                  <text x="340" y="115" textAnchor="middle" fill="#4ADE80" className="font-mono text-[8px] font-bold animate-pulse">APEX_01</text>
-                  
-                  <path d="M 340 70 V 30" stroke="#4ADE80" strokeWidth="1.5" strokeDasharray="3 3" />
-                  <circle cx="340" cy="30" r="4" fill="#4ADE80" className="animate-ping" />
-                </svg>
+                {/* Right Side: 3D Isometric Ranking Staircase SVG */}
+                <div className="w-[45vw] flex items-center justify-center">
+                  <svg width="100%" height="320" viewBox="0 0 500 320" fill="none" className="max-w-xl w-full">
+                    <rect width="100%" height="100%" rx="12" fill="#111" stroke="#333" strokeWidth="2" />
+                    
+                    <g stroke="#1F1F1F" strokeWidth="0.5">
+                      <line x1="50" y1="320" x2="300" y2="70" />
+                      <line x1="150" y1="320" x2="400" y2="70" />
+                      <line x1="250" y1="320" x2="500" y2="70" />
+                    </g>
+                    
+                    {/* Isometric Staircase blocks */}
+                    {/* Step 1 */}
+                    <path d="M 80 260 L 140 230 L 200 260 L 140 290 Z" fill="#1A1A1A" stroke="#333" strokeWidth="1.5" />
+                    <path d="M 80 260 L 80 290 L 140 320 L 140 290 Z" fill="#151515" stroke="#333" strokeWidth="1.5" />
+                    <path d="M 140 290 L 140 320 L 200 290 L 200 260 Z" fill="#222" stroke="#333" strokeWidth="1.5" />
+                    <text x="140" y="275" textAnchor="middle" fill="#666" className="font-mono text-[8px] font-bold">L_03</text>
+                    
+                    {/* Step 2 */}
+                    <path d="M 180 180 L 240 150 L 300 180 L 240 210 Z" fill="#252525" stroke="#333" strokeWidth="1.5" />
+                    <path d="M 180 180 L 180 210 L 240 240 L 240 210 Z" fill="#1E1E1E" stroke="#333" strokeWidth="1.5" />
+                    <path d="M 240 210 L 240 240 L 300 210 L 300 180 Z" fill="#2D2D2D" stroke="#333" strokeWidth="1.5" />
+                    <text x="240" y="195" textAnchor="middle" fill="#888" className="font-mono text-[8px] font-bold">L_02</text>
+                    
+                    {/* Step 3 (Active Top Step) */}
+                    <path d="M 280 100 L 340 70 L 400 100 L 340 130 Z" fill="#000" stroke="#4ADE80" strokeWidth="2" />
+                    <path d="M 280 100 L 280 130 L 340 160 L 340 130 Z" fill="#0A0A0A" stroke="#4ADE80" strokeWidth="1.5" />
+                    <path d="M 340 130 L 340 160 L 400 130 L 400 100 Z" fill="#151515" stroke="#4ADE80" strokeWidth="1.5" />
+                    <text x="340" y="115" textAnchor="middle" fill="#4ADE80" className="font-mono text-[8px] font-bold animate-pulse">APEX_01</text>
+                    
+                    <path d="M 340 70 V 30" stroke="#4ADE80" strokeWidth="1.5" strokeDasharray="3 3" />
+                    <circle cx="340" cy="30" r="4" fill="#4ADE80" className="animate-ping" />
+                  </svg>
+                </div>
               </div>
               
-              {/* Desktop Footer Embedded in Last Panel */}
-              <div className="absolute bottom-12 left-24 xl:left-36 right-24 xl:right-36 flex items-center justify-between border-t border-white/10 pt-6 z-30">
+              {/* Desktop Footer Embedded in Last Panel - Positioned at bottom of flex column */}
+              <div className="w-full shrink-0 flex flex-col md:flex-row items-center justify-between px-24 xl:px-36 py-8 border-t border-white/10 z-30">
                 <div className="font-mono text-[10px] text-gray-500 uppercase tracking-widest">
                   &copy; 2026 CIRCUITRON. ALL RIGHTS RESERVED.
                 </div>
                 
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-[9px] text-gray-400 tracking-widest uppercase">
-                    CRAFTED_BY:
+                <div className="flex items-center gap-2 group cursor-pointer mt-4 md:mt-0">
+                  <span className="font-mono text-[9px] text-gray-500 tracking-widest uppercase transition-colors group-hover:text-gray-400">
+                    CRAFTED_BY //
                   </span>
                   <a
                     href="https://itsemallen.dev"
                     target="_blank"
                     rel="noreferrer"
-                    className="relative group overflow-hidden px-3 py-1 border border-white/20 bg-transparent"
+                    className="font-mono text-[9px] font-black tracking-widest text-white uppercase flex items-center gap-1.5"
                   >
-                    <span className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out" />
-                    <span className="relative z-10 font-mono text-[9px] font-black uppercase tracking-widest text-white group-hover:text-black transition-colors duration-300">
-                      ALLEN
-                    </span>
+                    <span className="w-1.5 h-1.5 bg-green-500 opacity-40 group-hover:opacity-100 transition-opacity animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.5)]" />
+                    <span className="group-hover:text-green-400 transition-colors duration-300">ALLEN</span>
                   </a>
-                  <span className="font-mono text-[9px] text-gray-400 tracking-widest uppercase ml-1">
-                    & KASHINADTH
+                  <span className="font-mono text-[9px] text-gray-500 tracking-widest uppercase transition-colors group-hover:text-gray-400">
+                    _&_KASHINADTH
                   </span>
                 </div>
               </div>
@@ -643,23 +645,21 @@ export default function LandingPage() {
 
         {/* Mobile Footer Embedded */}
         <div className="flex flex-col items-center justify-center border-t border-white/10 pt-12 mt-16 gap-6 w-full">
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-[9px] text-gray-400 tracking-widest uppercase">
-              CRAFTED_BY:
+          <div className="flex flex-wrap justify-center items-center gap-2 group cursor-pointer">
+            <span className="font-mono text-[9px] text-gray-500 tracking-widest uppercase transition-colors group-hover:text-gray-400">
+              CRAFTED_BY //
             </span>
             <a
               href="https://itsemallen.dev"
               target="_blank"
               rel="noreferrer"
-              className="relative group overflow-hidden px-3 py-1 border border-white/20 bg-transparent"
+              className="font-mono text-[9px] font-black tracking-widest text-white uppercase flex items-center gap-1.5"
             >
-              <span className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out" />
-              <span className="relative z-10 font-mono text-[9px] font-black uppercase tracking-widest text-white group-hover:text-black transition-colors duration-300">
-                ALLEN
-              </span>
+              <span className="w-1.5 h-1.5 bg-green-500 opacity-40 group-hover:opacity-100 transition-opacity animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.5)]" />
+              <span className="group-hover:text-green-400 transition-colors duration-300">ALLEN</span>
             </a>
-            <span className="font-mono text-[9px] text-gray-400 tracking-widest uppercase ml-1">
-              & KASHINADTH
+            <span className="font-mono text-[9px] text-gray-500 tracking-widest uppercase transition-colors group-hover:text-gray-400">
+              _&_KASHINADTH
             </span>
           </div>
           <div className="font-mono text-[10px] text-gray-500 uppercase tracking-widest text-center">
