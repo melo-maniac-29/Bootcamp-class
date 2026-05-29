@@ -4,6 +4,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
+import DayEditor from "./DayEditor";
 
 export default function ContentPage() {
   const weeks = useQuery(api.content.getWeeks) || [];
@@ -12,8 +13,10 @@ export default function ContentPage() {
 
   const [newWeekTitle, setNewWeekTitle] = useState("");
   const [selectedWeek, setSelectedWeek] = useState(null);
+  const [editingDayId, setEditingDayId] = useState(null);
   
-  const days = useQuery(api.content.getDays, { weekId: selectedWeek }) || [];
+  const days = useQuery(api.content.getDays, { weekId: selectedWeek === null ? undefined : selectedWeek }) || [];
+  const deleteWeek = useMutation(api.content.deleteWeek);
 
   const handleCreateWeek = async (e) => {
     e.preventDefault();
@@ -58,15 +61,27 @@ export default function ContentPage() {
             {weeks.map((week) => (
               <div 
                 key={week._id} 
-                onClick={() => setSelectedWeek(week._id)}
-                className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                className={`p-4 rounded-xl border transition-all flex justify-between items-center group ${
                   selectedWeek === week._id 
                     ? "bg-white/10 border-white/30" 
                     : "bg-white/5 border-white/10 hover:bg-white/10"
                 }`}
               >
-                <div className="font-semibold">{week.title}</div>
-                <div className="text-xs text-white/50">Order: {week.order} • Status: {week.status}</div>
+                <div className="cursor-pointer flex-1" onClick={() => setSelectedWeek(week._id)}>
+                  <div className="font-semibold">{week.title}</div>
+                  <div className="text-xs text-white/50">Order: {week.order} • Status: {week.status}</div>
+                </div>
+                <button 
+                  onClick={() => {
+                    if(confirm("Are you sure you want to delete this week?")) {
+                      deleteWeek({ weekId: week._id });
+                      if(selectedWeek === week._id) setSelectedWeek(null);
+                    }
+                  }} 
+                  className="text-red-400 hover:bg-red-400/10 p-2 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                >
+                  <Trash2 size={16} />
+                </button>
               </div>
             ))}
             {weeks.length === 0 && <div className="text-white/50 text-sm">No weeks found. Create one above.</div>}
@@ -81,6 +96,8 @@ export default function ContentPage() {
           <div className="p-8 border border-dashed border-white/20 rounded-2xl text-center text-white/50">
             Select a week to manage its days.
           </div>
+        ) : editingDayId ? (
+          <DayEditor dayId={editingDayId} onClose={() => setEditingDayId(null)} />
         ) : (
           <div className="bg-[#121214] rounded-2xl border border-white/10 p-6">
             <div className="flex justify-between items-center mb-6">
@@ -95,13 +112,16 @@ export default function ContentPage() {
 
             <div className="space-y-2">
               {days.map((day) => (
-                <div key={day._id} className="p-4 rounded-xl bg-white/5 border border-white/10 flex justify-between items-center">
+                <div key={day._id} className="p-4 rounded-xl bg-white/5 border border-white/10 flex justify-between items-center group">
                   <div>
                     <div className="font-medium">{day.title}</div>
                     <div className="text-xs text-white/50">Order: {day.order}</div>
                   </div>
-                  <button className="text-red-400 hover:bg-red-400/10 p-2 rounded-lg transition-colors">
-                    <Trash2 size={16} />
+                  <button 
+                    onClick={() => setEditingDayId(day._id)} 
+                    className="text-blue-400 hover:bg-blue-400/10 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors opacity-0 group-hover:opacity-100"
+                  >
+                    Edit Day & Tasks
                   </button>
                 </div>
               ))}

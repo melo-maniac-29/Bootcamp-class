@@ -2,10 +2,28 @@
 
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
+import { useState } from "react";
+import { Check } from "lucide-react";
 
 export default function SubmissionsPage() {
   const submissions = useQuery(api.submissions.listSubmissions) || [];
   const updateStatus = useMutation(api.submissions.updateStatus);
+  
+  const [updatingId, setUpdatingId] = useState(null);
+  const [successId, setSuccessId] = useState(null);
+
+  const handleUpdate = async (id, status) => {
+    setUpdatingId(id);
+    try {
+      await updateStatus({ submissionId: id, status });
+      setSuccessId(id);
+      setTimeout(() => setSuccessId(null), 2000);
+    } catch (e) {
+      alert("Failed to update status.");
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
   return (
     <div>
@@ -27,9 +45,13 @@ export default function SubmissionsPage() {
                 <td className="p-4 font-semibold">{sub.userName}</td>
                 <td className="p-4 text-white/70">{sub.dayTitle}</td>
                 <td className="p-4">
-                  <a href={sub.link} target="_blank" rel="noreferrer" className="text-blue-400 hover:underline flex items-center gap-1">
-                    View Link
-                  </a>
+                  {sub.link ? (
+                    <a href={sub.link} target="_blank" rel="noreferrer" className="text-blue-400 hover:underline flex items-center gap-1">
+                      View Link
+                    </a>
+                  ) : (
+                    <span className="text-white/40 italic">No Link</span>
+                  )}
                 </td>
                 <td className="p-4">
                   <span className={`px-2 py-1 rounded-md text-xs font-medium ${
@@ -40,19 +62,23 @@ export default function SubmissionsPage() {
                     {sub.status || "Pending"}
                   </span>
                 </td>
-                <td className="p-4 flex gap-2">
+                <td className="p-4 flex gap-2 items-center">
                   <button 
-                    onClick={() => updateStatus({ submissionId: sub._id, status: "Approved" })}
-                    className="px-3 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded transition-colors text-xs font-semibold"
+                    onClick={() => handleUpdate(sub._id, "Approved")}
+                    disabled={updatingId === sub._id}
+                    className="px-3 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded transition-colors text-xs font-semibold disabled:opacity-50"
                   >
                     Approve
                   </button>
                   <button 
-                    onClick={() => updateStatus({ submissionId: sub._id, status: "Needs Revision" })}
-                    className="px-3 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 rounded transition-colors text-xs font-semibold"
+                    onClick={() => handleUpdate(sub._id, "Needs Revision")}
+                    disabled={updatingId === sub._id}
+                    className="px-3 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 rounded transition-colors text-xs font-semibold disabled:opacity-50"
                   >
                     Reject
                   </button>
+                  {updatingId === sub._id && <span className="text-xs text-blue-400 animate-pulse ml-2">Saving...</span>}
+                  {successId === sub._id && <Check size={16} className="text-emerald-400 ml-2" />}
                 </td>
               </tr>
             ))}
