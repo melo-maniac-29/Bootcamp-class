@@ -15,7 +15,7 @@ export default function AdminLayout({ children }) {
 
   useEffect(() => {
     if (user === null) {
-      router.push("/");
+      router.push("/login");
     } else if (user !== undefined && user.role !== "admin" && user.role !== "volunteer") {
       router.push("/dashboard");
     }

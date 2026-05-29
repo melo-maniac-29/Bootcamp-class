@@ -7,7 +7,7 @@ import AdminPortalLink from "@/components/AdminPortalLink";
 export default function DashboardLayout({ children }) {
   // Protect the route
   if (!convexAuthNextjsToken()) {
-    redirect("/");
+    redirect("/login");
   }
   
   return (
