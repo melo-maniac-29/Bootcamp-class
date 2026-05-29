@@ -6,33 +6,34 @@ import { ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 
-// Placeholder Quiz Data - eventually fetch from Convex
-const MOCK_QUIZ = [
-  {
-    id: 1,
-    question: "What is the primary benefit of using Convex?",
-    options: ["Global State Management", "Real-time backend synchronization", "CSS Styling", "Deploying static assets"],
-    answerIndex: 1
-  },
-  {
-    id: 2,
-    question: "How do you trigger a data change in Convex from Next.js?",
-    options: ["useQuery", "fetch API", "useMutation", "SQL UPDATE"],
-    answerIndex: 2
-  }
-];
+import { useQuery } from "convex/react";
+import { api } from "../../../../../../convex/_generated/api";
 
 export default function QuizPage() {
   const params = useParams();
   const router = useRouter();
   
+  const quiz = useQuery(api.content.getQuiz, { dayId: params.dayId });
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selected, setSelected] = useState(null);
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(0);
 
-  const currentQuestion = MOCK_QUIZ[currentIndex];
-  const isLast = currentIndex === MOCK_QUIZ.length - 1;
+  if (quiz === undefined) return <div className="p-12 text-center text-white/50">Loading quiz...</div>;
+  if (!quiz || !quiz.questions || quiz.questions.length === 0) {
+    return (
+      <div className="max-w-3xl mx-auto py-12 text-center">
+        <div className="text-white/50 mb-4">No quiz available for this day.</div>
+        <Link href={`/dashboard/days/${params.dayId}`} className="bg-white text-black px-6 py-2 rounded-xl font-bold">
+          Go Back
+        </Link>
+      </div>
+    );
+  }
+
+  const currentQuestion = quiz.questions[currentIndex];
+  const isLast = currentIndex === quiz.questions.length - 1;
 
   const handleSelect = (idx) => {
     if (showResult) return;
@@ -61,7 +62,7 @@ export default function QuizPage() {
       </Link>
 
       <div className="mb-8 flex justify-between items-center text-sm font-semibold text-white/50">
-        <span>Question {currentIndex + 1} of {MOCK_QUIZ.length}</span>
+        <span>Question {currentIndex + 1} of {quiz.questions.length}</span>
         <span>Score: {score}</span>
       </div>
 

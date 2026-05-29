@@ -61,4 +61,15 @@ export default defineSchema({
     status: v.string(), // "Pending Review", "Approved", "Needs Revision"
     submittedAt: v.number(),
   }).index("by_userId", ["userId"]).index("by_dayId", ["dayId"]).index("by_userId_dayId", ["userId", "dayId"]),
+
+  quizzes: defineTable({
+    dayId: v.id("days"),
+    questions: v.array(
+      v.object({
+        question: v.string(),
+        options: v.array(v.string()),
+        answerIndex: v.number(),
+      })
+    ),
+  }).index("by_dayId", ["dayId"]),
 });

@@ -36,6 +36,16 @@ export const getDay = query({
   },
 });
 
+export const getQuiz = query({
+  args: { dayId: v.id("days") },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("quizzes")
+      .withIndex("by_dayId", (q) => q.eq("dayId", args.dayId))
+      .first();
+  }
+});
+
 export const createWeek = mutation({
   args: { title: v.string(), description: v.optional(v.string()), status: v.string(), order: v.number() },
   handler: async (ctx, args) => {
