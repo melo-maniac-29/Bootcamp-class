@@ -1,0 +1,64 @@
+import { defineSchema, defineTable } from "convex/server";
+import { v } from "convex/values";
+import { authTables } from "@convex-dev/auth/server";
+
+export default defineSchema({
+  ...authTables,
+  
+  users: defineTable({
+    name: v.optional(v.string()),
+    email: v.optional(v.string()),
+    image: v.optional(v.string()),
+    emailVerificationTime: v.optional(v.number()),
+    phone: v.optional(v.string()),
+    phoneVerificationTime: v.optional(v.number()),
+    isAnonymous: v.optional(v.boolean()),
+
+    // Custom App Fields
+    role: v.optional(v.union(v.literal("student"), v.literal("volunteer"), v.literal("admin"))),
+    participantId: v.optional(v.string()),
+    streakCount: v.optional(v.number()),
+    lastActiveDate: v.optional(v.string()),
+  }).index("by_email", ["email"]).index("by_participantId", ["participantId"]),
+
+  weeks: defineTable({
+    title: v.string(),
+    description: v.optional(v.string()),
+    status: v.string(), // e.g. "active"
+    order: v.number(),
+  }).index("by_order", ["order"]),
+
+  days: defineTable({
+    weekId: v.id("weeks"),
+    title: v.string(),
+    description: v.optional(v.string()),
+    videoUrl: v.optional(v.string()),
+    videoTitle: v.optional(v.string()),
+    references: v.optional(v.array(v.string())),
+    unlockAt: v.optional(v.number()), // timestamp
+    deadlineAt: v.optional(v.number()), // timestamp
+    order: v.number(),
+    taskDescription: v.optional(v.string()),
+    taskRequirements: v.optional(v.array(v.string())),
+    deleted: v.boolean(),
+  }).index("by_weekId", ["weekId"]).index("by_order", ["order"]),
+
+  userProgress: defineTable({
+    userId: v.id("users"),
+    dayId: v.id("days"),
+    videoCompleted: v.boolean(),
+    quizCompleted: v.boolean(),
+    submissionCompleted: v.boolean(),
+    overallCompleted: v.boolean(),
+    videoWatchPercent: v.number(),
+  }).index("by_userId", ["userId"]).index("by_dayId", ["dayId"]).index("by_userId_dayId", ["userId", "dayId"]),
+
+  submissions: defineTable({
+    userId: v.id("users"),
+    dayId: v.id("days"),
+    link: v.optional(v.string()),
+    content: v.optional(v.string()),
+    status: v.string(), // "Pending Review", "Approved", "Needs Revision"
+    submittedAt: v.number(),
+  }).index("by_userId", ["userId"]).index("by_dayId", ["dayId"]),
+});
