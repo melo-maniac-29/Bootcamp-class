@@ -3,52 +3,84 @@
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import Link from "next/link";
-import { BookOpen, CheckCircle, Lock } from "lucide-react";
 import { Skeleton } from "../../../components/ui/skeleton";
+import { motion } from "framer-motion";
 
 export default function RoadmapPage() {
   const weeks = useQuery(api.content.getWeeks);
   
   if (weeks === undefined) {
     return (
-      <div className="max-w-4xl mx-auto space-y-8">
-        <h2 className="text-3xl font-bold mb-8">Bootcamp Roadmap</h2>
-        <Skeleton className="h-64 w-full rounded-2xl" />
-        <Skeleton className="h-64 w-full rounded-2xl" />
+      <div className="max-w-4xl mx-auto space-y-6">
+        <Skeleton className="h-8 w-1/3 bg-black/5" />
+        <Skeleton className="h-48 w-full rounded-xl bg-black/5" />
+        <Skeleton className="h-48 w-full rounded-xl bg-black/5" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <h2 className="text-3xl font-bold mb-8">Bootcamp Roadmap</h2>
-      
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      className="max-w-4xl mx-auto"
+    >
+      {/* Header */}
+      <div className="border-b border-black/[0.06] pb-8 mb-10">
+        <p className="font-mono text-[10px] tracking-[0.3em] text-black/30 uppercase mb-3">
+          COGNITION_MAP // ACTIVATED
+        </p>
+        <h1 className="text-4xl font-display font-black tracking-tighter uppercase text-black">
+          Bootcamp Roadmap.
+        </h1>
+        <p className="text-black/40 mt-2 font-mono text-xs tracking-wider uppercase">
+          {weeks.length} WEEK_CLUSTERS LOADED // SEQUENTIAL_MODE
+        </p>
+      </div>
+
+      {/* Weeks */}
       <div className="space-y-6">
         {weeks.map((week, index) => (
-          <div key={week._id} className="bg-[#121214] border border-white/10 rounded-2xl overflow-hidden">
-            <div className="p-6 border-b border-white/10 bg-white/5 flex justify-between items-center">
+          <motion.div
+            key={week._id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+            className="border border-black/[0.06] rounded-xl overflow-hidden bg-[#F8F9FA]"
+          >
+            {/* Week Header */}
+            <div className="p-6 border-b border-black/[0.06] flex justify-between items-start bg-white">
               <div>
-                <h3 className="text-xl font-bold">{week.title}</h3>
-                {week.description && <p className="text-white/60 text-sm mt-1">{week.description}</p>}
+                <p className="font-mono text-[9px] tracking-[0.3em] text-black/30 uppercase mb-1">
+                  WEEK_CLUSTER // {String(index + 1).padStart(2, "0")}
+                </p>
+                <h3 className="text-xl font-display font-black tracking-tighter uppercase text-black">{week.title}</h3>
+                {week.description && (
+                  <p className="text-black/40 text-sm font-mono mt-1">{week.description}</p>
+                )}
               </div>
-              <div className="text-sm font-medium px-3 py-1 bg-white/10 rounded-full">
+              <span className="font-mono text-[9px] uppercase tracking-widest px-3 py-1 border border-black/10 rounded-full text-black/40">
                 {week.status}
-              </div>
+              </span>
             </div>
             
-            <div className="p-6">
-               {/* We need a separate component to fetch days per week or just fetch them all */}
-               <WeekDays weekId={week._id} />
+            {/* Days */}
+            <div className="p-4">
+              <WeekDays weekId={week._id} />
             </div>
-          </div>
+          </motion.div>
         ))}
+
         {weeks.length === 0 && (
-          <div className="text-center text-white/50 py-12 border border-dashed border-white/20 rounded-2xl">
-            No roadmap content available yet. Wait for admins to release it!
+          <div className="text-center py-16 border border-dashed border-black/10 rounded-xl">
+            <p className="font-mono text-[10px] tracking-widest text-black/30 uppercase">
+              NO_CONTENT_NODES // AWAITING_ADMIN_RELEASE
+            </p>
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -57,37 +89,43 @@ function WeekDays({ weekId }) {
 
   if (days === undefined) {
     return (
-      <div className="space-y-3">
-        <Skeleton className="h-16 w-full rounded-xl" />
-        <Skeleton className="h-16 w-full rounded-xl" />
+      <div className="space-y-2 p-2">
+        {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-14 w-full rounded-lg bg-black/5" />)}
       </div>
     );
   }
   
   return (
-    <div className="space-y-3">
-      {days.map((day) => (
+    <div className="space-y-2">
+      {days.map((day, idx) => (
         <Link 
           href={`/dashboard/days/${day._id}`} 
           key={day._id}
-          className="flex items-center justify-between p-4 bg-black border border-white/10 rounded-xl hover:bg-white/5 hover:border-white/20 transition-all group"
+          className="flex items-center justify-between p-4 rounded-lg border border-black/[0.06] hover:border-black/20 hover:bg-white transition-all group bg-[#F8F9FA]"
         >
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/50 group-hover:bg-white group-hover:text-black transition-colors">
-              <BookOpen size={18} />
-            </div>
+            <span className="font-mono text-[10px] font-bold text-black/20 group-hover:text-black/50 transition-colors w-6">
+              {String(idx + 1).padStart(2, "0")}
+            </span>
             <div>
-              <div className="font-semibold text-white/90 group-hover:text-white transition-colors">{day.title}</div>
-              <div className="text-xs text-white/50">Day {day.order}</div>
+              <div className="font-mono text-sm font-bold text-black/60 group-hover:text-black transition-colors uppercase tracking-wider">
+                {day.title}
+              </div>
+              <div className="font-mono text-[9px] text-black/30 uppercase tracking-wider mt-0.5">
+                DAY_{String(day.order).padStart(2, "0")} // {day.status || "LOCKED"}
+              </div>
             </div>
           </div>
-          <div className="text-white/30">
-            {/* If locked, show Lock. If done, show CheckCircle */}
-            <Lock size={18} />
-          </div>
+          <svg className="w-4 h-4 text-black/20 group-hover:text-black/60 group-hover:translate-x-1 transition-all" viewBox="0 0 16 16" fill="none">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
         </Link>
       ))}
-      {days.length === 0 && <div className="text-sm text-white/40">No days released.</div>}
+      {days.length === 0 && (
+        <div className="font-mono text-[10px] text-black/20 uppercase tracking-widest py-4 px-4">
+          NO_DAY_NODES // PENDING
+        </div>
+      )}
     </div>
   );
 }

@@ -3,7 +3,6 @@
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { motion } from "framer-motion";
-import { Flame, Target, Trophy, Clock } from "lucide-react";
 import { Skeleton } from "../../components/ui/skeleton";
 
 export default function DashboardPage() {
@@ -12,131 +11,139 @@ export default function DashboardPage() {
 
   if (user === undefined) {
     return (
-      <div className="space-y-6">
-        <Skeleton className="h-10 w-1/3" />
-        <Skeleton className="h-20 w-2/3" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Skeleton className="h-32 w-full rounded-2xl" />
-          <Skeleton className="h-32 w-full rounded-2xl" />
-          <Skeleton className="h-32 w-full rounded-2xl" />
+      <div className="space-y-8 max-w-6xl mx-auto">
+        <Skeleton className="h-8 w-1/3 bg-black/5" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-28 w-full rounded-xl bg-black/5" />)}
         </div>
+        <Skeleton className="h-64 w-full rounded-xl bg-black/5" />
       </div>
     );
   }
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1 }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
-  };
+  const userName = user?.name || user?.email?.split('@')[0] || "USER";
 
   return (
-    <motion.div 
-      variants={containerVariants} 
-      initial="hidden" 
-      animate="show" 
-      className="max-w-6xl mx-auto space-y-8"
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      className="max-w-6xl mx-auto space-y-10"
     >
-      <motion.div variants={itemVariants}>
-        <h2 className="text-4xl font-bold tracking-tight">Welcome back, {user?.name || user?.email?.split('@')[0] || "User"}! 🚀</h2>
-        <p className="text-white/60 mt-2 text-lg">Here is your Bootcamp progress. Your role is: <span className="font-bold capitalize text-blue-400">{user?.role || "Student"}</span></p>
-      </motion.div>
+      {/* Header */}
+      <div className="border-b border-black/[0.06] pb-8">
+        <p className="font-mono text-[10px] tracking-[0.3em] text-black/30 uppercase mb-3">
+          SYS_IDENTITY // AUTHENTICATED
+        </p>
+        <h1 className="text-4xl font-display font-black tracking-tighter uppercase text-black">
+          {userName}.
+        </h1>
+        <p className="text-black/40 mt-2 font-mono text-xs tracking-wider uppercase">
+          ROLE_NODE: <span className="text-black font-bold">{user?.role || "STUDENT"}</span> // SYSTEM_ACCESS: GRANTED
+        </p>
+      </div>
 
       {/* Stats Grid */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard icon={<Flame className="text-orange-500" />} title="Current Streak" value={`${user?.streakCount || 0} Days`} />
-        <StatCard icon={<Target className="text-blue-500" />} title="Tasks Completed" value="4/12" />
-        <StatCard icon={<Clock className="text-emerald-500" />} title="Watch Time" value="12h 30m" />
-        <StatCard icon={<Trophy className="text-yellow-500" />} title="Global Rank" value="#42" />
-      </motion.div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard label="STREAK_COUNT" value={`${user?.streakCount || 0}`} unit="DAYS" index={0} />
+        <StatCard label="TASK_NODES" value="04" unit="/ 12" index={1} />
+        <StatCard label="WATCH_CYCLES" value="12h" unit="30m" index={2} />
+        <StatCard label="GLOBAL_RANK" value="#42" unit="APEX" index={3} />
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main Progress Area */}
-        <motion.div variants={itemVariants} className="lg:col-span-2 space-y-6">
-          <div className="p-8 rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-            <h3 className="text-2xl font-semibold mb-6 relative z-10">Your Journey</h3>
+        
+        {/* Progress Panel */}
+        <div className="lg:col-span-2">
+          <div className="border border-black/[0.06] rounded-xl p-8 bg-[#F8F9FA] relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-3 font-mono text-[8px] text-black/10 pointer-events-none select-none">
+              PROGRESS_MATRIX
+            </div>
+            <p className="font-mono text-[10px] tracking-[0.3em] text-black/30 uppercase mb-2">COGNITIVE_JOURNEY</p>
+            <h2 className="text-2xl font-display font-black tracking-tighter uppercase text-black mb-8">
+              Completion Status.
+            </h2>
             
-            <div className="space-y-4 relative z-10">
-              <div>
-                <div className="flex justify-between text-sm mb-2">
-                  <span className="text-white/70">Overall Completion</span>
-                  <span className="font-bold">33%</span>
-                </div>
-                <div className="h-3 w-full bg-black/50 rounded-full overflow-hidden border border-white/5">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    animate={{ width: "33%" }}
-                    transition={{ duration: 1, ease: "easeOut" }}
-                    className="h-full bg-gradient-to-r from-blue-500 to-emerald-400"
-                  />
-                </div>
-              </div>
+            <div className="space-y-6">
+              <ProgressBar label="OVERALL_COMPLETION" pct={33} delay={0} color="bg-black" />
+              <ProgressBar label="QUIZ_MODULES" pct={56} delay={0.15} color="bg-green-600" />
+              <ProgressBar label="SUBMISSION_RATE" pct={20} delay={0.3} color="bg-black/40" />
             </div>
           </div>
-        </motion.div>
+        </div>
 
-        {/* Leaderboard Sidebar */}
-        <motion.div variants={itemVariants}>
-          <div className="p-6 rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl">
-            <h3 className="text-xl font-semibold mb-6 flex items-center gap-2">
-              <Trophy className="text-yellow-500" size={20} /> Top Students
-            </h3>
-            {leaderboard === undefined ? (
-              <div className="space-y-4">
-                <Skeleton className="h-12 w-full rounded-xl" />
-                <Skeleton className="h-12 w-full rounded-xl" />
-                <Skeleton className="h-12 w-full rounded-xl" />
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {leaderboard.map((u, i) => (
-                  <div key={u._id} className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors border border-white/5">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                        i === 0 ? "bg-yellow-500/20 text-yellow-500" :
-                        i === 1 ? "bg-gray-400/20 text-gray-300" :
-                        i === 2 ? "bg-amber-600/20 text-amber-500" :
-                        "bg-white/5 text-white/50"
-                      }`}>
-                        {i + 1}
-                      </div>
-                      <span className="font-medium">{u.name || "Anonymous"}</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-sm font-bold text-orange-400">
-                      {u.streakCount || 0} <Flame size={14} />
-                    </div>
+        {/* Leaderboard Panel */}
+        <div className="border border-black/[0.06] rounded-xl p-6 bg-[#F8F9FA]">
+          <p className="font-mono text-[10px] tracking-[0.3em] text-black/30 uppercase mb-2">RANK_MATRIX</p>
+          <h2 className="text-xl font-display font-black tracking-tighter uppercase text-black mb-6">
+            Top Nodes.
+          </h2>
+          
+          {leaderboard === undefined ? (
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full rounded-lg bg-black/5" />)}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {leaderboard.slice(0, 8).map((u, i) => (
+                <div key={u._id} className="flex items-center justify-between p-3 rounded-lg border border-black/[0.06] hover:bg-black/[0.03] transition-colors">
+                  <div className="flex items-center gap-3">
+                    <span className={`font-mono text-[10px] font-bold w-6 ${
+                      i === 0 ? "text-yellow-600" :
+                      i === 1 ? "text-gray-500" :
+                      i === 2 ? "text-amber-600" :
+                      "text-black/20"
+                    }`}>
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span className="font-mono text-xs text-black/60">{u.name || "ANONYMOUS"}</span>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </motion.div>
+                  <span className="font-mono text-[10px] font-bold text-green-700">
+                    {u.streakCount || 0}d
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </motion.div>
   );
 }
 
-function StatCard({ icon, title, value }) {
+function ProgressBar({ label, pct, delay, color }) {
   return (
-    <div className="p-6 rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-xl hover:bg-white/10 transition-colors group cursor-pointer relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-      <div className="flex items-center gap-4 relative z-10">
-        <div className="p-3 bg-black/30 rounded-2xl border border-white/5 group-hover:scale-110 transition-transform">
-          {icon}
-        </div>
-        <div>
-          <div className="text-sm font-medium text-white/60">{title}</div>
-          <div className="text-2xl font-bold tracking-tight mt-0.5">{value}</div>
-        </div>
+    <div>
+      <div className="flex justify-between items-baseline mb-3">
+        <span className="font-mono text-[10px] text-black/40 tracking-wider uppercase">{label}</span>
+        <span className="font-display font-black text-2xl text-black leading-none">{pct}%</span>
+      </div>
+      <div className="h-[2px] w-full bg-black/5 rounded-full overflow-hidden">
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${pct}%` }}
+          transition={{ duration: 1.2, delay, ease: [0.16, 1, 0.3, 1] }}
+          className={`h-full ${color} rounded-full`}
+        />
       </div>
     </div>
+  );
+}
+
+function StatCard({ label, value, unit, index }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
+      className="border border-black/[0.06] rounded-xl p-6 bg-[#F8F9FA] hover:bg-white transition-colors group relative overflow-hidden"
+    >
+      <div className="absolute top-0 right-0 p-2 font-mono text-[8px] text-black/10 select-none pointer-events-none">NODE</div>
+      <p className="font-mono text-[9px] tracking-[0.25em] text-black/30 uppercase mb-3">{label}</p>
+      <div className="flex items-baseline gap-2">
+        <span className="font-display font-black text-4xl tracking-tighter text-black leading-none">{value}</span>
+        <span className="font-mono text-[10px] text-black/30 uppercase tracking-wider">{unit}</span>
+      </div>
+    </motion.div>
   );
 }

@@ -3,7 +3,7 @@
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useState } from "react";
-import { Check } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function SubmissionsPage() {
   const submissions = useQuery(api.submissions.listSubmissions) || [];
@@ -24,7 +24,6 @@ export default function SubmissionsPage() {
 
   const handleUpdate = async (id, status) => {
     try {
-      // Optimistic update makes the UI feel instant!
       await updateStatus({ submissionId: id, status });
       setSuccessId(id);
       setTimeout(() => setSuccessId(null), 2000);
@@ -33,68 +32,117 @@ export default function SubmissionsPage() {
     }
   };
 
+  const statusColor = (status) => {
+    if (status === "Approved") return "text-green-700 border-green-200 bg-green-50";
+    if (status === "Needs Revision") return "text-amber-700 border-amber-200 bg-amber-50";
+    return "text-black/40 border-black/10 bg-black/5";
+  };
+
   return (
-    <div>
-      <h2 className="text-3xl font-bold mb-6">Review Submissions</h2>
-      <div className="bg-[#121214] rounded-2xl border border-white/10 overflow-hidden">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-white/5 border-b border-white/10">
-            <tr>
-              <th className="p-4 font-medium text-white/80">Student</th>
-              <th className="p-4 font-medium text-white/80">Task (Day)</th>
-              <th className="p-4 font-medium text-white/80">Submission Link</th>
-              <th className="p-4 font-medium text-white/80">Status</th>
-              <th className="p-4 font-medium text-white/80">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {submissions.map((sub) => (
-              <tr key={sub._id} className="border-b border-white/5 last:border-0">
-                <td className="p-4 font-semibold">{sub.userName}</td>
-                <td className="p-4 text-white/70">{sub.dayTitle}</td>
-                <td className="p-4">
-                  {sub.link ? (
-                    <a href={sub.link} target="_blank" rel="noreferrer" className="text-blue-400 hover:underline flex items-center gap-1">
-                      View Link
-                    </a>
-                  ) : (
-                    <span className="text-white/40 italic">No Link</span>
-                  )}
-                </td>
-                <td className="p-4">
-                  <span className={`px-2 py-1 rounded-md text-xs font-medium ${
-                    sub.status === "Approved" ? "bg-emerald-500/10 text-emerald-400" :
-                    sub.status === "Needs Revision" ? "bg-amber-500/10 text-amber-400" :
-                    "bg-white/10 text-white/60"
-                  }`}>
-                    {sub.status || "Pending"}
-                  </span>
-                </td>
-                <td className="p-4 flex gap-2 items-center">
-                  <button 
-                    onClick={() => handleUpdate(sub._id, "Approved")}
-                    className="px-3 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded transition-colors text-xs font-semibold"
-                  >
-                    Approve
-                  </button>
-                  <button 
-                    onClick={() => handleUpdate(sub._id, "Needs Revision")}
-                    className="px-3 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 rounded transition-colors text-xs font-semibold"
-                  >
-                    Reject
-                  </button>
-                  {successId === sub._id && <Check size={16} className="text-emerald-400 ml-2 animate-in fade-in" />}
-                </td>
-              </tr>
-            ))}
-            {submissions.length === 0 && (
-              <tr>
-                <td colSpan="5" className="p-8 text-center text-white/50">No submissions pending review.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      className="max-w-6xl mx-auto"
+    >
+      {/* Header */}
+      <div className="border-b border-black/[0.06] pb-8 mb-10">
+        <p className="font-mono text-[10px] tracking-[0.3em] text-black/30 uppercase mb-3">
+          REVIEW_QUEUE // LIVE
+        </p>
+        <h1 className="text-4xl font-display font-black tracking-tighter uppercase text-black">
+          Submissions.
+        </h1>
+        <p className="text-black/40 mt-2 font-mono text-xs tracking-wider uppercase">
+          {submissions.length} SUBMISSION_NODES LOADED
+        </p>
       </div>
-    </div>
+
+      {/* Table */}
+      <div className="border border-black/[0.06] rounded-xl overflow-hidden bg-white">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b border-black/[0.06] bg-[#F8F9FA]">
+                {["STUDENT", "TASK_NODE", "SUBMISSION_LINK", "STATUS", "ACTION"].map(col => (
+                  <th key={col} className="px-5 py-4 font-mono text-[9px] tracking-[0.25em] text-black/30 uppercase font-bold">
+                    {col}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {submissions.map((sub, i) => (
+                <motion.tr
+                  key={sub._id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: i * 0.04 }}
+                  className="border-b border-black/[0.04] last:border-0 hover:bg-[#F8F9FA] transition-colors"
+                >
+                  <td className="px-5 py-4">
+                    <span className="font-mono text-sm font-bold text-black uppercase tracking-wider">{sub.userName}</span>
+                  </td>
+                  <td className="px-5 py-4">
+                    <span className="font-mono text-xs text-black/50">{sub.dayTitle}</span>
+                  </td>
+                  <td className="px-5 py-4">
+                    {sub.link ? (
+                      <a href={sub.link} target="_blank" rel="noreferrer" className="font-mono text-xs text-black underline underline-offset-4 hover:text-black/60 transition-colors flex items-center gap-1">
+                        VIEW_LINK
+                        <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none">
+                          <path d="M2 10L10 2M5 2h5v5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </a>
+                    ) : (
+                      <span className="font-mono text-xs text-black/20">NULL</span>
+                    )}
+                  </td>
+                  <td className="px-5 py-4">
+                    <span className={`inline-block font-mono text-[9px] uppercase tracking-widest px-2 py-1 border rounded-full ${statusColor(sub.status)}`}>
+                      {sub.status || "PENDING"}
+                    </span>
+                  </td>
+                  <td className="px-5 py-4">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleUpdate(sub._id, "Approved")}
+                        className="font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-green-200 text-green-700 hover:bg-green-50 transition-colors"
+                      >
+                        APPROVE
+                      </button>
+                      <button
+                        onClick={() => handleUpdate(sub._id, "Needs Revision")}
+                        className="font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-amber-200 text-amber-700 hover:bg-amber-50 transition-colors"
+                      >
+                        REVISE
+                      </button>
+                      {successId === sub._id && (
+                        <motion.span
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="font-mono text-[9px] text-green-600 uppercase tracking-wider"
+                        >
+                          SAVED
+                        </motion.span>
+                      )}
+                    </div>
+                  </td>
+                </motion.tr>
+              ))}
+              {submissions.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-5 py-16 text-center">
+                    <p className="font-mono text-[10px] tracking-widest text-black/20 uppercase">
+                      QUEUE_EMPTY // NO_SUBMISSIONS_PENDING
+                    </p>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </motion.div>
   );
 }
