@@ -107,26 +107,7 @@ export default function LandingPage() {
       {/* Top Right Navigation actions */}
       <div className="fixed top-8 right-8 md:top-12 md:right-12 z-50 flex items-center gap-4 md:gap-6 mix-blend-difference text-black dark:text-white font-mono text-xs select-none">
         
-        {/* Artistic Credit */}
-        <div className="hidden sm:flex items-center gap-2">
-          <span className="font-mono text-[9px] text-gray-400 tracking-widest uppercase">
-            CRAFTED_BY:
-          </span>
-          <a
-            href="https://itsemallen.dev"
-            target="_blank"
-            rel="noreferrer"
-            className="relative group overflow-hidden px-4 py-1.5 border border-white/20 rounded-full bg-white/5"
-          >
-            <span className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out rounded-full" />
-            <span className="relative z-10 font-mono text-[9px] font-black uppercase tracking-widest text-white group-hover:text-black transition-colors duration-300">
-              ALLEN
-            </span>
-          </a>
-          <span className="font-mono text-[9px] text-gray-400 tracking-widest uppercase ml-1">
-            & KASHINADTH
-          </span>
-        </div>
+
 
         {/* Theme Toggle */}
         {mounted && (
@@ -181,6 +162,27 @@ export default function LandingPage() {
           <path d="M50 15 L50 85 M15 50 L85 50" stroke="currentColor" strokeWidth="1" opacity="0.3" />
           <polygon points="50,25 55,50 50,75 45,50" fill="currentColor" />
         </motion.svg>
+      </div>
+
+      {/* Bottom Center Artistic Credit */}
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 hidden sm:flex items-center gap-2 mix-blend-difference pointer-events-auto select-none">
+        <span className="font-mono text-[9px] text-gray-400 tracking-widest uppercase">
+          CRAFTED_BY:
+        </span>
+        <a
+          href="https://itsemallen.dev"
+          target="_blank"
+          rel="noreferrer"
+          className="relative group overflow-hidden px-4 py-1.5 border border-white/20 rounded-full bg-white/5"
+        >
+          <span className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out rounded-full" />
+          <span className="relative z-10 font-mono text-[9px] font-black uppercase tracking-widest text-white group-hover:text-black transition-colors duration-300">
+            ALLEN
+          </span>
+        </a>
+        <span className="font-mono text-[9px] text-gray-400 tracking-widest uppercase ml-1">
+          & KASHINADTH
+        </span>
       </div>
 
       {/* ----------------- ASYMMETRICAL INTERACTIVE HERO CONTENT ----------------- */}
