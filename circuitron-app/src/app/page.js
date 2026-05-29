@@ -2,10 +2,17 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
+import { useTheme } from "next-themes";
 import { useState, useEffect, useRef } from "react";
 
 export default function LandingPage() {
   const [time, setTime] = useState("");
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => setMounted(true), []);
+  const isDark = mounted && (theme === "dark" || resolvedTheme === "dark");
+
   const { scrollYProgress: pageScrollY } = useScroll();
   const rotate = useTransform(pageScrollY, [0, 1], [0, 360]);
 
@@ -98,16 +105,62 @@ export default function LandingPage() {
       </div>
 
       {/* Top Right Navigation actions */}
-      <div className="fixed top-8 right-8 md:top-12 md:right-12 z-50 flex items-center gap-8 mix-blend-difference text-black dark:text-white font-mono text-xs select-none">
-        <div className="hidden sm:block text-gray-400 dark:text-gray-500 tracking-wider">
-          COGNITIVE_TIME: <span className="text-black dark:text-white font-bold">{time || "00:00:00"}</span>
+      <div className="fixed top-8 right-8 md:top-12 md:right-12 z-50 flex items-center gap-4 md:gap-6 mix-blend-difference text-black dark:text-white font-mono text-xs select-none">
+        
+        {/* Artistic Credit */}
+        <div className="hidden sm:flex items-center gap-2">
+          <span className="font-mono text-[9px] text-gray-400 tracking-widest uppercase">
+            CRAFTED_BY:
+          </span>
+          <a
+            href="https://itsemallen.dev"
+            target="_blank"
+            rel="noreferrer"
+            className="relative group overflow-hidden px-4 py-1.5 border border-white/20 rounded-full bg-white/5"
+          >
+            <span className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out rounded-full" />
+            <span className="relative z-10 font-mono text-[9px] font-black uppercase tracking-widest text-white group-hover:text-black transition-colors duration-300">
+              ALLEN
+            </span>
+          </a>
+          <span className="font-mono text-[9px] text-gray-400 tracking-widest uppercase ml-1">
+            & KASHINADTH
+          </span>
+        </div>
+
+        {/* Theme Toggle */}
+        {mounted && (
+          <button
+            onClick={() => setTheme(isDark ? "light" : "dark")}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/20 hover:bg-white/10 transition-colors group"
+            aria-label="Toggle Dark Mode"
+          >
+            {isDark ? (
+              <>
+                <svg className="w-3.5 h-3.5 text-white/50 group-hover:text-white transition-colors" viewBox="0 0 16 16" fill="none">
+                  <path d="M8 3v1m0 8v1m-3.5-6.5h-1m8 0h-1m-4.5-3.5l-.7-.7m7.1 7.1l-.7-.7m-5.7.7l-.7.7m7.1-7.1l-.7.7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="8" cy="8" r="2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </>
+            ) : (
+              <>
+                <svg className="w-3.5 h-3.5 text-white/50 group-hover:text-white transition-colors" viewBox="0 0 16 16" fill="none">
+                  <path d="M12.5 10.5A5.5 5.5 0 015.5 3.5a5.5 5.5 0 107 7z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </>
+            )}
+          </button>
+        )}
+
+        <div className="hidden lg:block text-gray-400 tracking-wider">
+          COGNITIVE_TIME: <span className="text-white font-bold">{time || "00:00:00"}</span>
         </div>
         <Link 
           href="/login"
-          className="group relative px-5 py-2.5 border border-black dark:border-white rounded-lg overflow-hidden bg-white dark:bg-[#0a0a0a] text-black dark:text-white font-bold uppercase tracking-[0.2em] text-[10px] pointer-events-auto transition-colors duration-300"
+          className="group relative px-5 py-2.5 border border-white rounded-lg overflow-hidden bg-transparent text-white font-bold uppercase tracking-[0.2em] text-[10px] pointer-events-auto transition-colors duration-300"
         >
-          <span className="relative z-10 group-hover:text-white dark:group-hover:text-black transition-colors duration-300">Access Portal</span>
-          <span className="absolute inset-0 bg-black dark:bg-white scale-y-0 group-hover:scale-y-100 origin-bottom transition-transform duration-300 ease-out z-0" />
+          <span className="relative z-10 group-hover:text-black transition-colors duration-300">Access Portal</span>
+          <span className="absolute inset-0 bg-white scale-y-0 group-hover:scale-y-100 origin-bottom transition-transform duration-300 ease-out z-0" />
         </Link>
       </div>
 

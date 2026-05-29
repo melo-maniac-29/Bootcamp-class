@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { Skeleton } from "../../components/ui/skeleton";
 import AppSidebar from "@/components/AppSidebar";
+import Topbar from "@/components/Topbar";
 
 /**
  * Purpose:
@@ -127,15 +128,7 @@ export default function AdminLayout({ children }) {
 
       {/* ── MAIN CONTENT ── */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Topbar */}
-        <div className="sticky top-0 z-20 flex items-center justify-between pl-16 md:pl-8 pr-8 py-4 border-b border-black/[0.06] dark:border-white/[0.06] bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur-md shrink-0">
-          <span className="font-mono text-[9px] tracking-[0.3em] text-black/30 dark:text-white/30 uppercase">
-            CIRCUITRON // {isAdmin ? "ADMIN_PORTAL" : "STAFF_PORTAL"}
-          </span>
-          <span className="font-mono text-[9px] tracking-[0.3em] text-black/30 dark:text-white/30 uppercase">
-            ACCESS: {isAdmin ? "FULL" : "PARTIAL"}
-          </span>
-        </div>
+        <Topbar title={`CIRCUITRON // ${isAdmin ? "ADMIN_PORTAL" : "STAFF_PORTAL"}`} />
         <main className="flex-1 overflow-y-auto p-8">
           {children}
         </main>

@@ -3,7 +3,7 @@ import "./globals.css";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import GlobalFooter from "@/components/GlobalFooter";
+
 
 const inter = Inter({
   variable: "--font-inter",
@@ -30,7 +30,6 @@ export default function RootLayout({ children }) {
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <ConvexClientProvider>
               <div className="flex-1 flex flex-col">{children}</div>
-              <GlobalFooter />
             </ConvexClientProvider>
           </ThemeProvider>
         </body>
