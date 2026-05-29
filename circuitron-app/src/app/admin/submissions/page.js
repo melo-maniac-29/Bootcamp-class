@@ -33,9 +33,9 @@ export default function SubmissionsPage() {
   };
 
   const statusColor = (status) => {
-    if (status === "Approved") return "text-green-700 border-green-200 bg-green-50";
-    if (status === "Needs Revision") return "text-amber-700 border-amber-200 bg-amber-50";
-    return "text-black/40 border-black/10 bg-black/5";
+    if (status === "Approved") return "text-green-700 dark:text-green-400 border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/30";
+    if (status === "Needs Revision") return "text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/30";
+    return "text-black/40 dark:text-white/40 border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5";
   };
 
   return (
@@ -46,26 +46,26 @@ export default function SubmissionsPage() {
       className="max-w-6xl mx-auto"
     >
       {/* Header */}
-      <div className="border-b border-black/[0.06] pb-8 mb-10">
-        <p className="font-mono text-[10px] tracking-[0.3em] text-black/30 uppercase mb-3">
+      <div className="border-b border-black/[0.06] dark:border-white/[0.06] pb-8 mb-10">
+        <p className="font-mono text-[10px] tracking-[0.3em] text-black/30 dark:text-white/30 uppercase mb-3">
           REVIEW_QUEUE // LIVE
         </p>
-        <h1 className="text-4xl font-display font-black tracking-tighter uppercase text-black">
+        <h1 className="text-4xl font-display font-black tracking-tighter uppercase text-black dark:text-white">
           Submissions.
         </h1>
-        <p className="text-black/40 mt-2 font-mono text-xs tracking-wider uppercase">
+        <p className="text-black/40 dark:text-white/40 mt-2 font-mono text-xs tracking-wider uppercase">
           {submissions.length} SUBMISSION_NODES LOADED
         </p>
       </div>
 
       {/* Table */}
-      <div className="border border-black/[0.06] rounded-xl overflow-hidden bg-white">
+      <div className="border border-black/[0.06] dark:border-white/[0.06] rounded-xl overflow-hidden bg-white dark:bg-[#0a0a0a]">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="border-b border-black/[0.06] bg-[#F8F9FA]">
+              <tr className="border-b border-black/[0.06] dark:border-white/[0.06] bg-[#F8F9FA] dark:bg-[#111111]">
                 {["STUDENT", "TASK_NODE", "SUBMISSION_LINK", "STATUS", "ACTION"].map(col => (
-                  <th key={col} className="px-5 py-4 font-mono text-[9px] tracking-[0.25em] text-black/30 uppercase font-bold">
+                  <th key={col} className="px-5 py-4 font-mono text-[9px] tracking-[0.25em] text-black/30 dark:text-white/30 uppercase font-bold">
                     {col}
                   </th>
                 ))}
@@ -78,24 +78,24 @@ export default function SubmissionsPage() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: i * 0.04 }}
-                  className="border-b border-black/[0.04] last:border-0 hover:bg-[#F8F9FA] transition-colors"
+                  className="border-b border-black/[0.04] dark:border-white/[0.04] last:border-0 hover:bg-[#F8F9FA] dark:hover:bg-[#111111] transition-colors"
                 >
                   <td className="px-5 py-4">
-                    <span className="font-mono text-sm font-bold text-black uppercase tracking-wider">{sub.userName}</span>
+                    <span className="font-mono text-sm font-bold text-black dark:text-white uppercase tracking-wider">{sub.userName}</span>
                   </td>
                   <td className="px-5 py-4">
-                    <span className="font-mono text-xs text-black/50">{sub.dayTitle}</span>
+                    <span className="font-mono text-xs text-black/50 dark:text-white/50">{sub.dayTitle}</span>
                   </td>
                   <td className="px-5 py-4">
                     {sub.link ? (
-                      <a href={sub.link} target="_blank" rel="noreferrer" className="font-mono text-xs text-black underline underline-offset-4 hover:text-black/60 transition-colors flex items-center gap-1">
+                      <a href={sub.link} target="_blank" rel="noreferrer" className="font-mono text-xs text-black dark:text-white underline underline-offset-4 hover:text-black/60 dark:hover:text-white/60 transition-colors flex items-center gap-1">
                         VIEW_LINK
                         <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none">
                           <path d="M2 10L10 2M5 2h5v5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       </a>
                     ) : (
-                      <span className="font-mono text-xs text-black/20">NULL</span>
+                      <span className="font-mono text-xs text-black/20 dark:text-white/20">NULL</span>
                     )}
                   </td>
                   <td className="px-5 py-4">
@@ -107,13 +107,13 @@ export default function SubmissionsPage() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleUpdate(sub._id, "Approved")}
-                        className="font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-green-200 text-green-700 hover:bg-green-50 transition-colors"
+                        className="font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 transition-colors"
                       >
                         APPROVE
                       </button>
                       <button
                         onClick={() => handleUpdate(sub._id, "Needs Revision")}
-                        className="font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-amber-200 text-amber-700 hover:bg-amber-50 transition-colors"
+                        className="font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-colors"
                       >
                         REVISE
                       </button>
@@ -121,7 +121,7 @@ export default function SubmissionsPage() {
                         <motion.span
                           initial={{ opacity: 0, scale: 0.8 }}
                           animate={{ opacity: 1, scale: 1 }}
-                          className="font-mono text-[9px] text-green-600 uppercase tracking-wider"
+                          className="font-mono text-[9px] text-green-600 dark:text-green-400 uppercase tracking-wider"
                         >
                           SAVED
                         </motion.span>
@@ -133,7 +133,7 @@ export default function SubmissionsPage() {
               {submissions.length === 0 && (
                 <tr>
                   <td colSpan={5} className="px-5 py-16 text-center">
-                    <p className="font-mono text-[10px] tracking-widest text-black/20 uppercase">
+                    <p className="font-mono text-[10px] tracking-widest text-black/20 dark:text-white/20 uppercase">
                       QUEUE_EMPTY // NO_SUBMISSIONS_PENDING
                     </p>
                   </td>

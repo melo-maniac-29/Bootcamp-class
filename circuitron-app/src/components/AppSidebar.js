@@ -41,10 +41,10 @@ export default function AppSidebar({
       {/* ─── MOBILE HAMBURGER BUTTON ─── */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="md:hidden fixed top-4 left-4 z-50 w-9 h-9 flex items-center justify-center rounded-lg border border-black/[0.08] bg-white/90 backdrop-blur hover:bg-black/5 transition-colors shadow-sm"
+        className="md:hidden fixed top-4 left-4 z-50 w-9 h-9 flex items-center justify-center rounded-lg border border-black/[0.08] dark:border-white/[0.08] bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur hover:bg-black/5 dark:hover:bg-white/5 transition-colors shadow-sm"
         aria-label="Open navigation"
       >
-        <svg className="w-4 h-4 text-black/60" viewBox="0 0 16 16" fill="none">
+        <svg className="w-4 h-4 text-black/60 dark:text-white/60" viewBox="0 0 16 16" fill="none">
           <path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
         </svg>
       </button>
@@ -70,7 +70,7 @@ export default function AppSidebar({
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="md:hidden fixed top-0 left-0 h-full w-[260px] z-50 bg-white border-r border-black/[0.06] flex flex-col"
+              className="md:hidden fixed top-0 left-0 h-full w-[260px] z-50 bg-white dark:bg-[#0a0a0a] border-r border-black/[0.06] dark:border-white/[0.06] flex flex-col"
             >
               <SidebarContents
                 open={true}
@@ -83,7 +83,7 @@ export default function AppSidebar({
                 onSignOut={handleSignOut}
                 onToggle={() => setMobileOpen(false)}
                 toggleIcon={
-                  <svg className="w-3.5 h-3.5 text-black/40" viewBox="0 0 16 16" fill="none">
+                  <svg className="w-3.5 h-3.5 text-black/40 dark:text-white/40" viewBox="0 0 16 16" fill="none">
                     <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 }
@@ -97,7 +97,7 @@ export default function AppSidebar({
       <motion.aside
         animate={{ width: open ? 220 : 60 }}
         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-        className="shrink-0 border-r border-black/[0.06] hidden md:flex flex-col h-screen sticky top-0 bg-white overflow-hidden"
+        className="shrink-0 border-r border-black/[0.06] dark:border-white/[0.06] hidden md:flex flex-col h-screen sticky top-0 bg-white dark:bg-[#0a0a0a] overflow-hidden"
       >
         <SidebarContents
           open={open}
@@ -113,7 +113,7 @@ export default function AppSidebar({
             <motion.svg
               animate={{ rotate: open ? 0 : 180 }}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="w-3.5 h-3.5 text-black/40"
+              className="w-3.5 h-3.5 text-black/40 dark:text-white/40"
               viewBox="0 0 16 16"
               fill="none"
             >
@@ -145,7 +145,7 @@ function SidebarContents({ open, navItems, brand, badge, badgeColor, topSection,
               transition={{ duration: 0.2 }}
               className="flex items-center gap-2 overflow-hidden"
             >
-              <Link href="/" className="font-display font-black text-lg tracking-tighter uppercase text-black whitespace-nowrap">
+              <Link href="/" className="font-display font-black text-lg tracking-tighter uppercase text-black dark:text-white whitespace-nowrap">
                 C //
               </Link>
               {badge && (
@@ -158,7 +158,7 @@ function SidebarContents({ open, navItems, brand, badge, badgeColor, topSection,
         </AnimatePresence>
         <button
           onClick={onToggle}
-          className="w-7 h-7 flex items-center justify-center rounded-md border border-black/[0.08] hover:bg-black/5 transition-colors shrink-0 ml-auto"
+          className="w-7 h-7 flex items-center justify-center rounded-md border border-black/[0.08] dark:border-white/[0.08] hover:bg-black/5 dark:hover:bg-white/5 transition-colors shrink-0 ml-auto"
           aria-label="Toggle sidebar"
         >
           {toggleIcon}
@@ -175,7 +175,7 @@ function SidebarContents({ open, navItems, brand, badge, badgeColor, topSection,
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="text-[9px] font-mono tracking-[0.3em] text-black/25 uppercase px-2 pb-2 pt-1"
+              className="text-[9px] font-mono tracking-[0.3em] text-black/25 dark:text-white/25 uppercase px-2 pb-2 pt-1"
             >
               SYS_NAVIGATION
             </motion.p>
@@ -187,22 +187,22 @@ function SidebarContents({ open, navItems, brand, badge, badgeColor, topSection,
         ))}
 
         {topSection && (
-          <div className={`pt-4 mt-3 border-t border-black/[0.06] ${open ? "" : "flex justify-center"}`}>
+          <div className={`pt-4 mt-3 border-t border-black/[0.06] dark:border-white/[0.06] ${open ? "" : "flex justify-center"}`}>
             {topSection(open)}
           </div>
         )}
       </nav>
 
       {/* ── LOGOUT — pinned to bottom ── */}
-      <div className="relative z-10 shrink-0 px-3 pb-8 pt-4 border-t border-black/[0.06]">
+      <div className="relative z-10 shrink-0 px-3 pb-8 pt-4 border-t border-black/[0.06] dark:border-white/[0.06]">
         <button
           onClick={onSignOut}
           title="Sign out"
-          className={`flex items-center rounded-lg text-[11px] font-mono font-bold uppercase tracking-wider text-black/30 hover:text-black hover:bg-black/5 transition-all group w-full ${
+          className={`flex items-center rounded-lg text-[11px] font-mono font-bold uppercase tracking-wider text-black/30 dark:text-white/30 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-all group w-full ${
             open ? "gap-3 px-3 py-2.5" : "justify-center py-2.5"
           }`}
         >
-          <svg className="w-3.5 h-3.5 shrink-0 text-black/25 group-hover:text-black transition-colors" viewBox="0 0 16 16" fill="none">
+          <svg className="w-3.5 h-3.5 shrink-0 text-black/25 dark:text-white/25 group-hover:text-black dark:group-hover:text-white transition-colors" viewBox="0 0 16 16" fill="none">
             <path d="M6 2H3a1 1 0 00-1 1v10a1 1 0 001 1h3M10 11l3-3-3-3M13 8H6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
           <AnimatePresence initial={false}>
@@ -234,11 +234,11 @@ function NavItem({ item, open, isActive }) {
         open ? "gap-3 px-3 py-2.5" : "justify-center py-2.5"
       } ${
         isActive
-          ? "bg-black text-white"
-          : "text-black/40 hover:text-black hover:bg-black/5"
+          ? "bg-black dark:bg-white text-white dark:text-black"
+          : "text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5"
       }`}
     >
-      <span className={`shrink-0 transition-colors ${isActive ? "text-white" : "text-black/25 group-hover:text-black"}`}>
+      <span className={`shrink-0 transition-colors ${isActive ? "text-white dark:text-black" : "text-black/25 dark:text-white/25 group-hover:text-black dark:group-hover:text-white"}`}>
         {item.icon}
       </span>
       <AnimatePresence initial={false}>

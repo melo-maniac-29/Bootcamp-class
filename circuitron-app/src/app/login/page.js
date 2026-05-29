@@ -70,7 +70,7 @@ export default function LoginPage() {
   const eyeY = mousePos.y * 10;
 
   return (
-    <div className="w-screen h-screen relative overflow-hidden bg-white text-black font-sans">
+    <div className="w-screen h-screen relative overflow-hidden bg-white dark:bg-[#0a0a0a] text-black dark:text-white font-sans">
       
       {/* ----------------- FIXED TELEMETRY BACKGROUND GRID ----------------- */}
       <div className="absolute inset-0 z-0 opacity-[0.02] pointer-events-none bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] bg-[size:2.5rem_2.5rem]" />
@@ -85,24 +85,24 @@ export default function LoginPage() {
         </Link>
         
         {/* Floating Mechanical Gliding Switcher */}
-        <div className="relative flex bg-gray-100/90 backdrop-blur-md p-1 rounded-full border border-gray-200 pointer-events-auto shadow-sm select-none">
+        <div className="relative flex bg-gray-100/90 dark:bg-white/10 backdrop-blur-md p-1 rounded-full border border-gray-200 dark:border-white/5 pointer-events-auto shadow-sm select-none">
           
           {/* Gliding shutter active background indicator */}
           <motion.div
             animate={{ x: step === "login" ? "0%" : "100%" }}
             transition={{ type: "spring", stiffness: 140, damping: 22 }}
-            className="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-black rounded-full z-0"
+            className="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-black dark:bg-white rounded-full z-0"
           />
 
           <button
             onClick={() => { setStep("login"); setError(""); }}
-            className={`relative z-10 px-6 py-2 rounded-full text-[10px] font-mono font-bold uppercase tracking-widest transition-colors duration-300 cursor-pointer ${step === "login" ? "text-white" : "text-gray-400 hover:text-black"}`}
+            className={`relative z-10 px-6 py-2 rounded-full text-[10px] font-mono font-bold uppercase tracking-widest transition-colors duration-300 cursor-pointer ${step === "login" ? "text-white dark:text-black" : "text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white"}`}
           >
             SYS_SIGN_IN
           </button>
           <button
             onClick={() => { setStep("signUp"); setError(""); }}
-            className={`relative z-10 px-6 py-2 rounded-full text-[10px] font-mono font-bold uppercase tracking-widest transition-colors duration-300 cursor-pointer ${step === "signUp" ? "text-white" : "text-gray-400 hover:text-black"}`}
+            className={`relative z-10 px-6 py-2 rounded-full text-[10px] font-mono font-bold uppercase tracking-widest transition-colors duration-300 cursor-pointer ${step === "signUp" ? "text-white dark:text-black" : "text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white"}`}
           >
             REGISTER_NODE
           </button>
@@ -116,7 +116,7 @@ export default function LoginPage() {
         <motion.div
           layout
           transition={{ type: "spring", stiffness: 90, damping: 20 }}
-          className="hidden lg:flex lg:w-1/2 h-full bg-[#F8F9FA] border-x border-gray-100 flex-col justify-between p-16 relative overflow-hidden z-20 select-none"
+          className="hidden lg:flex lg:w-1/2 h-full bg-[#F8F9FA] dark:bg-[#111111] border-x border-gray-100 dark:border-white/5 flex-col justify-between p-16 relative overflow-hidden z-20 select-none"
         >
           {/* Top Telemetry */}
           <div className="flex items-center justify-between font-mono text-[9px] text-gray-400">
@@ -206,7 +206,7 @@ export default function LoginPage() {
         <motion.div
           layout
           transition={{ type: "spring", stiffness: 90, damping: 20 }}
-          className="w-full lg:w-1/2 h-full flex items-center justify-center p-8 sm:p-12 lg:p-24 bg-white relative z-10"
+          className="w-full lg:w-1/2 h-full flex items-center justify-center p-8 sm:p-12 lg:p-24 bg-white dark:bg-[#0a0a0a] relative z-10"
         >
           <div className="w-full max-w-md pt-16">
             <AnimatePresence mode="wait">
@@ -236,7 +236,7 @@ export default function LoginPage() {
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-transparent border-b border-gray-200 focus:border-black outline-none px-0 py-3 text-black placeholder:text-gray-300 transition-colors text-lg font-medium font-mono"
+                        className="w-full bg-transparent border-b border-gray-200 dark:border-white/20 focus:border-black dark:focus:border-white outline-none px-0 py-3 text-black dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-600 transition-colors text-lg font-medium font-mono"
                         placeholder="student@university.edu"
                         required
                       />
@@ -250,7 +250,7 @@ export default function LoginPage() {
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full bg-transparent border-b border-gray-200 focus:border-black outline-none px-0 py-3 text-black placeholder:text-gray-300 transition-colors text-lg font-medium font-mono"
+                        className="w-full bg-transparent border-b border-gray-200 dark:border-white/20 focus:border-black dark:focus:border-white outline-none px-0 py-3 text-black dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-600 transition-colors text-lg font-medium font-mono"
                         placeholder="••••••••"
                         required
                       />
@@ -265,7 +265,7 @@ export default function LoginPage() {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full py-4.5 rounded-xl bg-black text-white font-mono text-xs font-bold uppercase tracking-widest mt-8 hover:bg-gray-800 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 group cursor-pointer"
+                      className="w-full py-4.5 rounded-xl bg-black dark:bg-white text-white dark:text-black font-mono text-xs font-bold uppercase tracking-widest mt-8 hover:bg-gray-800 dark:hover:bg-gray-200 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 group cursor-pointer"
                     >
                       {loading ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -283,9 +283,9 @@ export default function LoginPage() {
                     <button
                       type="button"
                       onClick={() => { setStep("signUp"); setError(""); }}
-                      className="font-mono text-[10px] text-gray-400 hover:text-black uppercase tracking-widest cursor-pointer transition-colors duration-300 group"
+                      className="font-mono text-[10px] text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white uppercase tracking-widest cursor-pointer transition-colors duration-300 group"
                     >
-                      NEED_LOGIC_NODE? <span className="text-black font-bold group-hover:underline">[ INITIALIZE_REGISTRATION ]</span>
+                      NEED_LOGIC_NODE? <span className="text-black dark:text-white font-bold group-hover:underline">[ INITIALIZE_REGISTRATION ]</span>
                     </button>
                   </div>
                 </motion.div>
@@ -362,9 +362,9 @@ export default function LoginPage() {
                     <button
                       type="button"
                       onClick={() => { setStep("login"); setError(""); }}
-                      className="font-mono text-[10px] text-gray-400 hover:text-black uppercase tracking-widest cursor-pointer transition-colors duration-300 group"
+                      className="font-mono text-[10px] text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white uppercase tracking-widest cursor-pointer transition-colors duration-300 group"
                     >
-                      CREDENTIALS_FOUND? <span className="text-black font-bold group-hover:underline">[ ACCESS_SYS_NODE ]</span>
+                      CREDENTIALS_FOUND? <span className="text-black dark:text-white font-bold group-hover:underline">[ ACCESS_SYS_NODE ]</span>
                     </button>
                   </div>
                 </motion.div>

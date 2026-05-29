@@ -54,10 +54,10 @@ export default function ContentPage() {
       className="max-w-6xl mx-auto"
     >
       {/* Header */}
-      <div className="border-b border-black/[0.06] pb-8 mb-10">
-        <p className="font-mono text-[10px] tracking-[0.3em] text-black/30 uppercase mb-3">ADMIN // CURRICULUM_MANAGER</p>
-        <h1 className="text-4xl font-display font-black tracking-tighter uppercase text-black">Curriculum.</h1>
-        <p className="text-black/40 mt-2 font-mono text-xs tracking-wider uppercase">
+      <div className="border-b border-black/[0.06] dark:border-white/[0.06] pb-8 mb-10">
+        <p className="font-mono text-[10px] tracking-[0.3em] text-black/30 dark:text-white/30 uppercase mb-3">ADMIN // CURRICULUM_MANAGER</p>
+        <h1 className="text-4xl font-display font-black tracking-tighter uppercase text-black dark:text-white">Curriculum.</h1>
+        <p className="text-black/40 dark:text-white/40 mt-2 font-mono text-xs tracking-wider uppercase">
           {weeks.length} WEEK_CLUSTERS · SELECT TO MANAGE DAYS
         </p>
       </div>
@@ -66,7 +66,7 @@ export default function ContentPage() {
         
         {/* ── WEEKS ── */}
         <div>
-          <p className="font-mono text-[10px] tracking-[0.3em] text-black/30 uppercase mb-4">WEEK_CLUSTERS</p>
+          <p className="font-mono text-[10px] tracking-[0.3em] text-black/30 dark:text-white/30 uppercase mb-4">WEEK_CLUSTERS</p>
 
           {/* Create week form */}
           <form onSubmit={handleCreateWeek} className="flex gap-2 mb-6">
@@ -75,11 +75,11 @@ export default function ContentPage() {
               value={newWeekTitle}
               onChange={(e) => setNewWeekTitle(e.target.value)}
               placeholder="Week title e.g. Week 1 — Foundations"
-              className="flex-1 border border-black/[0.12] rounded-lg px-4 py-2.5 font-mono text-sm outline-none focus:border-black transition-colors bg-white placeholder:text-black/20"
+              className="flex-1 border border-black/[0.12] dark:border-white/[0.12] rounded-lg px-4 py-2.5 font-mono text-sm outline-none focus:border-black dark:focus:border-white transition-colors bg-white dark:bg-[#0a0a0a] text-black dark:text-white placeholder:text-black/20 dark:placeholder:text-white/20"
             />
             <button
               type="submit"
-              className="bg-black text-white px-4 py-2.5 rounded-lg font-mono text-[10px] uppercase tracking-wider hover:bg-black/80 transition-colors flex items-center gap-2 shrink-0"
+              className="bg-black dark:bg-white text-white dark:text-black px-4 py-2.5 rounded-lg font-mono text-[10px] uppercase tracking-wider hover:bg-black/80 dark:hover:bg-white/80 transition-colors flex items-center gap-2 shrink-0"
             >
               <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none">
                 <path d="M8 2v12M2 8h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
@@ -94,19 +94,19 @@ export default function ContentPage() {
                 key={week._id}
                 className={`p-4 rounded-xl border transition-all flex justify-between items-center group cursor-pointer ${
                   selectedWeek === week._id
-                    ? "bg-black border-black"
-                    : "bg-[#F8F9FA] border-black/[0.06] hover:border-black/20"
+                    ? "bg-black dark:bg-white border-black dark:border-white"
+                    : "bg-[#F8F9FA] dark:bg-[#111111] border-black/[0.06] dark:border-white/[0.06] hover:border-black/20 dark:hover:border-white/20"
                 }`}
                 onClick={() => { setSelectedWeek(week._id); setEditingDayId(null); }}
               >
                 <div>
-                  <p className={`font-mono text-[9px] tracking-[0.2em] uppercase mb-0.5 ${selectedWeek === week._id ? "text-white/50" : "text-black/30"}`}>
+                  <p className={`font-mono text-[9px] tracking-[0.2em] uppercase mb-0.5 ${selectedWeek === week._id ? "text-white/50 dark:text-black/50" : "text-black/30 dark:text-white/30"}`}>
                     CLUSTER_{String(i + 1).padStart(2, "0")}
                   </p>
-                  <p className={`font-mono text-sm font-bold uppercase tracking-wider ${selectedWeek === week._id ? "text-white" : "text-black"}`}>
+                  <p className={`font-mono text-sm font-bold uppercase tracking-wider ${selectedWeek === week._id ? "text-white dark:text-black" : "text-black dark:text-white"}`}>
                     {week.title}
                   </p>
-                  <p className={`font-mono text-[9px] uppercase mt-0.5 ${selectedWeek === week._id ? "text-white/40" : "text-black/30"}`}>
+                  <p className={`font-mono text-[9px] uppercase mt-0.5 ${selectedWeek === week._id ? "text-white/40 dark:text-black/40" : "text-black/30 dark:text-white/30"}`}>
                     STATUS: {week.status?.toUpperCase()}
                   </p>
                 </div>
@@ -119,7 +119,7 @@ export default function ContentPage() {
                     }
                   }}
                   className={`p-2 rounded-lg transition-colors opacity-0 group-hover:opacity-100 ${
-                    selectedWeek === week._id ? "hover:bg-white/10 text-white/60 hover:text-white" : "hover:bg-red-50 text-black/30 hover:text-red-600"
+                    selectedWeek === week._id ? "hover:bg-white/10 dark:hover:bg-black/10 text-white/60 dark:text-black/60 hover:text-white dark:hover:text-black" : "hover:bg-red-50 dark:hover:bg-red-900/30 text-black/30 dark:text-white/30 hover:text-red-600 dark:hover:text-red-400"
                   }`}
                 >
                   <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
@@ -129,8 +129,8 @@ export default function ContentPage() {
               </div>
             ))}
             {weeks.length === 0 && (
-              <div className="py-10 text-center border border-dashed border-black/10 rounded-xl">
-                <p className="font-mono text-[10px] tracking-widest text-black/25 uppercase">NO_CLUSTERS // CREATE ABOVE</p>
+              <div className="py-10 text-center border border-dashed border-black/10 dark:border-white/10 rounded-xl">
+                <p className="font-mono text-[10px] tracking-widest text-black/25 dark:text-white/25 uppercase">NO_CLUSTERS // CREATE ABOVE</p>
               </div>
             )}
           </div>
@@ -139,11 +139,11 @@ export default function ContentPage() {
         {/* ── DAYS ── */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <p className="font-mono text-[10px] tracking-[0.3em] text-black/30 uppercase">DAY_NODES</p>
+            <p className="font-mono text-[10px] tracking-[0.3em] text-black/30 dark:text-white/30 uppercase">DAY_NODES</p>
             {selectedWeek && !editingDayId && (
               <button
                 onClick={handleCreateDay}
-                className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider px-3 py-2 rounded-lg border border-black/[0.12] hover:bg-black hover:text-white hover:border-black transition-all"
+                className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider px-3 py-2 rounded-lg border border-black/[0.12] dark:border-white/[0.12] hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black hover:border-black dark:hover:border-white transition-all"
               >
                 <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none">
                   <path d="M8 2v12M2 8h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
@@ -154,8 +154,8 @@ export default function ContentPage() {
           </div>
 
           {!selectedWeek ? (
-            <div className="py-16 text-center border border-dashed border-black/10 rounded-xl">
-              <p className="font-mono text-[10px] tracking-widest text-black/25 uppercase">SELECT_CLUSTER // TO VIEW DAYS</p>
+            <div className="py-16 text-center border border-dashed border-black/10 dark:border-white/10 rounded-xl">
+              <p className="font-mono text-[10px] tracking-widest text-black/25 dark:text-white/25 uppercase">SELECT_CLUSTER // TO VIEW DAYS</p>
             </div>
           ) : editingDayId ? (
             <DayEditor dayId={editingDayId} onClose={() => setEditingDayId(null)} />
@@ -164,25 +164,25 @@ export default function ContentPage() {
               {days.map((day, idx) => (
                 <div
                   key={day._id}
-                  className="p-4 rounded-xl border border-black/[0.06] bg-[#F8F9FA] flex justify-between items-center group hover:border-black/20 transition-all"
+                  className="p-4 rounded-xl border border-black/[0.06] dark:border-white/[0.06] bg-[#F8F9FA] dark:bg-[#111111] flex justify-between items-center group hover:border-black/20 dark:hover:border-white/20 transition-all"
                 >
                   <div>
-                    <p className="font-mono text-[9px] tracking-[0.2em] text-black/30 uppercase mb-0.5">
+                    <p className="font-mono text-[9px] tracking-[0.2em] text-black/30 dark:text-white/30 uppercase mb-0.5">
                       DAY_{String(day.order).padStart(2, "0")}
                     </p>
-                    <p className="font-mono text-sm font-bold text-black uppercase tracking-wider">{day.title}</p>
+                    <p className="font-mono text-sm font-bold text-black dark:text-white uppercase tracking-wider">{day.title}</p>
                   </div>
                   <button
                     onClick={() => setEditingDayId(day._id)}
-                    className="font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-black/[0.08] hover:bg-black hover:text-white hover:border-black transition-all opacity-0 group-hover:opacity-100"
+                    className="font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-black/[0.08] dark:border-white/[0.08] hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black hover:border-black dark:hover:border-white transition-all opacity-0 group-hover:opacity-100"
                   >
                     EDIT
                   </button>
                 </div>
               ))}
               {days.length === 0 && (
-                <div className="py-10 text-center border border-dashed border-black/10 rounded-xl">
-                  <p className="font-mono text-[10px] tracking-widest text-black/25 uppercase">NO_DAYS // ADD ABOVE</p>
+                <div className="py-10 text-center border border-dashed border-black/10 dark:border-white/10 rounded-xl">
+                  <p className="font-mono text-[10px] tracking-widest text-black/25 dark:text-white/25 uppercase">NO_DAYS // ADD ABOVE</p>
                 </div>
               )}
             </div>

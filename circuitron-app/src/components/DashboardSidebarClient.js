@@ -45,7 +45,7 @@ export default function DashboardSidebarClient() {
           <p className="text-[9px] font-mono tracking-[0.3em] text-black/25 uppercase px-2 pb-2">MANAGEMENT</p>
           <Link
             href="/admin"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[11px] font-mono font-bold uppercase tracking-wider text-black border border-black/10 hover:bg-black hover:text-white transition-all"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[11px] font-mono font-bold uppercase tracking-wider text-black dark:text-white border border-black/10 dark:border-white/10 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all"
           >
             <svg className="w-4 h-4 shrink-0" viewBox="0 0 16 16" fill="none">
               <path d="M8 1L14 4v4c0 3.5-2.5 6-6 7C2.5 14 0 11.5 0 8V4L8 1z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
@@ -54,8 +54,8 @@ export default function DashboardSidebarClient() {
           </Link>
         </div>
       ) : (
-        <Link href="/admin" title="Admin Portal" className="flex justify-center py-2.5 rounded-lg hover:bg-black/5 transition-colors">
-          <svg className="w-4 h-4 text-black/30 hover:text-black" viewBox="0 0 16 16" fill="none">
+        <Link href="/admin" title="Admin Portal" className="flex justify-center py-2.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+          <svg className="w-4 h-4 text-black/30 dark:text-white/30 hover:text-black dark:hover:text-white" viewBox="0 0 16 16" fill="none">
             <path d="M8 1L14 4v4c0 3.5-2.5 6-6 7C2.5 14 0 11.5 0 8V4L8 1z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
           </svg>
         </Link>

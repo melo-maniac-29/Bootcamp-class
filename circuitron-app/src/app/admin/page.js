@@ -54,15 +54,15 @@ export default function AdminDashboard() {
       className="max-w-4xl mx-auto"
     >
       {/* Header */}
-      <div className="border-b border-black/[0.06] pb-8 mb-10">
-        <p className="font-mono text-[10px] tracking-[0.3em] text-black/30 uppercase mb-3">
+      <div className="border-b border-black/[0.06] dark:border-white/[0.06] pb-8 mb-10">
+        <p className="font-mono text-[10px] tracking-[0.3em] text-black/30 dark:text-white/30 uppercase mb-3">
           CONTROL_NODE // AUTHENTICATED
         </p>
-        <h1 className="text-4xl font-display font-black tracking-tighter uppercase text-black">
+        <h1 className="text-4xl font-display font-black tracking-tighter uppercase text-black dark:text-white">
           {isAdmin ? "Admin Portal." : "Staff Portal."}
         </h1>
-        <p className="text-black/40 mt-2 font-mono text-xs tracking-wider uppercase">
-          CLEARANCE_LEVEL: <span className="text-black font-bold">{isAdmin ? "ADMIN" : "VOLUNTEER"}</span> // SELECT_MODULE_BELOW
+        <p className="text-black/40 dark:text-white/40 mt-2 font-mono text-xs tracking-wider uppercase">
+          CLEARANCE_LEVEL: <span className="text-black dark:text-white font-bold">{isAdmin ? "ADMIN" : "VOLUNTEER"}</span> // SELECT_MODULE_BELOW
         </p>
       </div>
 
@@ -77,16 +77,16 @@ export default function AdminDashboard() {
           >
             <Link
               href={mod.href}
-              className="flex items-start gap-5 p-6 rounded-xl border border-black/[0.06] bg-[#F8F9FA] hover:bg-white hover:border-black/20 transition-all group"
+              className="flex items-start gap-5 p-6 rounded-xl border border-black/[0.06] dark:border-white/[0.06] bg-[#F8F9FA] dark:bg-[#111111] hover:bg-white dark:hover:bg-[#151515] hover:border-black/20 dark:hover:border-white/20 transition-all group"
             >
-              <div className="p-3 rounded-lg border border-black/[0.06] bg-white text-black/40 group-hover:text-black group-hover:border-black/20 transition-colors">
+              <div className="p-3 rounded-lg border border-black/[0.06] dark:border-white/[0.06] bg-white dark:bg-[#0a0a0a] text-black/40 dark:text-white/40 group-hover:text-black dark:group-hover:text-white group-hover:border-black/20 dark:group-hover:border-white/20 transition-colors">
                 {mod.icon}
               </div>
               <div>
-                <p className="font-mono text-[11px] tracking-[0.2em] text-black font-bold uppercase mb-1">{mod.label}</p>
-                <p className="font-mono text-xs text-black/40">{mod.desc}</p>
+                <p className="font-mono text-[11px] tracking-[0.2em] text-black dark:text-white font-bold uppercase mb-1">{mod.label}</p>
+                <p className="font-mono text-xs text-black/40 dark:text-white/40">{mod.desc}</p>
               </div>
-              <svg className="w-4 h-4 text-black/20 group-hover:text-black/60 group-hover:translate-x-1 transition-all ml-auto mt-1 shrink-0" viewBox="0 0 16 16" fill="none">
+              <svg className="w-4 h-4 text-black/20 dark:text-white/20 group-hover:text-black/60 dark:group-hover:text-white/60 group-hover:translate-x-1 transition-all ml-auto mt-1 shrink-0" viewBox="0 0 16 16" fill="none">
                 <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </Link>

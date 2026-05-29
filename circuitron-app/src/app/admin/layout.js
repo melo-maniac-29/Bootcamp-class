@@ -26,18 +26,18 @@ export default function AdminLayout({ children }) {
 
   if (user === undefined) {
     return (
-      <div className="flex min-h-screen bg-white">
-        <div className="w-[220px] border-r border-black/[0.06] p-6 shrink-0">
-          <Skeleton className="h-7 w-24 mb-10 bg-black/5" />
+      <div className="flex min-h-screen bg-white dark:bg-[#0a0a0a]">
+        <div className="w-[220px] border-r border-black/[0.06] dark:border-white/[0.06] p-6 shrink-0">
+          <Skeleton className="h-7 w-24 mb-10 bg-black/5 dark:bg-white/5" />
           <div className="space-y-3">
-            <Skeleton className="h-9 w-full bg-black/5" />
-            <Skeleton className="h-9 w-full bg-black/5" />
-            <Skeleton className="h-9 w-full bg-black/5" />
+            <Skeleton className="h-9 w-full bg-black/5 dark:bg-white/5" />
+            <Skeleton className="h-9 w-full bg-black/5 dark:bg-white/5" />
+            <Skeleton className="h-9 w-full bg-black/5 dark:bg-white/5" />
           </div>
         </div>
         <div className="flex-1 p-8">
-          <Skeleton className="h-10 w-1/4 mb-8 bg-black/5" />
-          <Skeleton className="h-80 w-full rounded-xl bg-black/5" />
+          <Skeleton className="h-10 w-1/4 mb-8 bg-black/5 dark:bg-white/5" />
+          <Skeleton className="h-80 w-full rounded-xl bg-black/5 dark:bg-white/5" />
         </div>
       </div>
     );
@@ -99,7 +99,7 @@ export default function AdminLayout({ children }) {
       <p className="text-[9px] font-mono tracking-[0.3em] text-black/25 uppercase px-2 pb-2">STUDENT_VIEW</p>
       <Link
         href="/dashboard"
-        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[11px] font-mono font-bold uppercase tracking-wider text-green-700 border border-green-200 hover:bg-green-50 transition-all"
+        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[11px] font-mono font-bold uppercase tracking-wider text-green-700 dark:text-green-500 border border-green-200 dark:border-green-800 hover:bg-green-50 dark:hover:bg-green-900/30 transition-all"
       >
         <svg className="w-4 h-4 shrink-0" viewBox="0 0 16 16" fill="none">
           <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -108,7 +108,7 @@ export default function AdminLayout({ children }) {
       </Link>
     </div>
   ) : (
-    <Link href="/dashboard" title="Student Dashboard" className="flex justify-center py-2.5 rounded-lg hover:bg-black/5 transition-colors">
+    <Link href="/dashboard" title="Student Dashboard" className="flex justify-center py-2.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
       <svg className="w-4 h-4 text-green-500" viewBox="0 0 16 16" fill="none">
         <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
@@ -116,23 +116,23 @@ export default function AdminLayout({ children }) {
   );
 
   return (
-    <div className="min-h-screen bg-white text-black flex font-sans selection:bg-black selection:text-white">
+    <div className="min-h-screen bg-white dark:bg-[#0a0a0a] text-black dark:text-white flex font-sans selection:bg-black dark:selection:bg-white selection:text-white dark:selection:text-black">
       <AppSidebar
         navItems={navItems}
         brand="ADMIN"
         badge={isAdmin ? "ADMIN" : "STAFF"}
-        badgeColor="text-black/50 border-black/10 bg-black/5"
+        badgeColor="text-black/50 dark:text-white/50 border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5"
         topSection={studentViewSection}
       />
 
       {/* ── MAIN CONTENT ── */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Topbar */}
-        <div className="sticky top-0 z-20 flex items-center justify-between pl-16 md:pl-8 pr-8 py-4 border-b border-black/[0.06] bg-white/90 backdrop-blur-md shrink-0">
-          <span className="font-mono text-[9px] tracking-[0.3em] text-black/30 uppercase">
+        <div className="sticky top-0 z-20 flex items-center justify-between pl-16 md:pl-8 pr-8 py-4 border-b border-black/[0.06] dark:border-white/[0.06] bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur-md shrink-0">
+          <span className="font-mono text-[9px] tracking-[0.3em] text-black/30 dark:text-white/30 uppercase">
             CIRCUITRON // {isAdmin ? "ADMIN_PORTAL" : "STAFF_PORTAL"}
           </span>
-          <span className="font-mono text-[9px] tracking-[0.3em] text-black/30 uppercase">
+          <span className="font-mono text-[9px] tracking-[0.3em] text-black/30 dark:text-white/30 uppercase">
             ACCESS: {isAdmin ? "FULL" : "PARTIAL"}
           </span>
         </div>

@@ -67,7 +67,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-black selection:bg-black selection:text-white relative font-sans">
+    <div className="min-h-screen bg-white dark:bg-[#0a0a0a] text-black dark:text-white selection:bg-black dark:selection:bg-white selection:text-white dark:selection:text-black relative font-sans">
       
       {/* ----------------- PERSPECTIVE BLUEPRINT FLOOR GRID ----------------- */}
       <div className="absolute inset-0 z-0 opacity-[0.025] pointer-events-none overflow-hidden select-none">
@@ -87,7 +87,7 @@ export default function LandingPage() {
       </div>
 
       {/* Top Left Navigation logo */}
-      <div className="fixed top-8 left-8 md:top-12 md:left-12 z-50 flex items-center gap-3 mix-blend-difference text-black pointer-events-auto select-none">
+      <div className="fixed top-8 left-8 md:top-12 md:left-12 z-50 flex items-center gap-3 mix-blend-difference text-black dark:text-white pointer-events-auto select-none">
         <Link href="/" className="font-display font-black text-2xl tracking-tighter uppercase">
           C //
         </Link>
@@ -98,16 +98,16 @@ export default function LandingPage() {
       </div>
 
       {/* Top Right Navigation actions */}
-      <div className="fixed top-8 right-8 md:top-12 md:right-12 z-50 flex items-center gap-8 mix-blend-difference text-black font-mono text-xs select-none">
-        <div className="hidden sm:block text-gray-400 tracking-wider">
-          COGNITIVE_TIME: <span className="text-black font-bold">{time || "00:00:00"}</span>
+      <div className="fixed top-8 right-8 md:top-12 md:right-12 z-50 flex items-center gap-8 mix-blend-difference text-black dark:text-white font-mono text-xs select-none">
+        <div className="hidden sm:block text-gray-400 dark:text-gray-500 tracking-wider">
+          COGNITIVE_TIME: <span className="text-black dark:text-white font-bold">{time || "00:00:00"}</span>
         </div>
         <Link 
           href="/login"
-          className="group relative px-5 py-2.5 border border-black rounded-lg overflow-hidden bg-white text-black font-bold uppercase tracking-[0.2em] text-[10px] pointer-events-auto transition-colors duration-300"
+          className="group relative px-5 py-2.5 border border-black dark:border-white rounded-lg overflow-hidden bg-white dark:bg-[#0a0a0a] text-black dark:text-white font-bold uppercase tracking-[0.2em] text-[10px] pointer-events-auto transition-colors duration-300"
         >
-          <span className="relative z-10 group-hover:text-white transition-colors duration-300">Access Portal</span>
-          <span className="absolute inset-0 bg-black scale-y-0 group-hover:scale-y-100 origin-bottom transition-transform duration-300 ease-out z-0" />
+          <span className="relative z-10 group-hover:text-white dark:group-hover:text-black transition-colors duration-300">Access Portal</span>
+          <span className="absolute inset-0 bg-black dark:bg-white scale-y-0 group-hover:scale-y-100 origin-bottom transition-transform duration-300 ease-out z-0" />
         </Link>
       </div>
 
@@ -121,9 +121,9 @@ export default function LandingPage() {
       <div className="fixed bottom-8 right-8 md:bottom-12 md:right-12 z-50 hidden md:flex items-center gap-4 font-mono text-[9px] text-gray-400 select-none mix-blend-difference pointer-events-none">
         <div className="text-right">
           <div>SCROLL_VECTOR</div>
-          <div className="text-black font-bold">MONITORING</div>
+          <div className="text-black dark:text-white font-bold">MONITORING</div>
         </div>
-        <motion.svg style={{ rotate }} className="w-8 h-8 text-black" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <motion.svg style={{ rotate }} className="w-8 h-8 text-black dark:text-white" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
           <circle cx="50" cy="50" r="45" stroke="currentColor" strokeWidth="1" strokeDasharray="4 4" />
           <path d="M50 15 L50 85 M15 50 L85 50" stroke="currentColor" strokeWidth="1" opacity="0.3" />
           <polygon points="50,25 55,50 50,75 45,50" fill="currentColor" />
@@ -149,7 +149,7 @@ export default function LandingPage() {
                 TACTILE_INTEGRITY_VERIFIED
               </div>
 
-              <h1 className="text-[11vw] sm:text-[9vw] lg:text-[7vw] xl:text-[6.5vw] font-display font-black leading-[0.85] tracking-tighter uppercase text-black select-none">
+              <h1 className="text-[11vw] sm:text-[9vw] lg:text-[7vw] xl:text-[6.5vw] font-display font-black leading-[0.85] tracking-tighter uppercase text-black dark:text-white select-none">
                 HARDWARE <br />
                 <span className="text-gray-300 font-medium italic normal-case">Evolved.</span> <br />
                 ENGINEERING.
@@ -162,10 +162,10 @@ export default function LandingPage() {
               <div className="pt-4">
                 <Link
                   href="/login"
-                  className="group relative inline-flex items-center justify-center w-full sm:w-auto px-10 py-5 bg-black text-white font-display font-bold text-sm tracking-[0.2em] uppercase rounded-lg overflow-hidden transition-transform duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                  className="group relative inline-flex items-center justify-center w-full sm:w-auto px-10 py-5 bg-black dark:bg-white text-white dark:text-black font-display font-bold text-sm tracking-[0.2em] uppercase rounded-lg overflow-hidden transition-transform duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                 >
                   <span className="relative z-10">INITIALIZE COGNITIVE Vault</span>
-                  <span className="absolute inset-0 bg-gray-800 translate-y-full group-hover:translate-y-0 transition-transform duration-400 ease-out z-0" />
+                  <span className="absolute inset-0 bg-gray-800 dark:bg-gray-200 translate-y-full group-hover:translate-y-0 transition-transform duration-400 ease-out z-0" />
                 </Link>
               </div>
             </motion.div>
@@ -177,7 +177,7 @@ export default function LandingPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 1.2, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-              className="w-full bg-white border border-black/10 rounded-2xl p-6 sm:p-8 shadow-sm relative overflow-hidden group/sandbox"
+              className="w-full bg-white dark:bg-[#0a0a0a] border border-black/10 dark:border-white/10 rounded-2xl p-6 sm:p-8 shadow-sm relative overflow-hidden group/sandbox"
             >
               {/* Outer decorative tech lines */}
               <div className="absolute top-0 right-0 p-3 font-mono text-[8px] text-gray-300 pointer-events-none select-none">
@@ -191,7 +191,7 @@ export default function LandingPage() {
               </div>
 
               {/* Interactive SVG Canvas */}
-              <div className="bg-[#F8F9FA] border border-gray-150 rounded-xl p-4 flex items-center justify-center relative mb-6 overflow-hidden">
+              <div className="bg-[#F8F9FA] dark:bg-[#111] border border-gray-150 dark:border-white/5 rounded-xl p-4 flex items-center justify-center relative mb-6 overflow-hidden">
                 <svg width="100%" height="220" viewBox="0 0 400 220" className="relative z-10">
                   {/* Grid Lines Overlay */}
                   <defs>

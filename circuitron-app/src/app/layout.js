@@ -2,6 +2,8 @@ import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import GlobalFooter from "@/components/GlobalFooter";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -21,11 +23,16 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <ConvexAuthNextjsServerProvider>
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
         <body
-          className={`${inter.variable} ${outfit.variable} font-sans antialiased bg-white text-black`}
+          className={`${inter.variable} ${outfit.variable} font-sans antialiased bg-white dark:bg-[#0a0a0a] text-black dark:text-white flex flex-col min-h-screen`}
         >
-          <ConvexClientProvider>{children}</ConvexClientProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <ConvexClientProvider>
+              <div className="flex-1 flex flex-col">{children}</div>
+              <GlobalFooter />
+            </ConvexClientProvider>
+          </ThemeProvider>
         </body>
       </html>
     </ConvexAuthNextjsServerProvider>
