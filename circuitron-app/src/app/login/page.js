@@ -17,6 +17,7 @@ export default function LoginPage() {
   const [step, setStep] = useState("login"); // "login" or "signUp"
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -55,6 +56,11 @@ export default function LoginPage() {
         await signIn("password", { email, password, flow: "signIn" });
         router.push("/dashboard");
       } else {
+        if (password !== confirmPassword) {
+          setError("Passwords do not match.");
+          setLoading(false);
+          return;
+        }
         await signIn("password", { email, password, flow: "signUp" });
         router.push("/dashboard");
       }
@@ -315,7 +321,7 @@ export default function LoginPage() {
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-transparent border-b border-gray-200 focus:border-black outline-none px-0 py-3 text-black placeholder:text-gray-300 transition-colors text-lg font-medium font-mono"
+                        className="w-full bg-transparent border-b border-gray-200 dark:border-white/20 focus:border-black dark:focus:border-white outline-none px-0 py-3 text-black dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-600 transition-colors text-lg font-medium font-mono"
                         placeholder="architect@circuitron.net"
                         required
                       />
@@ -329,7 +335,21 @@ export default function LoginPage() {
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full bg-transparent border-b border-gray-200 focus:border-black outline-none px-0 py-3 text-black placeholder:text-gray-300 transition-colors text-lg font-medium font-mono"
+                        className="w-full bg-transparent border-b border-gray-200 dark:border-white/20 focus:border-black dark:focus:border-white outline-none px-0 py-3 text-black dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-600 transition-colors text-lg font-medium font-mono"
+                        placeholder="••••••••"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2 group relative">
+                      <label className="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest transition-colors group-focus-within:text-black">
+                        CONFIRM_PASSWORD
+                      </label>
+                      <input
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="w-full bg-transparent border-b border-gray-200 dark:border-white/20 focus:border-black dark:focus:border-white outline-none px-0 py-3 text-black dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-600 transition-colors text-lg font-medium font-mono"
                         placeholder="••••••••"
                         required
                       />
@@ -344,7 +364,7 @@ export default function LoginPage() {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full py-4.5 rounded-xl bg-black text-white font-mono text-xs font-bold uppercase tracking-widest mt-8 hover:bg-gray-800 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 group cursor-pointer"
+                      className="w-full py-4.5 rounded-xl bg-black dark:bg-white text-white dark:text-black font-mono text-xs font-bold uppercase tracking-widest mt-8 hover:bg-gray-800 dark:hover:bg-gray-200 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 group cursor-pointer"
                     >
                       {loading ? (
                         <Loader2 className="w-4 h-4 animate-spin" />

@@ -193,8 +193,39 @@ function SidebarContents({ open, navItems, brand, badge, badgeColor, topSection,
         )}
       </nav>
 
-      {/* ── LOGOUT — pinned to bottom ── */}
+      {/* ── LOGOUT & FOOTER — pinned to bottom ── */}
       <div className="relative z-10 shrink-0 px-3 pb-8 pt-4 border-t border-black/[0.06] dark:border-white/[0.06]">
+        <AnimatePresence initial={false}>
+          {open && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="flex flex-col gap-2 mb-6 overflow-hidden whitespace-nowrap px-1"
+            >
+              <span className="font-mono text-[9px] text-black/30 dark:text-white/30 tracking-widest uppercase">
+                CRAFTED_BY:
+              </span>
+              <div className="flex items-center gap-2">
+                <a
+                  href="https://itsemallen.dev"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="relative group overflow-hidden px-3 py-1 border border-black/10 dark:border-white/10 rounded-full bg-[#F8F9FA] dark:bg-[#111111]"
+                >
+                  <span className="absolute inset-0 bg-black dark:bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out rounded-full" />
+                  <span className="relative z-10 font-mono text-[9px] font-black uppercase tracking-widest text-black dark:text-white group-hover:text-white dark:group-hover:text-black transition-colors duration-300">
+                    ALLEN
+                  </span>
+                </a>
+                <span className="font-mono text-[9px] text-black/30 dark:text-white/30 tracking-widest uppercase">
+                  & KASHINADTH
+                </span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <button
           onClick={onSignOut}
           title="Sign out"
