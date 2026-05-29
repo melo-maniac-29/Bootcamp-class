@@ -593,7 +593,7 @@ export default function LandingPage() {
                     CRAFTED_BY //
                   </span>
                   <a
-                    href="https://itsemallen.dev"
+                    href="https://itsmeallen.dev"
                     target="_blank"
                     rel="noreferrer"
                     className="font-mono text-[9px] font-black tracking-widest text-white uppercase flex items-center gap-1.5"
@@ -602,7 +602,7 @@ export default function LandingPage() {
                     <span className="group-hover:text-green-400 transition-colors duration-300">ALLEN</span>
                   </a>
                   <span className="font-mono text-[9px] text-gray-500 tracking-widest uppercase transition-colors group-hover:text-gray-400">
-                    _&_KASHINADTH
+                    & KASHINADTH
                   </span>
                 </div>
               </div>
@@ -650,7 +650,7 @@ export default function LandingPage() {
               CRAFTED_BY //
             </span>
             <a
-              href="https://itsemallen.dev"
+              href="https://itsmeallen.dev"
               target="_blank"
               rel="noreferrer"
               className="font-mono text-[9px] font-black tracking-widest text-white uppercase flex items-center gap-1.5"
@@ -659,7 +659,7 @@ export default function LandingPage() {
               <span className="group-hover:text-green-400 transition-colors duration-300">ALLEN</span>
             </a>
             <span className="font-mono text-[9px] text-gray-500 tracking-widest uppercase transition-colors group-hover:text-gray-400">
-              _&_KASHINADTH
+              & KASHINADTH
             </span>
           </div>
           <div className="font-mono text-[10px] text-gray-500 uppercase tracking-widest text-center">

@@ -208,7 +208,7 @@ function SidebarContents({ open, navItems, brand, badge, badgeColor, topSection,
               </span>
               <div className="flex items-center gap-2 mt-1 group cursor-pointer">
                 <a
-                  href="https://itsemallen.dev"
+                  href="https://itsmeallen.dev"
                   target="_blank"
                   rel="noreferrer"
                   className="font-mono text-[9px] font-black tracking-widest text-black dark:text-white uppercase flex items-center gap-1.5"
@@ -217,7 +217,7 @@ function SidebarContents({ open, navItems, brand, badge, badgeColor, topSection,
                   <span className="group-hover:text-green-500 dark:group-hover:text-green-400 transition-colors duration-300">ALLEN</span>
                 </a>
                 <span className="font-mono text-[9px] text-black/30 dark:text-white/30 tracking-widest uppercase transition-colors group-hover:text-black/50 dark:group-hover:text-white/50">
-                  _&_KASHINADTH
+                  & KASHINADTH
                 </span>
               </div>
             </motion.div>
