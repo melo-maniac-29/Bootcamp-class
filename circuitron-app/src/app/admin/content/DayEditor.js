@@ -3,8 +3,18 @@
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useState, useEffect } from "react";
-import { Save, Trash2, Plus, X } from "lucide-react";
+import { motion } from "framer-motion";
 
+/**
+ * Purpose:
+ *   Editor panel for a single bootcamp day. Allows updating title,
+ *   description, videoUrl, taskDescription and managing quiz questions.
+ *   Saves via updateDay and upsertQuiz mutations.
+ *
+ * Args:
+ *   dayId   string   The Convex ID of the day to edit.
+ *   onClose function Callback to dismiss the editor panel.
+ */
 export default function DayEditor({ dayId, onClose }) {
   const day = useQuery(api.content.getDay, { dayId });
   const quiz = useQuery(api.content.getQuiz, { dayId });
@@ -16,34 +26,24 @@ export default function DayEditor({ dayId, onClose }) {
   const [formData, setFormData] = useState({ title: "", description: "", videoUrl: "", taskDescription: "" });
   const [questions, setQuestions] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    if (day) {
-      setFormData({
-        title: day.title || "",
-        description: day.description || "",
-        videoUrl: day.videoUrl || "",
-        taskDescription: day.taskDescription || ""
-      });
-    }
+    if (day) setFormData({ title: day.title || "", description: day.description || "", videoUrl: day.videoUrl || "", taskDescription: day.taskDescription || "" });
   }, [day]);
 
   useEffect(() => {
-    if (quiz) {
-      setQuestions(quiz.questions || []);
-    } else if (quiz === null) {
-      setQuestions([]);
-    }
+    if (quiz) setQuestions(quiz.questions || []);
+    else if (quiz === null) setQuestions([]);
   }, [quiz]);
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
       await updateDay({ dayId, ...formData });
-      if (questions.length > 0) {
-        await upsertQuiz({ dayId, questions });
-      }
-      alert("Saved successfully!");
+      if (questions.length > 0) await upsertQuiz({ dayId, questions });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
     } catch (e) {
       console.error(e);
       alert("Failed to save.");
@@ -53,93 +53,124 @@ export default function DayEditor({ dayId, onClose }) {
   };
 
   const handleDelete = async () => {
-    if (confirm("Are you sure you want to delete this day?")) {
+    if (confirm("Delete this day permanently?")) {
       await deleteDay({ dayId });
       onClose();
     }
   };
 
-  const addQuestion = () => {
-    setQuestions([...questions, { question: "New Question", options: ["Option 1", "Option 2"], answerIndex: 0 }]);
-  };
+  const addQuestion = () =>
+    setQuestions([...questions, { question: "New Question", options: ["Option A", "Option B"], answerIndex: 0 }]);
 
-  if (!day) return <div className="p-8 text-white/50">Loading editor...</div>;
+  if (!day) return (
+    <div className="py-10 text-center">
+      <p className="font-mono text-[10px] tracking-widest text-black/25 uppercase">LOADING_DAY_EDITOR...</p>
+    </div>
+  );
+
+  const fieldClass = "w-full border border-black/[0.12] rounded-lg px-4 py-2.5 font-mono text-sm outline-none focus:border-black transition-colors bg-white placeholder:text-black/20";
 
   return (
-    <div className="bg-[#1A1A1D] border border-white/10 p-6 rounded-2xl relative">
-      <button onClick={onClose} className="absolute top-4 right-4 text-white/50 hover:text-white p-2">
-        <X size={20} />
-      </button>
-      
-      <h3 className="text-2xl font-bold mb-6">Edit Day: {day.title}</h3>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+      className="border border-black/[0.08] rounded-xl p-6 bg-white relative"
+    >
+      {/* Header */}
+      <div className="flex items-start justify-between mb-6">
+        <div>
+          <p className="font-mono text-[9px] tracking-[0.3em] text-black/30 uppercase mb-1">EDITING_DAY</p>
+          <h3 className="font-display font-black text-xl tracking-tight uppercase text-black">{day.title}</h3>
+        </div>
+        <button onClick={onClose} className="p-2 rounded-lg hover:bg-black/5 transition-colors text-black/40 hover:text-black">
+          <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
+            <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+        </button>
+      </div>
 
+      {/* Form fields */}
       <div className="space-y-4 mb-8">
         <div>
-          <label className="block text-sm text-white/60 mb-1">Title</label>
-          <input type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full bg-black border border-white/20 rounded-lg px-4 py-2 outline-none focus:border-white transition-colors" />
+          <label className="block font-mono text-[9px] tracking-[0.2em] text-black/40 uppercase mb-1.5">TITLE</label>
+          <input type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className={fieldClass} />
         </div>
         <div>
-          <label className="block text-sm text-white/60 mb-1">Description</label>
-          <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full bg-black border border-white/20 rounded-lg px-4 py-2 outline-none focus:border-white transition-colors h-24" />
+          <label className="block font-mono text-[9px] tracking-[0.2em] text-black/40 uppercase mb-1.5">DESCRIPTION</label>
+          <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} rows={3} className={fieldClass} />
         </div>
         <div>
-          <label className="block text-sm text-white/60 mb-1">YouTube Video URL</label>
-          <input type="text" value={formData.videoUrl} onChange={e => setFormData({...formData, videoUrl: e.target.value})} placeholder="https://youtube.com/watch?v=..." className="w-full bg-black border border-white/20 rounded-lg px-4 py-2 outline-none focus:border-white transition-colors" />
+          <label className="block font-mono text-[9px] tracking-[0.2em] text-black/40 uppercase mb-1.5">VIDEO_URL</label>
+          <input type="text" value={formData.videoUrl} onChange={e => setFormData({...formData, videoUrl: e.target.value})} placeholder="https://youtube.com/watch?v=..." className={fieldClass} />
         </div>
         <div>
-          <label className="block text-sm text-white/60 mb-1">Task Description (Markdown)</label>
-          <textarea value={formData.taskDescription} onChange={e => setFormData({...formData, taskDescription: e.target.value})} className="w-full bg-black border border-white/20 rounded-lg px-4 py-2 outline-none focus:border-white transition-colors h-32" />
+          <label className="block font-mono text-[9px] tracking-[0.2em] text-black/40 uppercase mb-1.5">TASK_DESCRIPTION (MARKDOWN)</label>
+          <textarea value={formData.taskDescription} onChange={e => setFormData({...formData, taskDescription: e.target.value})} rows={4} className={fieldClass} />
         </div>
       </div>
 
+      {/* Quiz questions */}
       <div className="mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <h4 className="text-lg font-semibold text-blue-400">Quiz Questions</h4>
-          <button onClick={addQuestion} className="text-sm bg-white/10 hover:bg-white/20 px-3 py-1 rounded-lg flex items-center gap-1 transition-colors">
-            <Plus size={14} /> Add Question
+        <div className="flex items-center justify-between mb-4">
+          <p className="font-mono text-[10px] tracking-[0.3em] text-black/30 uppercase">QUIZ_QUESTIONS</p>
+          <button onClick={addQuestion} className="font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-black/[0.1] hover:bg-black hover:text-white hover:border-black transition-all flex items-center gap-1.5">
+            <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none">
+              <path d="M8 2v12M2 8h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+            ADD_QUESTION
           </button>
         </div>
-        
+
         {questions.length === 0 ? (
-          <div className="text-sm text-white/40 italic">No quiz questions added yet.</div>
+          <div className="py-6 text-center border border-dashed border-black/10 rounded-lg">
+            <p className="font-mono text-[10px] text-black/25 uppercase tracking-widest">NO_QUESTIONS // ADD ABOVE</p>
+          </div>
         ) : (
           <div className="space-y-4">
-            {questions.map((q, qIndex) => (
-              <div key={qIndex} className="p-4 border border-white/10 rounded-xl bg-black/50">
-                <div className="flex justify-between mb-2">
-                  <input type="text" value={q.question} onChange={e => {
-                    const newQ = [...questions];
-                    newQ[qIndex].question = e.target.value;
-                    setQuestions(newQ);
-                  }} className="flex-1 bg-transparent border-b border-white/20 outline-none focus:border-blue-400 font-medium pb-1" />
-                  <button onClick={() => setQuestions(questions.filter((_, i) => i !== qIndex))} className="text-red-400 hover:text-red-300 ml-4"><Trash2 size={16} /></button>
+            {questions.map((q, qIdx) => (
+              <div key={qIdx} className="p-4 border border-black/[0.08] rounded-lg bg-[#F8F9FA]">
+                <div className="flex gap-3 items-start mb-3">
+                  <span className="font-mono text-[9px] text-black/30 mt-1 shrink-0">Q{qIdx + 1}</span>
+                  <input
+                    type="text"
+                    value={q.question}
+                    onChange={e => { const n = [...questions]; n[qIdx] = {...n[qIdx], question: e.target.value}; setQuestions(n); }}
+                    className="flex-1 border-b border-black/[0.12] bg-transparent outline-none font-mono text-sm text-black focus:border-black pb-1 transition-colors"
+                  />
+                  <button onClick={() => setQuestions(questions.filter((_, i) => i !== qIdx))} className="p-1 text-black/30 hover:text-red-500 transition-colors shrink-0">
+                    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none">
+                      <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                  </button>
                 </div>
-                <div className="space-y-2 mt-4 pl-4">
-                  {q.options.map((opt, oIndex) => (
-                    <div key={oIndex} className="flex items-center gap-3">
-                      <input type="radio" name={`correct-${qIndex}`} checked={q.answerIndex === oIndex} onChange={() => {
-                        const newQ = [...questions];
-                        newQ[qIndex].answerIndex = oIndex;
-                        setQuestions(newQ);
-                      }} />
-                      <input type="text" value={opt} onChange={e => {
-                        const newQ = [...questions];
-                        newQ[qIndex].options[oIndex] = e.target.value;
-                        setQuestions(newQ);
-                      }} className="flex-1 bg-transparent border-b border-white/10 outline-none focus:border-white text-sm pb-1" />
+                <div className="space-y-2 pl-6">
+                  {q.options.map((opt, oIdx) => (
+                    <div key={oIdx} className="flex items-center gap-3">
+                      <input type="radio" name={`correct-${qIdx}`} checked={q.answerIndex === oIdx}
+                        onChange={() => { const n = [...questions]; n[qIdx] = {...n[qIdx], answerIndex: oIdx}; setQuestions(n); }}
+                        className="accent-black"
+                      />
+                      <input
+                        type="text"
+                        value={opt}
+                        onChange={e => { const n = [...questions]; n[qIdx].options[oIdx] = e.target.value; setQuestions(n); }}
+                        className="flex-1 border-b border-black/[0.08] bg-transparent outline-none font-mono text-xs text-black focus:border-black pb-0.5 transition-colors"
+                      />
                       <button onClick={() => {
-                        const newQ = [...questions];
-                        newQ[qIndex].options = newQ[qIndex].options.filter((_, i) => i !== oIndex);
-                        if(newQ[qIndex].answerIndex >= oIndex) newQ[qIndex].answerIndex = Math.max(0, newQ[qIndex].answerIndex - 1);
-                        setQuestions(newQ);
-                      }} className="text-white/40 hover:text-red-400 text-xs px-2">x</button>
+                        const n = [...questions];
+                        n[qIdx].options = n[qIdx].options.filter((_, i) => i !== oIdx);
+                        if (n[qIdx].answerIndex >= oIdx) n[qIdx].answerIndex = Math.max(0, n[qIdx].answerIndex - 1);
+                        setQuestions(n);
+                      }} className="text-black/20 hover:text-red-400 transition-colors font-mono text-xs px-1">×</button>
                     </div>
                   ))}
-                  <button onClick={() => {
-                    const newQ = [...questions];
-                    newQ[qIndex].options.push(`Option ${newQ[qIndex].options.length + 1}`);
-                    setQuestions(newQ);
-                  }} className="text-xs text-blue-400 hover:underline mt-2 inline-block">Add Option</button>
+                  <button
+                    onClick={() => { const n = [...questions]; n[qIdx].options.push(`Option ${n[qIdx].options.length + 1}`); setQuestions(n); }}
+                    className="font-mono text-[9px] text-black/40 hover:text-black uppercase tracking-wider transition-colors mt-1 inline-block"
+                  >
+                    + ADD_OPTION
+                  </button>
                 </div>
               </div>
             ))}
@@ -147,14 +178,22 @@ export default function DayEditor({ dayId, onClose }) {
         )}
       </div>
 
-      <div className="flex justify-between items-center pt-4 border-t border-white/10">
-        <button onClick={handleDelete} className="text-red-400 hover:bg-red-400/10 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
-          <Trash2 size={16} /> Delete Day
+      {/* Footer actions */}
+      <div className="flex justify-between items-center pt-4 border-t border-black/[0.06]">
+        <button onClick={handleDelete} className="font-mono text-[9px] uppercase tracking-wider px-4 py-2.5 rounded border border-red-200 text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2">
+          <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none">
+            <path d="M3 4h10M6 4V2h4v2M6 7v5M10 7v5M4 4l.5 9h7l.5-9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          DELETE_DAY
         </button>
-        <button onClick={handleSave} disabled={isSaving} className="bg-emerald-500 hover:bg-emerald-400 text-black px-6 py-2 rounded-lg font-bold transition-colors flex items-center gap-2 disabled:opacity-50">
-          <Save size={18} /> {isSaving ? "Saving..." : "Save Changes"}
+        <button onClick={handleSave} disabled={isSaving} className="font-mono text-[9px] uppercase tracking-wider px-6 py-2.5 rounded bg-black text-white hover:bg-black/80 transition-colors disabled:opacity-50 flex items-center gap-2">
+          {saved ? (
+            <><svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg> SAVED</>
+          ) : isSaving ? "SAVING..." : (
+            <><svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none"><path d="M4 8h8M4 11h8M4 5h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg> SAVE_CHANGES</>
+          )}
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 }
