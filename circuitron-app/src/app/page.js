@@ -577,6 +577,34 @@ export default function LandingPage() {
                   <circle cx="340" cy="30" r="4" fill="#4ADE80" className="animate-ping" />
                 </svg>
               </div>
+              
+              {/* Desktop Footer Embedded in Last Panel */}
+              <div className="absolute bottom-12 left-24 xl:left-36 right-24 xl:right-36 flex items-center justify-between border-t border-white/10 pt-6 z-30">
+                <div className="font-mono text-[10px] text-gray-500 uppercase tracking-widest">
+                  &copy; 2026 CIRCUITRON. ALL RIGHTS RESERVED.
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-[9px] text-gray-400 tracking-widest uppercase">
+                    CRAFTED_BY:
+                  </span>
+                  <a
+                    href="https://itsemallen.dev"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="relative group overflow-hidden px-3 py-1 border border-white/20 bg-transparent"
+                  >
+                    <span className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out" />
+                    <span className="relative z-10 font-mono text-[9px] font-black uppercase tracking-widest text-white group-hover:text-black transition-colors duration-300">
+                      ALLEN
+                    </span>
+                  </a>
+                  <span className="font-mono text-[9px] text-gray-400 tracking-widest uppercase ml-1">
+                    & KASHINADTH
+                  </span>
+                </div>
+              </div>
+
             </div>
 
           </motion.div>
@@ -613,34 +641,33 @@ export default function LandingPage() {
           </p>
         </div>
 
-      </section>
-
-      {/* ----------------- GLOBAL FOOTER ----------------- */}
-      <footer className="w-full py-12 bg-black border-t border-white/10 flex flex-col sm:flex-row items-center justify-between px-8 md:px-24 xl:px-36 z-20 relative select-none">
-        <div className="font-mono text-[10px] text-gray-500 uppercase tracking-widest mb-8 sm:mb-0">
-          &copy; 2026 CIRCUITRON. ALL RIGHTS RESERVED.
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-[9px] text-gray-400 tracking-widest uppercase">
-            CRAFTED_BY:
-          </span>
-          <a
-            href="https://itsemallen.dev"
-            target="_blank"
-            rel="noreferrer"
-            className="relative group overflow-hidden px-4 py-1.5 border border-white/20 rounded-full bg-white/5"
-          >
-            <span className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out rounded-full" />
-            <span className="relative z-10 font-mono text-[9px] font-black uppercase tracking-widest text-white group-hover:text-black transition-colors duration-300">
-              ALLEN
+        {/* Mobile Footer Embedded */}
+        <div className="flex flex-col items-center justify-center border-t border-white/10 pt-12 mt-16 gap-6 w-full">
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-[9px] text-gray-400 tracking-widest uppercase">
+              CRAFTED_BY:
             </span>
-          </a>
-          <span className="font-mono text-[9px] text-gray-400 tracking-widest uppercase ml-1">
-            & KASHINADTH
-          </span>
+            <a
+              href="https://itsemallen.dev"
+              target="_blank"
+              rel="noreferrer"
+              className="relative group overflow-hidden px-3 py-1 border border-white/20 bg-transparent"
+            >
+              <span className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out" />
+              <span className="relative z-10 font-mono text-[9px] font-black uppercase tracking-widest text-white group-hover:text-black transition-colors duration-300">
+                ALLEN
+              </span>
+            </a>
+            <span className="font-mono text-[9px] text-gray-400 tracking-widest uppercase ml-1">
+              & KASHINADTH
+            </span>
+          </div>
+          <div className="font-mono text-[10px] text-gray-500 uppercase tracking-widest text-center">
+            &copy; 2026 CIRCUITRON. ALL RIGHTS RESERVED.
+          </div>
         </div>
-      </footer>
+
+      </section>
 
       {/* Dynamic Keyframes */}
       <style jsx global>{`

@@ -206,14 +206,14 @@ function SidebarContents({ open, navItems, brand, badge, badgeColor, topSection,
               <span className="font-mono text-[9px] text-black/30 dark:text-white/30 tracking-widest uppercase">
                 CRAFTED_BY:
               </span>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 mt-1">
                 <a
                   href="https://itsemallen.dev"
                   target="_blank"
                   rel="noreferrer"
-                  className="relative group overflow-hidden px-3 py-1 border border-black/10 dark:border-white/10 rounded-full bg-[#F8F9FA] dark:bg-[#111111]"
+                  className="relative group overflow-hidden px-2.5 py-1 border border-black/20 dark:border-white/20 bg-transparent"
                 >
-                  <span className="absolute inset-0 bg-black dark:bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out rounded-full" />
+                  <span className="absolute inset-0 bg-black dark:bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out" />
                   <span className="relative z-10 font-mono text-[9px] font-black uppercase tracking-widest text-black dark:text-white group-hover:text-white dark:group-hover:text-black transition-colors duration-300">
                     ALLEN
                   </span>
