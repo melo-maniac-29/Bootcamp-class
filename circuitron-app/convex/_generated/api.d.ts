@@ -9,7 +9,10 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as content from "../content.js";
 import type * as http from "../http.js";
+import type * as submissions from "../submissions.js";
+import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -19,7 +22,10 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  content: typeof content;
   http: typeof http;
+  submissions: typeof submissions;
+  users: typeof users;
 }>;
 
 /**
