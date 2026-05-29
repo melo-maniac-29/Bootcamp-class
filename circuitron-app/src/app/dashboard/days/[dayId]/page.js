@@ -1,3 +1,5 @@
+"use client";
+
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../../convex/_generated/api";
 import { useParams, useRouter } from "next/navigation";
@@ -41,7 +43,15 @@ export default function DayViewerPage() {
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-           <h2 className="text-3xl font-bold">Day Details</h2>
+           <div className="flex justify-between items-center mb-6">
+             <h2 className="text-3xl font-bold">Day Details</h2>
+             <Link 
+               href={`/dashboard/days/${dayId}/quiz`}
+               className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-xl font-semibold transition-colors shadow-lg shadow-blue-500/20"
+             >
+               Take Knowledge Check
+             </Link>
+           </div>
            
            <div className="aspect-video bg-black border border-white/20 rounded-2xl flex items-center justify-center group overflow-hidden relative cursor-pointer hover:border-white/40 transition-colors">
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />
