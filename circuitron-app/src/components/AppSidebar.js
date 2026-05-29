@@ -195,34 +195,7 @@ function SidebarContents({ open, navItems, brand, badge, badgeColor, topSection,
 
       {/* ── LOGOUT & FOOTER — pinned to bottom ── */}
       <div className="relative z-10 shrink-0 px-3 pb-8 pt-4 border-t border-black/[0.06] dark:border-white/[0.06]">
-        <AnimatePresence initial={false}>
-          {open && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="flex flex-col gap-2 mb-6 overflow-hidden whitespace-nowrap px-1"
-            >
-              <span className="font-mono text-[9px] text-black/30 dark:text-white/30 tracking-widest uppercase transition-colors">
-                CRAFTED_BY //
-              </span>
-              <div className="flex items-center gap-2 mt-1 group cursor-pointer">
-                <a
-                  href="https://itsmeallen.dev"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="font-mono text-[9px] font-black tracking-widest text-black dark:text-white uppercase flex items-center gap-1.5"
-                >
-                  <span className="w-1.5 h-1.5 bg-green-500 opacity-40 group-hover:opacity-100 transition-opacity animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.5)]" />
-                  <span className="group-hover:text-green-500 dark:group-hover:text-green-400 transition-colors duration-300">ALLEN</span>
-                </a>
-                <span className="font-mono text-[9px] text-black/30 dark:text-white/30 tracking-widest uppercase transition-colors group-hover:text-black/50 dark:group-hover:text-white/50">
-                  & KASHINADTH
-                </span>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+
 
         <button
           onClick={onSignOut}
