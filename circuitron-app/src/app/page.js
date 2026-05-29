@@ -161,7 +161,8 @@ export default function LandingPage() {
           <circle cx="50" cy="50" r="45" stroke="currentColor" strokeWidth="1" strokeDasharray="4 4" />
           <path d="M50 15 L50 85 M15 50 L85 50" stroke="currentColor" strokeWidth="1" opacity="0.3" />
           <polygon points="50,25 55,50 50,75 45,50" fill="currentColor" />
-
+        </motion.svg>
+      </div>
 
       {/* ----------------- ASYMMETRICAL INTERACTIVE HERO CONTENT ----------------- */}
       
