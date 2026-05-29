@@ -1,7 +1,11 @@
 import { authAdmin, dbAdmin } from '@/lib/firebaseAdmin';
 import { NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/authMiddleware';
 
 export async function POST(req) {
+  const authResult = await requireAdmin(req);
+  if (authResult instanceof Response) return authResult;
+
   try {
     const { uid, newPassword } = await req.json();
 

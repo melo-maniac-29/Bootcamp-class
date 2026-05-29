@@ -1,7 +1,11 @@
 // admin-portal/src/app/api/submissions/analyze/route.js
 import { NextResponse } from 'next/server';
+import { verifyAuth } from '@/lib/authMiddleware';
 
 export async function POST(req) {
+    const authResult = await verifyAuth(req);
+    if (authResult instanceof Response) return authResult;
+
     try {
         const { submission, maxPoints } = await req.json();
         const apiKey = process.env.GEMINI_API_KEY;

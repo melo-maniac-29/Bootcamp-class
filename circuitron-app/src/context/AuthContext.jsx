@@ -1,7 +1,9 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect } from 'react';
+import { getIdToken as firebaseGetIdToken } from 'firebase/auth';
 import { onAuthChange, logoutUser, getUserProfile } from '@/lib/auth';
+import { auth } from '@/lib/firebase';
 import { useRouter, usePathname } from 'next/navigation';
 
 const AuthContext = createContext(null);
@@ -44,13 +46,21 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const getIdToken = async () => {
+    if (auth.currentUser) {
+      return await firebaseGetIdToken(auth.currentUser);
+    }
+    return null;
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
       loading,
       logout,
       refreshUser,
-      isAdmin: user?.role === 'admin'
+      isAdmin: user?.role === 'admin',
+      getIdToken
     }}>
       {children}
     </AuthContext.Provider>

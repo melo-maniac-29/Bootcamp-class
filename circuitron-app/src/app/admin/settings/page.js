@@ -6,7 +6,12 @@ import { useAuth } from '@/context/AuthContext';
 import { auth } from '@/lib/firebase';
 import { updateUser } from '@/lib/db';
 import { updateProfile, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
-import { User, Lock, LogOut, Check, AlertCircle } from 'lucide-react';
+import { User, Lock, LogOut, Check, AlertCircle, Loader2, Save, Shield } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useRouter } from 'next/navigation';
+import { logoutUser } from '@/lib/auth';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 10 },
@@ -14,7 +19,8 @@ const fadeUp = {
 };
 
 export default function SettingsPage() {
-  const { user, refreshUser, logout } = useAuth();
+  const { user, refreshUser } = useAuth();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('profile');
 
   // Profile form
@@ -39,6 +45,7 @@ export default function SettingsPage() {
       await updateUser(user.uid, { displayName: displayName.trim() });
       if (refreshUser) await refreshUser();
       setProfileMsg({ type: 'success', text: 'Profile updated successfully!' });
+      setTimeout(() => setProfileMsg(null), 3000);
     } catch (err) {
       console.error(err);
       setProfileMsg({ type: 'error', text: err.message || 'Failed to update profile' });
@@ -67,9 +74,10 @@ export default function SettingsPage() {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
+      setTimeout(() => setPasswordMsg(null), 3000);
     } catch (err) {
       console.error(err);
-      if (err.code === 'auth/wrong-password') {
+      if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
         setPasswordMsg({ type: 'error', text: 'Current password is incorrect.' });
       } else {
         setPasswordMsg({ type: 'error', text: err.message || 'Failed to change password' });
@@ -78,25 +86,33 @@ export default function SettingsPage() {
       setPasswordLoading(false);
     }
   };
+  
+  const handleSignOut = async () => {
+    await logoutUser();
+    router.push('/');
+  };
+
+  const participantId = user?.participantId || 'ADMIN';
+  const roleDisplay = user?.role === 'admin' ? 'Administrator' : (user?.role || 'Unknown');
 
   return (
     <div className="max-w-3xl mx-auto pb-16 pt-4 space-y-8">
       <motion.div initial="hidden" animate="show" variants={fadeUp} className="space-y-6">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Settings</h1>
-          <p className="text-lg text-muted-foreground font-medium mt-1">Manage your account and preferences.</p>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white">Settings</h1>
+          <p className="text-sm text-white/60 mt-1">Manage your administrator account and preferences.</p>
         </div>
 
-        <div className="flex gap-2 border-b border-border pb-px">
+        <div className="flex gap-2 border-b border-white/10 pb-px">
           {[
-            { id: 'profile', label: 'Profile', icon: <User size={18} /> },
-            { id: 'security', label: 'Security', icon: <Lock size={18} /> },
+            { id: 'profile', label: 'Profile', icon: <User size={16} /> },
+            { id: 'security', label: 'Security', icon: <Lock size={16} /> },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold transition-colors relative ${
-                activeTab === tab.id ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+              className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors relative ${
+                activeTab === tab.id ? 'text-white' : 'text-white/50 hover:text-white/80'
               }`}
             >
               {tab.icon}
@@ -104,107 +120,112 @@ export default function SettingsPage() {
               {activeTab === tab.id && (
                 <motion.div
                   layoutId="activeTabIndicator"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-t-full"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-white rounded-t-full"
                 />
               )}
             </button>
           ))}
         </div>
 
-        <div className="bg-card border border-border rounded-xl overflow-hidden">
+        <Card className="bg-[#121214] border-white/10 text-white shadow-none">
           {activeTab === 'profile' && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="p-6 md:p-8 border-b border-border">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+              <CardHeader className="border-b border-white/10 pb-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white shrink-0">
                     <User size={24} />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-foreground">Profile Information</h2>
-                    <p className="text-sm text-muted-foreground">Update your display name and account details</p>
+                    <CardTitle className="text-xl">Profile Information</CardTitle>
+                    <p className="text-sm text-white/60">Update your display name and account details.</p>
                   </div>
                 </div>
+              </CardHeader>
+              <CardContent className="pt-6 space-y-6">
+                <form onSubmit={handleProfileUpdate} className="space-y-6">
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-white/60 uppercase tracking-wider">Email Address</label>
+                      <Input
+                        className="bg-[#0A0A0A] border-white/10 text-white/50 cursor-not-allowed"
+                        type="email"
+                        value={user?.email || ''}
+                        disabled
+                      />
+                      <p className="text-xs text-white/40 mt-1">Admin email cannot be changed here.</p>
+                    </div>
 
-                <form onSubmit={handleProfileUpdate} className="space-y-5">
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-semibold text-foreground">Email Address</label>
-                    <input
-                      className="w-full bg-secondary border border-border rounded-lg px-4 py-2.5 text-muted-foreground cursor-not-allowed focus:outline-none"
-                      type="email"
-                      value={user?.email || ''}
-                      disabled
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">Email cannot be changed.</p>
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-white/60 uppercase tracking-wider">Participant ID</label>
+                      <Input 
+                        type="text" 
+                        value={participantId} 
+                        disabled 
+                        className="bg-[#0A0A0A] border-white/10 text-white/50 font-mono cursor-not-allowed"
+                      />
+                    </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-semibold text-foreground">Display Name</label>
-                    <input
-                      className="w-full bg-background border border-border focus:border-primary rounded-lg px-4 py-2.5 text-foreground focus:outline-none transition-colors"
-                      type="text"
-                      value={displayName}
-                      onChange={(e) => setDisplayName(e.target.value)}
-                      placeholder="Enter your display name"
-                      required
-                    />
-                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-white/60 uppercase tracking-wider">Display Name</label>
+                      <Input
+                        className="bg-[#0A0A0A] border-white/10 text-white focus:border-white/30"
+                        type="text"
+                        value={displayName}
+                        onChange={(e) => setDisplayName(e.target.value)}
+                        placeholder="Enter your display name"
+                        required
+                      />
+                    </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-semibold text-foreground">Role</label>
-                    <input
-                      className="w-full bg-secondary border border-border rounded-lg px-4 py-2.5 text-muted-foreground cursor-not-allowed focus:outline-none capitalize"
-                      type="text"
-                      value={user?.role === 'admin' ? 'Administrator' : user?.role || 'Unknown'}
-                      disabled
-                    />
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-white/60 uppercase tracking-wider">Role</label>
+                      <Input
+                        className="bg-[#0A0A0A] border-white/10 text-white/50 cursor-not-allowed"
+                        type="text"
+                        value={roleDisplay}
+                        disabled
+                      />
+                    </div>
                   </div>
 
                   {profileMsg && (
-                    <div className={`flex items-center gap-2 p-3 rounded-lg text-sm font-medium ${
-                      profileMsg.type === 'success' ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'
+                    <div className={`flex items-center gap-2 p-3 rounded-md text-sm font-medium border ${
+                      profileMsg.type === 'success' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'
                     }`}>
                       {profileMsg.type === 'success' ? <Check size={16} /> : <AlertCircle size={16} />}
                       <span>{profileMsg.text}</span>
                     </div>
                   )}
 
-                  <div className="pt-2">
-                    <button
+                  <div className="pt-4 flex justify-between items-center border-t border-white/10 mt-6 pt-6">
+                    <Button
+                      type="button"
+                      onClick={handleSignOut}
+                      variant="ghost"
+                      className="text-red-400 hover:text-red-300 hover:bg-red-400/10"
+                    >
+                      <LogOut size={16} className="mr-2" />
+                      Sign Out
+                    </Button>
+
+                    <Button
                       type="submit"
                       disabled={profileLoading || !displayName.trim() || displayName === user?.displayName}
-                      className="flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 px-5 py-2.5 rounded-lg font-medium transition-colors border border-primary/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="bg-white text-black hover:bg-white/90"
                     >
-                      {profileLoading ? (
-                        <div className="w-5 h-5 rounded-full border-2 border-primary-foreground border-t-transparent animate-spin" />
-                      ) : (
-                        <>
-                          <Check size={18} />
-                          <span>Save Changes</span>
-                        </>
-                      )}
-                    </button>
+                      {profileLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save size={16} className="mr-2" />}
+                      Save Changes
+                    </Button>
                   </div>
                 </form>
-              </div>
-
-              <div className="p-6 md:p-8 bg-secondary/30">
-                <div className="mb-4">
-                  <h3 className="text-base font-bold text-destructive">Danger Zone</h3>
-                  <p className="text-sm text-muted-foreground">Sign out of your account on this device.</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={logout}
-                  className="flex items-center justify-center gap-2 w-full md:w-auto bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/20 px-5 py-2.5 rounded-lg font-medium transition-colors"
-                >
-                  <LogOut size={18} />
-                  Sign Out
-                </button>
-              </div>
+              </CardContent>
             </motion.div>
           )}
 
@@ -213,83 +234,80 @@ export default function SettingsPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className="p-6 md:p-8"
             >
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center text-green-500 shrink-0">
-                  <Lock size={24} />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-foreground">Change Password</h2>
-                  <p className="text-sm text-muted-foreground">Reauthenticate and set a new password</p>
-                </div>
-              </div>
-
-              <form onSubmit={handlePasswordChange} className="space-y-5">
-                <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-foreground">Current Password</label>
-                  <input
-                    className="w-full bg-background border border-border focus:border-primary rounded-lg px-4 py-2.5 text-foreground focus:outline-none transition-colors"
-                    type="password"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-foreground">New Password</label>
-                  <input
-                    className="w-full bg-background border border-border focus:border-primary rounded-lg px-4 py-2.5 text-foreground focus:outline-none transition-colors"
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    required
-                    minLength={6}
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-foreground">Confirm New Password</label>
-                  <input
-                    className="w-full bg-background border border-border focus:border-primary rounded-lg px-4 py-2.5 text-foreground focus:outline-none transition-colors"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    minLength={6}
-                  />
-                </div>
-
-                {passwordMsg && (
-                  <div className={`flex items-center gap-2 p-3 rounded-lg text-sm font-medium ${
-                    passwordMsg.type === 'success' ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'
-                  }`}>
-                    {passwordMsg.type === 'success' ? <Check size={16} /> : <AlertCircle size={16} />}
-                    <span>{passwordMsg.text}</span>
+              <CardHeader className="border-b border-white/10 pb-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white shrink-0">
+                    <Shield size={24} />
                   </div>
-                )}
-
-                <div className="pt-2">
-                  <button
-                    type="submit"
-                    disabled={passwordLoading}
-                    className="flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 px-5 py-2.5 rounded-lg font-medium transition-colors border border-primary/10 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {passwordLoading ? (
-                      <div className="w-5 h-5 rounded-full border-2 border-primary-foreground border-t-transparent animate-spin" />
-                    ) : (
-                      <>
-                        <Lock size={18} />
-                        <span>Update Password</span>
-                      </>
-                    )}
-                  </button>
+                  <div>
+                    <CardTitle className="text-xl">Change Password</CardTitle>
+                    <p className="text-sm text-white/60">Reauthenticate and set a new password.</p>
+                  </div>
                 </div>
-              </form>
+              </CardHeader>
+              
+              <CardContent className="pt-6 space-y-6">
+                <form onSubmit={handlePasswordChange} className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-white/60 uppercase tracking-wider">Current Password</label>
+                    <Input
+                      className="bg-[#0A0A0A] border-white/10 text-white focus:border-white/30 max-w-md"
+                      type="password"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-white/60 uppercase tracking-wider">New Password</label>
+                    <Input
+                      className="bg-[#0A0A0A] border-white/10 text-white focus:border-white/30 max-w-md"
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      required
+                      minLength={6}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-white/60 uppercase tracking-wider">Confirm New Password</label>
+                    <Input
+                      className="bg-[#0A0A0A] border-white/10 text-white focus:border-white/30 max-w-md"
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      minLength={6}
+                    />
+                  </div>
+
+                  {passwordMsg && (
+                    <div className={`flex items-center gap-2 p-3 rounded-md text-sm font-medium border max-w-md ${
+                      passwordMsg.type === 'success' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'
+                    }`}>
+                      {passwordMsg.type === 'success' ? <Check size={16} /> : <AlertCircle size={16} />}
+                      <span>{passwordMsg.text}</span>
+                    </div>
+                  )}
+
+                  <div className="pt-4 flex justify-end border-t border-white/10 mt-6 pt-6">
+                    <Button
+                      type="submit"
+                      disabled={passwordLoading}
+                      className="bg-white text-black hover:bg-white/90"
+                    >
+                      {passwordLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save size={16} className="mr-2" />}
+                      Update Password
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
             </motion.div>
           )}
-        </div>
+        </Card>
       </motion.div>
     </div>
   );

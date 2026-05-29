@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, usePathname } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { 
   LayoutDashboard, 
@@ -18,6 +18,7 @@ export default function DashboardLayout({ children }) {
   const { user, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   useEffect(() => {
     if (!loading) {
@@ -88,13 +89,33 @@ export default function DashboardLayout({ children }) {
           <h2 className="text-sm font-medium text-white/60">
             {navItems.find(i => pathname === i.href || (i.href !== '/dashboard' && pathname.startsWith(i.href)))?.name || 'Dashboard'}
           </h2>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 relative">
             <button className="text-white/60 hover:text-white">
               <Bell size={18} />
             </button>
-            <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-sm font-medium">
+            <button 
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-sm font-medium hover:bg-white/20 transition-colors"
+            >
               {user.displayName?.charAt(0) || 'U'}
-            </div>
+            </button>
+            
+            {showProfileMenu && (
+              <div className="absolute right-0 top-10 mt-2 w-48 bg-[#121214] border border-white/10 rounded-lg shadow-xl overflow-hidden z-50">
+                <div className="px-4 py-3 border-b border-white/10">
+                  <p className="text-sm font-medium text-white truncate">{user.displayName || 'Participant'}</p>
+                  <p className="text-xs text-white/50 truncate">{user.email}</p>
+                </div>
+                <div className="py-1">
+                  <Link href="/dashboard/settings" onClick={() => setShowProfileMenu(false)} className="flex items-center px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/5">
+                    <Settings size={14} className="mr-2" /> Settings
+                  </Link>
+                  <button onClick={() => { setShowProfileMenu(false); handleLogout(); }} className="w-full flex items-center px-4 py-2 text-sm text-red-400 hover:bg-red-400/10 transition-colors">
+                    <LogOut size={14} className="mr-2" /> Logout
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </header>
         <div className="flex-1 overflow-auto p-4 md:p-8">

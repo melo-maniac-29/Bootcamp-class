@@ -4,8 +4,34 @@
 
 export const ROLES = {
   ADMIN: 'admin',
-  VOLUNTEER: 'volunteer',
   STUDENT: 'student',
+};
+
+export const DAY_STATES = {
+  LOCKED: 'LOCKED',
+  ACTIVE: 'ACTIVE',
+  EXPIRED: 'EXPIRED',
+  COMPLETED: 'COMPLETED',
+  PENDING_REVIEW: 'PENDING_REVIEW',
+  NEEDS_REVISION: 'NEEDS_REVISION',
+};
+
+export const SUBMISSION_STATUS = {
+  DRAFT: 'draft',
+  SUBMITTED: 'submitted',
+  PENDING_REVIEW: 'pending_review',
+  APPROVED: 'approved',
+  REJECTED: 'rejected',
+  NEEDS_REVISION: 'needs_revision',
+  EXPIRED: 'expired',
+};
+
+export const VIDEO_COMPLETION_THRESHOLD = 50; // percent
+
+export const QUIZ_CONFIG = {
+  QUESTIONS_PER_QUIZ: 5,
+  OPTIONS_PER_QUESTION: 4,
+  TIME_PER_QUESTION: 15, // seconds
 };
 
 export const TASK_TYPES = {
@@ -25,22 +51,6 @@ export const SUBMISSION_TYPES = {
   VIDEO: 'video',
   CODE: 'code',
   MULTICHOICE: 'multichoice',
-};
-
-export const SUBMISSION_STATUS = {
-  PENDING: 'pending',
-  APPROVED: 'approved',
-  REJECTED: 'rejected',
-};
-
-export const BOOTCAMP_STATUS = {
-  ACTIVE: 'active',
-  ARCHIVED: 'archived',
-};
-
-export const ASSIGNMENT_MODES = {
-  RANDOM: 'random',
-  MANUAL: 'manual',
 };
 
 export const TUTORIAL_CONTENT_TYPES = {

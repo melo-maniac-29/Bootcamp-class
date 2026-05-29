@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import { authAdmin, dbAdmin } from '@/lib/firebaseAdmin';
+import { requireAdmin } from '@/lib/authMiddleware';
 
 export async function POST(request) {
+  const authResult = await requireAdmin(request);
+  if (authResult instanceof Response) return authResult;
+
   try {
     const data = await request.json();
     const { participantId, email: reqEmail, password: reqPassword, displayName, role, bootcampId, firstLogin, level, volunteerId, teamId } = data;
@@ -67,6 +71,9 @@ export async function POST(request) {
 }
 
 export async function DELETE(request) {
+  const authResult = await requireAdmin(request);
+  if (authResult instanceof Response) return authResult;
+
   try {
     const { searchParams } = new URL(request.url);
     const uid = searchParams.get('uid');
@@ -87,3 +94,4 @@ export async function DELETE(request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+

@@ -1,148 +1,254 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, use } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ExternalLink, CheckCircle2, UploadCloud } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
+import {
+  Video, HelpCircle, FileUp, ExternalLink, Lock, CheckCircle2,
+  AlertTriangle, Loader2, ArrowLeft, BookOpen
+} from 'lucide-react';
 import Link from 'next/link';
+import { getDay, getUserProgress, getDayState, updateUserProgress } from '@/lib/db';
+import YouTubePlayer from '@/components/learning/YouTubePlayer';
+import QuizEngine from '@/components/learning/QuizEngine';
+import TaskSubmission from '@/components/learning/TaskSubmission';
 
 export default function DailyLearningWorkspace({ params }) {
-  const [activeTab, setActiveTab] = useState('video'); // video, quiz, task
-  const [videoProgress, setVideoProgress] = useState(0);
+  const resolvedParams = use(params);
+  const { dayId } = resolvedParams;
+  const { user } = useAuth();
+  const router = useRouter();
+  const [day, setDay] = useState(null);
+  const [progress, setProgress] = useState(null);
+  const [dayState, setDayState] = useState(null);
+  const [activeTab, setActiveTab] = useState('video');
+  const [loading, setLoading] = useState(true);
 
-  // Mock checking YouTube iframe progress
-  // In a real implementation, we'd use the YouTube IFrame API to listen for time updates
-  const handleSimulateWatch = () => {
-    setVideoProgress(100);
+  useEffect(() => {
+    const load = async () => {
+      if (!dayId || !user?.uid) return;
+      try {
+        const [dayData, progressData] = await Promise.all([
+          getDay(dayId),
+          getUserProgress(user.uid, dayId),
+        ]);
+
+        if (!dayData) {
+          router.push('/dashboard/days');
+          return;
+        }
+
+        setDay(dayData);
+        setProgress(progressData);
+        setDayState(getDayState(dayData, progressData));
+      } catch (err) {
+        console.error('Failed to load day:', err);
+      }
+      setLoading(false);
+    };
+    load();
+  }, [dayId, user?.uid]);
+
+  const refreshProgress = async () => {
+    if (!user?.uid || !dayId) return;
+    const p = await getUserProgress(user.uid, dayId);
+    setProgress(p);
+    if (day) setDayState(getDayState(day, p));
   };
+
+  const handleVideoComplete = () => {
+    refreshProgress();
+  };
+
+  const handleQuizComplete = () => {
+    refreshProgress();
+  };
+
+  const handleTaskComplete = () => {
+    refreshProgress();
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-white/20" />
+      </div>
+    );
+  }
+
+  if (!day) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-white/30 text-sm">Day not found.</p>
+      </div>
+    );
+  }
+
+  const isLocked = dayState === 'LOCKED';
+  const isExpired = dayState === 'EXPIRED';
+  const isCompleted = dayState === 'COMPLETED';
+
+  // LOCKED STATE
+  if (isLocked) {
+    const unlockTime = (() => {
+      if (!day.unlockAt) return 'soon';
+      try {
+        const d = day.unlockAt.toDate ? day.unlockAt.toDate() : new Date(day.unlockAt);
+        return d.toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      } catch { return 'soon'; }
+    })();
+
+    return (
+      <div className="space-y-6 max-w-2xl mx-auto">
+        <Link href="/dashboard/days" className="text-white/40 hover:text-white transition-colors text-sm inline-flex items-center gap-1">
+          <ArrowLeft size={14} /> Back to Roadmap
+        </Link>
+        <Card className="bg-[#121214] border-white/10 text-white shadow-none">
+          <CardContent className="p-12 text-center">
+            <Lock size={48} className="text-white/15 mx-auto mb-4" />
+            <h2 className="text-xl font-medium text-white mb-2">{day.title}</h2>
+            <p className="text-sm text-white/40 mb-4">This day hasn&apos;t unlocked yet.</p>
+            <p className="text-xs text-white/30">Unlocks: {unlockTime}</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const tabs = [
+    { id: 'video', label: 'Video', icon: Video, done: progress?.videoCompleted },
+    { id: 'quiz', label: 'Quiz', icon: HelpCircle, done: progress?.quizCompleted },
+    { id: 'task', label: 'Task', icon: FileUp, done: progress?.submissionCompleted },
+    { id: 'references', label: 'References', icon: BookOpen, done: null },
+  ];
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-8">
-        <Link href="/dashboard/days" className="text-white/40 hover:text-white transition-colors text-sm">
-          ← Back to Roadmap
+      <div className="flex items-center gap-4">
+        <Link href="/dashboard/days" className="text-white/40 hover:text-white transition-colors text-sm inline-flex items-center gap-1">
+          <ArrowLeft size={14} /> Back
         </Link>
-        <h1 className="text-2xl font-semibold tracking-tight text-white ml-2">Day 2: Microcontrollers</h1>
+        <div className="flex-1">
+          <h1 className="text-2xl font-semibold tracking-tight text-white">{day.title}</h1>
+          {day.description && <p className="text-sm text-white/40 mt-0.5">{day.description}</p>}
+        </div>
+        {isCompleted && (
+          <span className="flex items-center gap-1.5 text-emerald-400 text-sm font-medium bg-emerald-500/10 px-3 py-1.5 rounded-full">
+            <CheckCircle2 size={14} /> Completed
+          </span>
+        )}
+        {isExpired && (
+          <span className="flex items-center gap-1.5 text-red-400 text-xs font-medium bg-red-500/10 px-3 py-1.5 rounded-full">
+            <AlertTriangle size={14} /> Deadline Passed
+          </span>
+        )}
+      </div>
+
+      {/* Progress Bar */}
+      <div className="flex gap-2">
+        {tabs.slice(0, 3).map(tab => (
+          <div key={tab.id} className="flex-1">
+            <div className={`h-1.5 rounded-full ${tab.done ? 'bg-emerald-500' : 'bg-white/10'}`} />
+            <p className={`text-xs mt-1 ${tab.done ? 'text-emerald-400' : 'text-white/30'}`}>
+              {tab.done ? '✓' : '○'} {tab.label}
+            </p>
+          </div>
+        ))}
       </div>
 
       {/* Tabs */}
-      <div className="flex space-x-1 bg-[#121214] p-1 rounded-lg border border-white/10 w-fit">
-        {['video', 'quiz', 'task'].map((tab) => (
+      <div className="flex space-x-1 bg-[#121214] p-1 rounded-lg border border-white/10 w-fit overflow-x-auto">
+        {tabs.map((tab) => (
           <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 text-sm font-medium rounded-md capitalize transition-colors ${
-              activeTab === tab 
-                ? 'bg-white/10 text-white' 
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-1.5 whitespace-nowrap ${
+              activeTab === tab.id
+                ? 'bg-white/10 text-white'
                 : 'text-white/50 hover:text-white hover:bg-white/5'
             }`}
           >
-            {tab}
+            <tab.icon size={14} />
+            {tab.label}
+            {tab.done && <CheckCircle2 size={12} className="text-emerald-400" />}
           </button>
         ))}
       </div>
 
       {/* Content Area */}
-      <div className="mt-6">
+      <div className="mt-4">
         {activeTab === 'video' && (
-          <div className="space-y-6">
-            <div className="aspect-video bg-black rounded-xl overflow-hidden border border-white/10 relative">
-              {/* Simulated YouTube Embed */}
-              <iframe 
-                width="100%" 
-                height="100%" 
-                src="https://www.youtube.com/embed/dQw4w9WgXcQ?controls=1&rel=0" 
-                title="YouTube video player" 
-                frameBorder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                allowFullScreen
-                className="absolute inset-0"
-              ></iframe>
-            </div>
-            
-            <div className="flex items-center justify-between bg-[#121214] p-4 rounded-lg border border-white/10">
-              <div>
-                <p className="text-sm font-medium text-white">Video Progress Tracking</p>
-                <p className="text-xs text-white/50">Watch at least 50% to complete this section.</p>
-              </div>
-              {videoProgress >= 50 ? (
-                <div className="flex items-center text-emerald-500 text-sm font-medium">
-                  <CheckCircle2 size={16} className="mr-1" /> Completed
-                </div>
-              ) : (
-                <Button onClick={handleSimulateWatch} variant="outline" className="border-white/10 text-white hover:bg-white/10">
-                  Simulate Watch &gt;50%
-                </Button>
-              )}
-            </div>
-
-            <Card className="bg-[#121214] border-white/10 text-white shadow-none">
-              <CardHeader>
-                <CardTitle className="text-lg">Reference Materials</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  <li>
-                    <a href="#" className="flex items-center text-sm text-blue-400 hover:text-blue-300">
-                      <ExternalLink size={14} className="mr-2" /> Datasheet PDF
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="flex items-center text-sm text-blue-400 hover:text-blue-300">
-                      <ExternalLink size={14} className="mr-2" /> Arduino Reference Guide
-                    </a>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
+          <YouTubePlayer
+            videoUrl={day.videoUrl}
+            dayId={dayId}
+            userId={user?.uid}
+            onComplete={handleVideoComplete}
+          />
         )}
 
         {activeTab === 'quiz' && (
-          <Card className="bg-[#121214] border-white/10 text-white shadow-none">
-            <CardContent className="p-8 flex flex-col items-center justify-center text-center min-h-[400px]">
-              <h2 className="text-xl font-medium mb-2">Knowledge Check</h2>
-              <p className="text-white/60 mb-6 max-w-md">Complete a quick 5-question quiz to verify your understanding of today's lesson.</p>
-              <Button className="bg-white text-black hover:bg-white/90">
-                Start Quiz
-              </Button>
-            </CardContent>
-          </Card>
+          <>
+            {isExpired && !progress?.quizCompleted ? (
+              <Card className="bg-[#121214] border-white/10 text-white shadow-none">
+                <CardContent className="p-8 text-center">
+                  <AlertTriangle size={32} className="text-red-400 mx-auto mb-3" />
+                  <h3 className="text-lg font-medium text-white mb-1">Quiz Deadline Passed</h3>
+                  <p className="text-sm text-white/40">The quiz is no longer available for this day.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <QuizEngine
+                dayId={dayId}
+                userId={user?.uid}
+                onComplete={handleQuizComplete}
+              />
+            )}
+          </>
         )}
 
         {activeTab === 'task' && (
+          <TaskSubmission
+            dayId={dayId}
+            userId={user?.uid}
+            taskDescription={day.taskDescription}
+            taskRequirements={day.taskRequirements}
+            isExpired={isExpired && !progress?.submissionCompleted}
+            onComplete={handleTaskComplete}
+          />
+        )}
+
+        {activeTab === 'references' && (
           <Card className="bg-[#121214] border-white/10 text-white shadow-none">
             <CardHeader>
-              <CardTitle>Daily Task Submission</CardTitle>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <BookOpen size={18} /> Reference Materials
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="p-4 bg-white/5 rounded-lg border border-white/10">
-                <h4 className="font-medium text-sm text-white mb-2">Instructions</h4>
-                <p className="text-sm text-white/60">
-                  Build the circuit shown in the video using Wokwi. Submit a screenshot of your circuit and the public Wokwi link.
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-white/80 uppercase tracking-wider">Project Link (Wokwi)</label>
-                  <input type="url" placeholder="https://wokwi.com/..." className="w-full bg-[#0A0A0A] border border-white/20 rounded-md px-3 py-2 text-white text-sm focus:outline-none focus:border-white transition-colors" />
-                </div>
-                
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-white/80 uppercase tracking-wider">Upload Screenshot / Video</label>
-                  <div className="border-2 border-dashed border-white/20 rounded-lg p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-white/5 transition-colors">
-                    <UploadCloud className="text-white/40 mb-3" size={32} />
-                    <p className="text-sm font-medium text-white">Click to upload or drag and drop</p>
-                    <p className="text-xs text-white/40 mt-1">PNG, JPG, MP4 up to 50MB</p>
-                  </div>
-                </div>
-
-                <Button className="w-full bg-[#9162F5] hover:bg-[#8152e5] text-white mt-4">
-                  Submit Task
-                </Button>
-              </div>
+            <CardContent>
+              {(!day.references || day.references.length === 0) ? (
+                <p className="text-sm text-white/30 text-center py-8">No references available for this day.</p>
+              ) : (
+                <ul className="space-y-3">
+                  {day.references.map((ref, idx) => (
+                    <li key={idx}>
+                      <a
+                        href={ref.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors group"
+                      >
+                        <ExternalLink size={16} className="text-blue-400 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-white group-hover:text-blue-400 transition-colors">{ref.title || ref.url}</p>
+                          <p className="text-xs text-white/30 truncate">{ref.url}</p>
+                        </div>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </CardContent>
           </Card>
         )}

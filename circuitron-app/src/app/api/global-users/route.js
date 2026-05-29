@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import { dbAdmin } from '@/lib/firebaseAdmin';
+import { requireAdmin } from '@/lib/authMiddleware';
 
 export async function GET(request) {
+  const authResult = await requireAdmin(request);
+  if (authResult instanceof Response) return authResult;
+
   try {
     const { searchParams } = new URL(request.url);
     const role = searchParams.get('role');
@@ -40,6 +44,9 @@ export async function GET(request) {
 }
 
 export async function PATCH(request) {
+  const authResult = await requireAdmin(request);
+  if (authResult instanceof Response) return authResult;
+
   try {
     const { uid, bootcampId } = await request.json();
 
