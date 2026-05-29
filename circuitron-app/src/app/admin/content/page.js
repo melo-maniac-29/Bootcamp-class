@@ -4,9 +4,20 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import DayEditor from "./DayEditor";
 
 export default function ContentPage() {
+  const router = useRouter();
+  const currentUser = useQuery(api.users.current);
+  
+  if (currentUser === undefined) return null;
+
+  if (currentUser && currentUser.role === "volunteer") {
+    router.push("/admin/submissions");
+    return null;
+  }
+
   const weeks = useQuery(api.content.getWeeks) || [];
   const createWeek = useMutation(api.content.createWeek);
   const createDay = useMutation(api.content.createDay);

@@ -16,7 +16,7 @@ export default function AdminLayout({ children }) {
   useEffect(() => {
     if (user === null) {
       router.push("/");
-    } else if (user !== undefined && user.role !== "admin") {
+    } else if (user !== undefined && user.role !== "admin" && user.role !== "volunteer") {
       router.push("/dashboard");
     }
   }, [user, router]);
@@ -39,23 +39,29 @@ export default function AdminLayout({ children }) {
       </div>
     );
   }
-  if (!user || user.role !== "admin") return null;
+  if (!user || (user.role !== "admin" && user.role !== "volunteer")) return null;
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] flex text-white font-sans">
       <aside className="w-64 border-r border-white/10 p-6 flex flex-col justify-between hidden md:flex">
         <div>
-          <h1 className="text-xl font-bold tracking-tight">Admin Portal</h1>
+          <h1 className="text-xl font-bold tracking-tight">
+            {user.role === "admin" ? "Admin Portal" : "Staff Portal"}
+          </h1>
           <nav className="mt-8 space-y-2">
             <Link href="/admin" className="flex items-center gap-3 px-3 py-2 hover:bg-white/10 rounded-lg text-sm transition-colors">
               <LayoutDashboard size={18} /> Overview
             </Link>
-            <Link href="/admin/content" className="flex items-center gap-3 px-3 py-2 hover:bg-white/10 rounded-lg text-sm transition-colors">
-              <BookOpen size={18} /> Curriculum
-            </Link>
-            <Link href="/admin/users" className="flex items-center gap-3 px-3 py-2 hover:bg-white/10 rounded-lg text-sm transition-colors">
-              <Users size={18} /> Users
-            </Link>
+            {user.role === "admin" && (
+              <>
+                <Link href="/admin/content" className="flex items-center gap-3 px-3 py-2 hover:bg-white/10 rounded-lg text-sm transition-colors">
+                  <BookOpen size={18} /> Curriculum
+                </Link>
+                <Link href="/admin/users" className="flex items-center gap-3 px-3 py-2 hover:bg-white/10 rounded-lg text-sm transition-colors">
+                  <Users size={18} /> Users
+                </Link>
+              </>
+            )}
             <Link href="/admin/submissions" className="flex items-center gap-3 px-3 py-2 hover:bg-white/10 rounded-lg text-sm transition-colors">
               <CheckSquare size={18} /> Reviews
             </Link>

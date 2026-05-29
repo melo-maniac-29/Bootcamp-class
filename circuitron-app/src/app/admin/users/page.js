@@ -3,9 +3,18 @@
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useState } from "react";
-import { Check } from "lucide-react";
+import { Check, ShieldAlert } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function UsersPage() {
+  const router = useRouter();
+  const currentUser = useQuery(api.users.current);
+  
+  if (currentUser && currentUser.role === "volunteer") {
+    router.push("/admin/submissions");
+    return null;
+  }
+
   const users = useQuery(api.users.listUsers) || [];
   const setRole = useMutation(api.users.setRole).withOptimisticUpdate(
     (localStore, args) => {
