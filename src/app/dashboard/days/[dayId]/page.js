@@ -35,13 +35,7 @@ export default function DayViewerPage() {
     }
   };
 
-  const getYouTubeId = (url) => {
-    if (!url) return null;
-    const match = url.match(
-      /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/
-    );
-    return match ? match[1] : null;
-  };
+
 
   if (day === undefined || quiz === undefined) return (
     <div className="flex items-center justify-center min-h-[50vh]">
@@ -59,7 +53,7 @@ export default function DayViewerPage() {
   const isLockedAfter = day.lateDeadlineAt && now > day.lateDeadlineAt;
   const isLateGrace = day.deadlineAt && day.lateDeadlineAt && now > day.deadlineAt && now <= day.lateDeadlineAt;
   
-  const videoId = getYouTubeId(day.videoUrl);
+
   const hasQuiz = quiz && quiz.questions && quiz.questions.length > 0;
   const hasTask = !!day.taskDescription;
 
@@ -106,17 +100,7 @@ export default function DayViewerPage() {
 
       <div className={`grid grid-cols-1 ${hasTask ? 'lg:grid-cols-3' : ''} gap-8`}>
         <div className={`${hasTask ? 'lg:col-span-2' : ''} space-y-6`}>
-          {videoId && (
-            <div className="aspect-video rounded-xl overflow-hidden border border-black/[0.06] dark:border-white/[0.06] bg-black">
-              <iframe
-                src={`https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`}
-                title={day.videoTitle || day.title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full"
-              />
-            </div>
-          )}
+
 
           {day.description && (
             <div className="border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-6 bg-[#F8F9FA] dark:bg-[#111111]">

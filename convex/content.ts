@@ -113,8 +113,8 @@ export const updateDay = mutation({
     unlockAt: v.optional(v.number()),
     deadlineAt: v.optional(v.number()),
     lateDeadlineAt: v.optional(v.number()),
-    videoPoints: v.optional(v.number()),
-    quizPoints: v.optional(v.number()),
+    quizPointsOnTime: v.optional(v.number()),
+    quizPointsLate: v.optional(v.number()),
     taskPointsOnTime: v.optional(v.number()),
     taskPointsLate: v.optional(v.number()),
     order: v.optional(v.number()),
@@ -209,8 +209,11 @@ export const saveQuizResult = mutation({
     // Only award points the FIRST time they complete the quiz
     if (!existing || !existing.quizCompleted) {
       const user = await ctx.db.get(userId);
-      if (user && day.quizPoints) {
-        await ctx.db.patch(userId, { totalPoints: (user.totalPoints || 0) + day.quizPoints });
+      if (user) {
+        const now = Date.now();
+        const isLate = day.deadlineAt && now > day.deadlineAt ? true : false;
+        const pointsToAdd = isLate ? (day.quizPointsLate || 0) : (day.quizPointsOnTime || 0);
+        await ctx.db.patch(userId, { totalPoints: (user.totalPoints || 0) + pointsToAdd });
       }
     }
 

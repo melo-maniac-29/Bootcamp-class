@@ -119,13 +119,10 @@ function WeekDays({ weekId }) {
           <Link 
             href={`/dashboard/days/${day._id}`} 
             key={day._id}
-            onClick={(e) => isLocked && e.preventDefault()}
-            className={`flex flex-col md:flex-row md:items-center justify-between p-5 rounded-xl border border-black/[0.06] dark:border-white/[0.06] transition-all group bg-white dark:bg-[#0a0a0a] relative overflow-hidden ${isLocked ? 'opacity-60 cursor-not-allowed' : 'hover:border-black/30 dark:hover:border-white/30 hover:shadow-lg hover:-translate-y-0.5'}`}
+            className="flex flex-col md:flex-row md:items-center justify-between p-5 rounded-xl border border-black/[0.06] dark:border-white/[0.06] transition-all group bg-white dark:bg-[#0a0a0a] relative overflow-hidden hover:border-black/30 dark:hover:border-white/30 hover:shadow-lg hover:-translate-y-0.5"
           >
             {/* Hover Accent Line */}
-            {!isLocked && (
-              <div className="absolute left-0 top-0 bottom-0 w-1 bg-black dark:bg-white scale-y-0 group-hover:scale-y-100 transition-transform origin-top"></div>
-            )}
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-black dark:bg-white scale-y-0 group-hover:scale-y-100 transition-transform origin-top"></div>
             
             <div className="flex items-start gap-5">
               <span className="font-mono text-[10px] font-bold text-black/20 dark:text-white/20 group-hover:text-black/40 dark:group-hover:text-white/40 transition-colors w-6 pt-0.5">
@@ -150,14 +147,13 @@ function WeekDays({ weekId }) {
                 </div>
               </div>
             </div>
-            {!isLocked && (
-              <div className="hidden md:flex items-center gap-2 text-black/20 dark:text-white/20 group-hover:text-black dark:group-hover:text-white transition-colors">
-                <span className="font-mono text-[9px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0">ENTER</span>
-                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 16 16" fill="none">
-                  <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-            )}
+            
+            <div className="hidden md:flex items-center gap-2 text-black/20 dark:text-white/20 group-hover:text-black dark:group-hover:text-white transition-colors">
+              <span className="font-mono text-[9px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0">ENTER</span>
+              <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 16 16" fill="none">
+                <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
           </Link>
         );
       })}
