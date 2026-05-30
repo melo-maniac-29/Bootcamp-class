@@ -90,6 +90,19 @@ export const deleteWeek = mutation({
   },
 });
 
+/**
+ * Purpose: Update an existing day node with metadata and time gates.
+ *
+ * @param {Object} args - Object containing dayId and any fields to update (e.g., unlockAt, pointsOnTime).
+ * @returns {Promise<void>}
+ *
+ * Errors:
+ *   - UNAUTHORIZED
+ *   - REQUIRES_ADMIN_ROLE
+ *
+ * Side Effects:
+ *   - Patches the days table
+ */
 export const updateDay = mutation({
   args: {
     dayId: v.id("days"),
@@ -97,6 +110,11 @@ export const updateDay = mutation({
     description: v.optional(v.string()),
     videoUrl: v.optional(v.string()),
     videoTitle: v.optional(v.string()),
+    unlockAt: v.optional(v.number()),
+    deadlineAt: v.optional(v.number()),
+    lateDeadlineAt: v.optional(v.number()),
+    pointsOnTime: v.optional(v.number()),
+    pointsLate: v.optional(v.number()),
     order: v.optional(v.number()),
     taskDescription: v.optional(v.string()),
   },

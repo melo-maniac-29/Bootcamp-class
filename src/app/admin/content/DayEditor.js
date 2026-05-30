@@ -5,6 +5,17 @@ import { api } from "../../../../convex/_generated/api";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
+const toDatetimeLocal = (timestamp) => {
+  if (!timestamp) return "";
+  const d = new Date(timestamp);
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+};
+
+const toTimestamp = (datetimeLocal) => {
+  if (!datetimeLocal) return undefined;
+  return new Date(datetimeLocal).getTime();
+};
+
 /**
  * Purpose:
  *   Editor panel for a single bootcamp day. Allows updating title,
@@ -23,13 +34,29 @@ export default function DayEditor({ dayId, onClose }) {
   const deleteDay = useMutation(api.content.deleteDay);
   const upsertQuiz = useMutation(api.content.upsertQuiz);
 
-  const [formData, setFormData] = useState({ title: "", description: "", videoUrl: "", taskDescription: "" });
+  const [formData, setFormData] = useState({ 
+    title: "", description: "", videoUrl: "", taskDescription: "",
+    unlockAtStr: "", deadlineAtStr: "", lateDeadlineAtStr: "",
+    pointsOnTime: 0, pointsLate: 0
+  });
   const [questions, setQuestions] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    if (day) setFormData({ title: day.title || "", description: day.description || "", videoUrl: day.videoUrl || "", taskDescription: day.taskDescription || "" });
+    if (day) {
+      setFormData({ 
+        title: day.title || "", 
+        description: day.description || "", 
+        videoUrl: day.videoUrl || "", 
+        taskDescription: day.taskDescription || "",
+        unlockAtStr: toDatetimeLocal(day.unlockAt),
+        deadlineAtStr: toDatetimeLocal(day.deadlineAt),
+        lateDeadlineAtStr: toDatetimeLocal(day.lateDeadlineAt),
+        pointsOnTime: day.pointsOnTime || 0,
+        pointsLate: day.pointsLate || 0
+      });
+    }
   }, [day]);
 
   useEffect(() => {
@@ -40,7 +67,18 @@ export default function DayEditor({ dayId, onClose }) {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await updateDay({ dayId, ...formData });
+      const payload = {
+        title: formData.title,
+        description: formData.description,
+        videoUrl: formData.videoUrl,
+        taskDescription: formData.taskDescription,
+        unlockAt: toTimestamp(formData.unlockAtStr),
+        deadlineAt: toTimestamp(formData.deadlineAtStr),
+        lateDeadlineAt: toTimestamp(formData.lateDeadlineAtStr),
+        pointsOnTime: parseInt(formData.pointsOnTime) || 0,
+        pointsLate: parseInt(formData.pointsLate) || 0,
+      };
+      await updateDay({ dayId, ...payload });
       if (questions.length > 0) await upsertQuiz({ dayId, questions });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
@@ -107,6 +145,34 @@ export default function DayEditor({ dayId, onClose }) {
         <div>
           <label className="block font-mono text-[9px] tracking-[0.2em] text-black/40 uppercase mb-1.5">TASK_DESCRIPTION (MARKDOWN)</label>
           <textarea value={formData.taskDescription} onChange={e => setFormData({...formData, taskDescription: e.target.value})} rows={4} className={fieldClass} />
+        </div>
+      </div>
+
+      {/* Access Control & Timing */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div>
+          <label className="block font-mono text-[9px] tracking-[0.2em] text-black/40 uppercase mb-1.5">UNLOCK_AT</label>
+          <input type="datetime-local" value={formData.unlockAtStr} onChange={e => setFormData({...formData, unlockAtStr: e.target.value})} className={fieldClass} />
+        </div>
+        <div>
+          <label className="block font-mono text-[9px] tracking-[0.2em] text-black/40 uppercase mb-1.5">PROPER_DEADLINE</label>
+          <input type="datetime-local" value={formData.deadlineAtStr} onChange={e => setFormData({...formData, deadlineAtStr: e.target.value})} className={fieldClass} />
+        </div>
+        <div>
+          <label className="block font-mono text-[9px] tracking-[0.2em] text-black/40 uppercase mb-1.5">LATE_LOCK_DEADLINE</label>
+          <input type="datetime-local" value={formData.lateDeadlineAtStr} onChange={e => setFormData({...formData, lateDeadlineAtStr: e.target.value})} className={fieldClass} />
+        </div>
+      </div>
+
+      {/* Scoring */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div>
+          <label className="block font-mono text-[9px] tracking-[0.2em] text-black/40 uppercase mb-1.5">POINTS_ON_TIME</label>
+          <input type="number" value={formData.pointsOnTime} onChange={e => setFormData({...formData, pointsOnTime: e.target.value})} className={fieldClass} />
+        </div>
+        <div>
+          <label className="block font-mono text-[9px] tracking-[0.2em] text-black/40 uppercase mb-1.5">POINTS_LATE</label>
+          <input type="number" value={formData.pointsLate} onChange={e => setFormData({...formData, pointsLate: e.target.value})} className={fieldClass} />
         </div>
       </div>
 

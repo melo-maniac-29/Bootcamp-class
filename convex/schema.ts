@@ -37,6 +37,9 @@ export default defineSchema({
     references: v.optional(v.array(v.string())),
     unlockAt: v.optional(v.number()), // timestamp
     deadlineAt: v.optional(v.number()), // timestamp
+    lateDeadlineAt: v.optional(v.number()), // absolute lock timestamp
+    pointsOnTime: v.optional(v.number()),
+    pointsLate: v.optional(v.number()),
     order: v.number(),
     taskDescription: v.optional(v.string()),
     taskRequirements: v.optional(v.array(v.string())),
@@ -59,6 +62,7 @@ export default defineSchema({
     link: v.optional(v.string()),
     content: v.optional(v.string()),
     status: v.string(), // "Pending Review", "Approved", "Needs Revision"
+    isLate: v.optional(v.boolean()),
     submittedAt: v.number(),
   }).index("by_userId", ["userId"]).index("by_dayId", ["dayId"]).index("by_userId_dayId", ["userId", "dayId"]),
 

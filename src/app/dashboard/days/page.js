@@ -86,6 +86,7 @@ export default function RoadmapPage() {
 
 function WeekDays({ weekId }) {
   const days = useQuery(api.content.getDays, { weekId });
+  const now = Date.now();
 
   if (days === undefined) {
     return (
@@ -97,30 +98,43 @@ function WeekDays({ weekId }) {
   
   return (
     <div className="space-y-2">
-      {days.map((day, idx) => (
-        <Link 
-          href={`/dashboard/days/${day._id}`} 
-          key={day._id}
-          className="flex items-center justify-between p-4 rounded-lg border border-black/[0.06] dark:border-white/[0.06] hover:border-black/20 dark:hover:border-white/20 hover:bg-white dark:hover:bg-[#151515] transition-all group bg-[#F8F9FA] dark:bg-[#111111]"
-        >
-          <div className="flex items-center gap-4">
-            <span className="font-mono text-[10px] font-bold text-black/20 dark:text-white/20 group-hover:text-black/50 dark:group-hover:text-white/50 transition-colors w-6">
-              {String(idx + 1).padStart(2, "0")}
-            </span>
-            <div>
-              <div className="font-mono text-sm font-bold text-black/60 dark:text-white/60 group-hover:text-black dark:group-hover:text-white transition-colors uppercase tracking-wider">
-                {day.title}
-              </div>
-              <div className="font-mono text-[9px] text-black/30 dark:text-white/30 uppercase tracking-wider mt-0.5">
-                DAY_{String(day.order).padStart(2, "0")} // {day.status || "LOCKED"}
+      {days.map((day, idx) => {
+        const isLocked = day.unlockAt && now < day.unlockAt;
+        
+        return (
+          <Link 
+            href={`/dashboard/days/${day._id}`} 
+            key={day._id}
+            onClick={(e) => isLocked && e.preventDefault()}
+            className={`flex items-center justify-between p-4 rounded-lg border border-black/[0.06] dark:border-white/[0.06] hover:border-black/20 dark:hover:border-white/20 transition-all group bg-[#F8F9FA] dark:bg-[#111111] ${isLocked ? 'opacity-60 cursor-not-allowed hover:bg-[#F8F9FA] dark:hover:bg-[#111111]' : 'hover:bg-white dark:hover:bg-[#151515]'}`}
+          >
+            <div className="flex items-center gap-4">
+              <span className="font-mono text-[10px] font-bold text-black/20 dark:text-white/20 group-hover:text-black/50 dark:group-hover:text-white/50 transition-colors w-6">
+                {String(idx + 1).padStart(2, "0")}
+              </span>
+              <div>
+                <div className="flex items-center gap-2 font-mono text-sm font-bold text-black/60 dark:text-white/60 group-hover:text-black dark:group-hover:text-white transition-colors uppercase tracking-wider">
+                  {day.title}
+                  {isLocked && (
+                    <svg className="w-3.5 h-3.5 text-black/40 dark:text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                  )}
+                </div>
+                <div className="font-mono text-[9px] text-black/30 dark:text-white/30 uppercase tracking-wider mt-0.5">
+                  DAY_{String(day.order).padStart(2, "0")} // {isLocked ? `UNLOCKS ${new Date(day.unlockAt).toLocaleDateString()}` : "ACTIVE"}
+                </div>
               </div>
             </div>
-          </div>
-          <svg className="w-4 h-4 text-black/20 dark:text-white/20 group-hover:text-black/60 dark:group-hover:text-white/60 group-hover:translate-x-1 transition-all" viewBox="0 0 16 16" fill="none">
-            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </Link>
-      ))}
+            {!isLocked && (
+              <svg className="w-4 h-4 text-black/20 dark:text-white/20 group-hover:text-black/60 dark:group-hover:text-white/60 group-hover:translate-x-1 transition-all" viewBox="0 0 16 16" fill="none">
+                <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            )}
+          </Link>
+        );
+      })}
       {days.length === 0 && (
         <div className="font-mono text-[10px] text-black/20 dark:text-white/20 uppercase tracking-widest py-4 px-4">
           NO_DAY_NODES // PENDING
