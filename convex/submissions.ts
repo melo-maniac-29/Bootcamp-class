@@ -54,18 +54,40 @@ export const listSubmissions = query({
 
 /**
  * Purpose: Update the grading status of a submission (e.g. Approved, Needs Revision).
+ *          If marking as Approved, grant the appropriate points.
  * 
  * @param {Object} args - { submissionId: Id<"submissions">, status: string }
  * 
  * Errors:
  *  - UNAUTHORIZED
  *  - REQUIRES_REVIEWER_ROLE
+ *  - SUBMISSION_NOT_FOUND
+ *  - DAY_NOT_FOUND
  */
 export const updateStatus = mutation({
   args: { submissionId: v.id("submissions"), status: v.string() },
   handler: async (ctx, args) => {
     await checkReviewer(ctx);
-    await ctx.db.patch(args.submissionId, { status: args.status });
+    
+    const submission = await ctx.db.get(args.submissionId);
+    if (!submission) throw new Error("SUBMISSION_NOT_FOUND");
+    
+    // Check if we are approving
+    if (args.status === "Approved" && !submission.pointsAwarded) {
+      const day = await ctx.db.get(submission.dayId);
+      if (!day) throw new Error("DAY_NOT_FOUND");
+      
+      const user = await ctx.db.get(submission.userId);
+      if (user) {
+        const pointsToAdd = submission.isLate ? (day.taskPointsLate || 0) : (day.taskPointsOnTime || 0);
+        await ctx.db.patch(user._id, { totalPoints: (user.totalPoints || 0) + pointsToAdd });
+      }
+      
+      return await ctx.db.patch(args.submissionId, { status: args.status, pointsAwarded: true });
+    }
+
+    // Standard update if not an approval
+    return await ctx.db.patch(args.submissionId, { status: args.status });
   },
 });
 
@@ -101,28 +123,53 @@ export const submitTask = mutation({
     }
 
     // Determine if late (past proper submission deadline)
-    let isLate = false;
-    if (day.deadlineAt && now > day.deadlineAt) {
-      isLate = true;
-    }
+    const isLate = day.deadlineAt && now > day.deadlineAt ? true : false;
+    const hasTask = !!day.taskDescription;
+    
+    // Auto-approve if there is no task required
+    const initialStatus = hasTask ? "Pending Review" : "Approved";
+    const pointsAwarded = !hasTask;
 
-    // Check if already submitted
     const existing = await ctx.db
       .query("submissions")
       .withIndex("by_userId_dayId", (q) => q.eq("userId", userId).eq("dayId", args.dayId))
       .first();
       
     if (existing) {
-      await ctx.db.patch(existing._id, { link: args.link, submittedAt: now, status: "Pending Review", isLate });
-    } else {
-      await ctx.db.insert("submissions", {
-        userId,
-        dayId: args.dayId,
-        link: args.link,
-        status: "Pending Review",
-        isLate,
-        submittedAt: now
+      // If we are auto-approving a re-submission or they re-submit after being locked, handled earlier.
+      // We don't double award points if already awarded.
+      const shouldAwardNow = pointsAwarded && !existing.pointsAwarded;
+      if (shouldAwardNow) {
+        const user = await ctx.db.get(userId);
+        if (user) {
+          const pointsToAdd = isLate ? (day.taskPointsLate || 0) : (day.taskPointsOnTime || 0);
+          await ctx.db.patch(userId, { totalPoints: (user.totalPoints || 0) + pointsToAdd });
+        }
+      }
+      return await ctx.db.patch(existing._id, { 
+        link: args.link, 
+        isLate, 
+        status: initialStatus,
+        pointsAwarded: existing.pointsAwarded || shouldAwardNow
       });
     }
+
+    if (pointsAwarded) {
+      const user = await ctx.db.get(userId);
+      if (user) {
+        const pointsToAdd = isLate ? (day.taskPointsLate || 0) : (day.taskPointsOnTime || 0);
+        await ctx.db.patch(userId, { totalPoints: (user.totalPoints || 0) + pointsToAdd });
+      }
+    }
+
+    return await ctx.db.insert("submissions", {
+      userId,
+      dayId: args.dayId,
+      link: args.link,
+      status: initialStatus,
+      isLate,
+      pointsAwarded,
+      submittedAt: now,
+    });
   },
 });

@@ -19,6 +19,7 @@ export default defineSchema({
     participantId: v.optional(v.string()),
     streakCount: v.optional(v.number()),
     lastActiveDate: v.optional(v.string()),
+    totalPoints: v.optional(v.number()),
   }).index("by_email", ["email"]).index("by_participantId", ["participantId"]),
 
   weeks: defineTable({
@@ -65,6 +66,7 @@ export default defineSchema({
     content: v.optional(v.string()),
     status: v.string(), // "Pending Review", "Approved", "Needs Revision"
     isLate: v.optional(v.boolean()),
+    pointsAwarded: v.optional(v.boolean()),
     submittedAt: v.number(),
   }).index("by_userId", ["userId"]).index("by_dayId", ["dayId"]).index("by_userId_dayId", ["userId", "dayId"]),
 

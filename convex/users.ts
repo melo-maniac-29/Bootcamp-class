@@ -41,12 +41,10 @@ export const setRole = mutation({
 export const getLeaderboard = query({
   args: {},
   handler: async (ctx) => {
-    // A real leaderboard would rank by XP or tasks completed.
-    // For now we'll rank by streakCount (descending)
+    // Rank students by totalPoints
     const users = await ctx.db.query("users").collect();
     return users
       .filter((u) => u.role === "student" || !u.role)
-      .sort((a, b) => (b.streakCount || 0) - (a.streakCount || 0))
-      .slice(0, 10);
+      .sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0));
   }
 });

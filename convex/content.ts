@@ -192,20 +192,27 @@ export const getMyProgress = query({
   },
 });
 
-/**
- * Marks a quiz as completed for the current user in userProgress.
- * Upserts so re-taking the quiz doesn't create duplicate rows.
- */
 export const saveQuizResult = mutation({
   args: { dayId: v.id("days"), score: v.number(), total: v.number() },
   handler: async (ctx, args) => {
     const userId = await auth.getUserId(ctx);
-    if (!userId) throw new Error("Unauthorized");
+    if (!userId) throw new Error("UNAUTHORIZED");
 
     const existing = await ctx.db
       .query("userProgress")
       .withIndex("by_userId_dayId", (q) => q.eq("userId", userId).eq("dayId", args.dayId))
       .first();
+
+    const day = await ctx.db.get(args.dayId);
+    if (!day) throw new Error("DAY_NOT_FOUND");
+
+    // Only award points the FIRST time they complete the quiz
+    if (!existing || !existing.quizCompleted) {
+      const user = await ctx.db.get(userId);
+      if (user && day.quizPoints) {
+        await ctx.db.patch(userId, { totalPoints: (user.totalPoints || 0) + day.quizPoints });
+      }
+    }
 
     if (existing) {
       await ctx.db.patch(existing._id, { quizCompleted: true });
