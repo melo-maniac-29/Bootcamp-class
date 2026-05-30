@@ -10,6 +10,7 @@
 
 import type * as auth from "../auth.js";
 import type * as content from "../content.js";
+import type * as dev from "../dev.js";
 import type * as http from "../http.js";
 import type * as reset from "../reset.js";
 import type * as submissions from "../submissions.js";
@@ -24,6 +25,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   content: typeof content;
+  dev: typeof dev;
   http: typeof http;
   reset: typeof reset;
   submissions: typeof submissions;
