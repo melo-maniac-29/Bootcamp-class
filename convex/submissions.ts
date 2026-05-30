@@ -84,7 +84,7 @@ export const updateStatus = mutation({
  *  - Inserts or patches a row in the submissions table
  */
 export const submitTask = mutation({
-  args: { dayId: v.id("days"), link: v.string() },
+  args: { dayId: v.id("days"), link: v.optional(v.string()) },
   handler: async (ctx, args) => {
     const userId = await auth.getUserId(ctx);
     if (!userId) throw new Error("UNAUTHORIZED");

@@ -22,11 +22,11 @@ export default function DayViewerPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!link.trim()) return;
+    if (hasTask && !link.trim()) return;
     setSubmitting(true);
     setSubmitError("");
     try {
-      await submitTask({ dayId, link: link.trim() });
+      await submitTask({ dayId, link: hasTask ? link.trim() : undefined });
       setSubmitted(true);
     } catch (err) {
       setSubmitError(err.message || "Failed to submit. Please try again.");
@@ -152,13 +152,14 @@ export default function DayViewerPage() {
           )}
         </div>
 
-        {hasTask && (
-          <div>
-            <div className="border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-6 bg-[#F8F9FA] dark:bg-[#111111] sticky top-24">
-              <p className="font-mono text-[10px] tracking-[0.3em] text-black/30 dark:text-white/30 uppercase mb-2">TASK_SUBMISSION</p>
-              <h2 className="font-display font-black text-xl tracking-tight uppercase text-black dark:text-white mb-6">
-                Submit Work.
-              </h2>
+        <div>
+          <div className="border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-6 bg-[#F8F9FA] dark:bg-[#111111] sticky top-24">
+            <p className="font-mono text-[10px] tracking-[0.3em] text-black/30 dark:text-white/30 uppercase mb-2">
+              {hasTask ? "TASK_SUBMISSION" : "NODE_COMPLETION"}
+            </p>
+            <h2 className="font-display font-black text-xl tracking-tight uppercase text-black dark:text-white mb-6">
+              {hasTask ? "Submit Work." : "Complete Node."}
+            </h2>
 
               {submitted ? (
                 <motion.div
@@ -186,17 +187,25 @@ export default function DayViewerPage() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  <p className="font-mono text-xs text-black/40 dark:text-white/40 leading-relaxed">
-                    Paste your GitHub / live project link to submit today's task.
-                  </p>
-                  <input
-                    type="url"
-                    value={link}
-                    onChange={(e) => setLink(e.target.value)}
-                    required
-                    placeholder="https://github.com/your/repo"
-                    className="w-full border border-black/[0.12] dark:border-white/[0.12] rounded-lg px-4 py-3 font-mono text-sm outline-none focus:border-black dark:focus:border-white transition-colors bg-white dark:bg-[#0a0a0a] placeholder:text-black/20 dark:placeholder:text-white/20 text-black dark:text-white"
-                  />
+                  {hasTask ? (
+                    <>
+                      <p className="font-mono text-xs text-black/40 dark:text-white/40 leading-relaxed">
+                        Paste your GitHub / live project link to submit today's task.
+                      </p>
+                      <input
+                        type="url"
+                        value={link}
+                        onChange={(e) => setLink(e.target.value)}
+                        required
+                        placeholder="https://github.com/your/repo"
+                        className="w-full border border-black/[0.12] dark:border-white/[0.12] rounded-lg px-4 py-3 font-mono text-sm outline-none focus:border-black dark:focus:border-white transition-colors bg-white dark:bg-[#0a0a0a] placeholder:text-black/20 dark:placeholder:text-white/20 text-black dark:text-white"
+                      />
+                    </>
+                  ) : (
+                    <p className="font-mono text-xs text-black/40 dark:text-white/40 leading-relaxed">
+                      Mark this node as complete to claim your points.
+                    </p>
+                  )}
                   {submitError && (
                     <p className="font-mono text-[10px] text-red-500 uppercase tracking-wider">{submitError}</p>
                   )}
@@ -205,13 +214,12 @@ export default function DayViewerPage() {
                     disabled={submitting}
                     className="w-full bg-black dark:bg-white text-white dark:text-black font-mono text-[10px] uppercase tracking-wider rounded-lg py-3 hover:bg-black/80 dark:hover:bg-white/80 transition-colors disabled:opacity-50"
                   >
-                    {submitting ? "SUBMITTING..." : "SUBMIT_TASK"}
+                    {submitting ? "PROCESSING..." : hasTask ? "SUBMIT_TASK" : "MARK_COMPLETE"}
                   </button>
                 </form>
               )}
             </div>
           </div>
-        )}
       </div>
     </motion.div>
   );
