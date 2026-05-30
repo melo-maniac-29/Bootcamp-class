@@ -35,7 +35,7 @@ export default function DayEditor({ dayId, onClose }) {
   const upsertQuiz = useMutation(api.content.upsertQuiz);
 
   const [formData, setFormData] = useState({ 
-    title: "", description: "", taskDescription: "",
+    title: "", description: "", videoUrl: "", taskDescription: "",
     unlockAtStr: "", deadlineAtStr: "", lateDeadlineAtStr: "",
     quizPointsOnTime: 0, quizPointsLate: 0, taskPointsOnTime: 0, taskPointsLate: 0
   });
@@ -48,6 +48,7 @@ export default function DayEditor({ dayId, onClose }) {
       setFormData({ 
         title: day.title || "", 
         description: day.description || "", 
+        videoUrl: day.videoUrl || "",
         taskDescription: day.taskDescription || "",
         unlockAtStr: toDatetimeLocal(day.unlockAt),
         deadlineAtStr: toDatetimeLocal(day.deadlineAt),
@@ -71,6 +72,7 @@ export default function DayEditor({ dayId, onClose }) {
       const payload = {
         title: formData.title,
         description: formData.description,
+        videoUrl: formData.videoUrl,
         taskDescription: formData.taskDescription,
         unlockAt: toTimestamp(formData.unlockAtStr),
         deadlineAt: toTimestamp(formData.deadlineAtStr),
@@ -139,6 +141,10 @@ export default function DayEditor({ dayId, onClose }) {
         <div>
           <label className="block font-mono text-[9px] tracking-[0.2em] text-black/40 uppercase mb-1.5">DESCRIPTION</label>
           <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} rows={3} className={fieldClass} />
+        </div>
+        <div>
+          <label className="block font-mono text-[9px] tracking-[0.2em] text-black/40 uppercase mb-1.5">VIDEO_URL</label>
+          <input type="text" value={formData.videoUrl} onChange={e => setFormData({...formData, videoUrl: e.target.value})} placeholder="https://youtube.com/watch?v=..." className={fieldClass} />
         </div>
         <div>
           <label className="block font-mono text-[9px] tracking-[0.2em] text-black/40 uppercase mb-1.5">TASK_DESCRIPTION (MARKDOWN)</label>
