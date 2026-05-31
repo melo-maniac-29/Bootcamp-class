@@ -38,6 +38,18 @@ export const setRole = mutation({
   },
 });
 
+export const deleteUser = mutation({
+  args: { targetUserId: v.id("users") },
+  handler: async (ctx, args) => {
+    const userId = await auth.getUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
+    const user = await ctx.db.get(userId);
+    if (user?.role !== "admin") throw new Error("Requires admin role");
+    
+    await ctx.db.delete(args.targetUserId);
+  },
+});
+
 export const getLeaderboard = query({
   args: {},
   handler: async (ctx) => {
