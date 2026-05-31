@@ -83,7 +83,7 @@ export default function DayEditor({ dayId, onClose }) {
         taskPointsLate: parseInt(formData.taskPointsLate) || 0,
       };
       await updateDay({ dayId, ...payload });
-      if (questions.length > 0) await upsertQuiz({ dayId, questions });
+      await upsertQuiz({ dayId, questions });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (e) {
