@@ -94,13 +94,13 @@ export default function LandingPage() {
       </div>
 
       {/* Top Left Navigation logo */}
-      <div className="fixed top-8 left-8 md:top-12 md:left-12 z-50 flex items-center gap-3 mix-blend-difference text-black dark:text-white pointer-events-auto select-none">
-        <Link href="/" className="font-display font-black text-2xl tracking-tighter uppercase">
+      <div className="fixed top-8 left-8 md:top-12 md:left-12 z-50 flex items-center gap-3 pointer-events-auto select-none">
+        <Link href="/" className="font-display font-black text-2xl tracking-tighter uppercase text-black dark:text-white">
           C //
         </Link>
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-green-50 border border-green-200">
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20">
           <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-          <span className="text-[9px] font-bold tracking-wider uppercase font-mono text-green-700">ONLINE_CORE</span>
+          <span className="text-[9px] font-bold tracking-wider uppercase font-mono text-green-700 dark:text-green-400">ONLINE_CORE</span>
         </div>
       </div>
 

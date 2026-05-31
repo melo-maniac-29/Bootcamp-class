@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
-import { Loader2, ArrowRight } from "lucide-react";
+import { Loader2, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 
@@ -22,6 +22,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [quoteIndex, setQuoteIndex] = useState(0);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const { signIn } = useAuthActions();
   const router = useRouter();
@@ -82,10 +84,10 @@ export default function LoginPage() {
       <div className="absolute inset-0 z-0 opacity-[0.02] pointer-events-none bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] bg-[size:2.5rem_2.5rem]" />
 
       {/* ----------------- FLOATING HEADER INTERFACE ----------------- */}
-      <header className="fixed top-8 left-8 right-8 z-50 flex items-center justify-between pointer-events-none select-none">
+      <header className="fixed top-6 sm:top-8 left-4 right-4 sm:left-8 sm:right-8 z-50 flex items-center justify-between pointer-events-none select-none">
         <Link 
           href="/" 
-          className="font-display font-black text-2xl tracking-tighter uppercase pointer-events-auto mix-blend-difference hover:opacity-75 transition-opacity"
+          className="font-display font-black text-2xl tracking-tighter uppercase pointer-events-auto text-black dark:text-white hover:opacity-75 transition-opacity"
         >
           C //
         </Link>
@@ -102,15 +104,17 @@ export default function LoginPage() {
 
           <button
             onClick={() => { setStep("login"); setError(""); }}
-            className={`relative z-10 px-6 py-2 rounded-full text-[10px] font-mono font-bold uppercase tracking-widest transition-colors duration-300 cursor-pointer ${step === "login" ? "text-white dark:text-black" : "text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white"}`}
+            className={`relative z-10 px-3 sm:px-6 py-2 rounded-full text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-widest transition-colors duration-300 cursor-pointer ${step === "login" ? "text-white dark:text-black" : "text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white"}`}
           >
-            SYS_SIGN_IN
+            <span className="sm:hidden">SIGN_IN</span>
+            <span className="hidden sm:inline">SYS_SIGN_IN</span>
           </button>
           <button
             onClick={() => { setStep("signUp"); setError(""); }}
-            className={`relative z-10 px-6 py-2 rounded-full text-[10px] font-mono font-bold uppercase tracking-widest transition-colors duration-300 cursor-pointer ${step === "signUp" ? "text-white dark:text-black" : "text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white"}`}
+            className={`relative z-10 px-3 sm:px-6 py-2 rounded-full text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-widest transition-colors duration-300 cursor-pointer ${step === "signUp" ? "text-white dark:text-black" : "text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white"}`}
           >
-            REGISTER_NODE
+            <span className="sm:hidden">REGISTER</span>
+            <span className="hidden sm:inline">REGISTER_NODE</span>
           </button>
         </div>
       </header>
@@ -122,7 +126,7 @@ export default function LoginPage() {
         <motion.div
           layout
           transition={{ type: "spring", stiffness: 90, damping: 20 }}
-          className="hidden lg:flex lg:w-1/2 h-full bg-[#F8F9FA] dark:bg-[#111111] border-x border-gray-100 dark:border-white/5 flex-col justify-between p-16 relative overflow-hidden z-20 select-none"
+          className="hidden lg:flex lg:w-1/2 h-full bg-[#F8F9FA] dark:bg-[#111111] border-x border-gray-100 dark:border-white/5 flex-col justify-between p-16 pt-24 relative overflow-hidden z-20 select-none"
         >
           {/* Top Telemetry */}
           <div className="flex items-center justify-between font-mono text-[9px] text-gray-400">
@@ -209,12 +213,13 @@ export default function LoginPage() {
         </motion.div>
 
         {/* Right/Left Solid Form Panel (Smooth layout animation) */}
+        {/* Right/Left Solid Form Panel (Smooth layout animation) */}
         <motion.div
           layout
           transition={{ type: "spring", stiffness: 90, damping: 20 }}
-          className="w-full lg:w-1/2 h-full flex items-center justify-center p-8 sm:p-12 lg:p-24 bg-white dark:bg-[#0a0a0a] relative z-10"
+          className="w-full lg:w-1/2 h-full flex items-start lg:items-center justify-center p-6 sm:p-12 lg:p-24 bg-white dark:bg-[#0a0a0a] relative z-10 overflow-y-auto lg:overflow-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
-          <div className="w-full max-w-md pt-16">
+          <div className="w-full max-w-md pt-24 pb-12 lg:pt-0 lg:pb-0">
             <AnimatePresence mode="wait">
               {step === "login" ? (
                 // Sign In Form interface
@@ -252,14 +257,23 @@ export default function LoginPage() {
                       <label className="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest transition-colors group-focus-within:text-black">
                         PASSWORD
                       </label>
-                      <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full bg-transparent border-b border-gray-200 dark:border-white/20 focus:border-black dark:focus:border-white outline-none px-0 py-3 text-black dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-600 transition-colors text-lg font-medium font-mono"
-                        placeholder="••••••••"
-                        required
-                      />
+                      <div className="relative">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="w-full bg-transparent border-b border-gray-200 dark:border-white/20 focus:border-black dark:focus:border-white outline-none px-0 py-3 pr-10 text-black dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-600 transition-colors text-lg font-medium font-mono"
+                          placeholder="••••••••"
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black dark:hover:text-white transition-colors cursor-pointer"
+                        >
+                          {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        </button>
+                      </div>
                     </div>
 
                     {error && (
@@ -331,28 +345,46 @@ export default function LoginPage() {
                       <label className="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest transition-colors group-focus-within:text-black">
                         PASSWORD
                       </label>
-                      <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full bg-transparent border-b border-gray-200 dark:border-white/20 focus:border-black dark:focus:border-white outline-none px-0 py-3 text-black dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-600 transition-colors text-lg font-medium font-mono"
-                        placeholder="••••••••"
-                        required
-                      />
+                      <div className="relative">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="w-full bg-transparent border-b border-gray-200 dark:border-white/20 focus:border-black dark:focus:border-white outline-none px-0 py-3 pr-10 text-black dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-600 transition-colors text-lg font-medium font-mono"
+                          placeholder="••••••••"
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black dark:hover:text-white transition-colors cursor-pointer"
+                        >
+                          {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        </button>
+                      </div>
                     </div>
 
                     <div className="space-y-2 group relative">
                       <label className="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest transition-colors group-focus-within:text-black">
                         CONFIRM_PASSWORD
                       </label>
-                      <input
-                        type="password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="w-full bg-transparent border-b border-gray-200 dark:border-white/20 focus:border-black dark:focus:border-white outline-none px-0 py-3 text-black dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-600 transition-colors text-lg font-medium font-mono"
-                        placeholder="••••••••"
-                        required
-                      />
+                      <div className="relative">
+                        <input
+                          type={showConfirmPassword ? "text" : "password"}
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          className="w-full bg-transparent border-b border-gray-200 dark:border-white/20 focus:border-black dark:focus:border-white outline-none px-0 py-3 pr-10 text-black dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-600 transition-colors text-lg font-medium font-mono"
+                          placeholder="••••••••"
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black dark:hover:text-white transition-colors cursor-pointer"
+                        >
+                          {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        </button>
+                      </div>
                     </div>
 
                     {error && (
