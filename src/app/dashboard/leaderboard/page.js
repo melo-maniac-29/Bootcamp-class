@@ -4,9 +4,26 @@ import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { motion } from "framer-motion";
 import { Skeleton } from "../../../components/ui/skeleton";
+import { useState, useEffect } from "react";
 
 export default function LeaderboardPage() {
   const users = useQuery(api.users.getLeaderboard);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  const filteredUsers = (users || []).filter(user => 
+    user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.participantId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user._id.includes(searchQuery)
+  );
+
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const paginatedUsers = filteredUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   if (users === undefined) {
     return (
@@ -37,6 +54,18 @@ export default function LeaderboardPage() {
         </p>
       </div>
 
+      <div className="mb-6 flex flex-col md:flex-row gap-4 justify-between items-center">
+        <div className="w-full md:w-96">
+          <input
+            type="text"
+            placeholder="SEARCH PARTICIPANT..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-white dark:bg-[#0a0a0a] border border-black/[0.1] dark:border-white/[0.1] rounded-lg px-4 py-3 font-mono text-[10px] uppercase tracking-widest focus:outline-none focus:border-black dark:focus:border-white text-black dark:text-white"
+          />
+        </div>
+      </div>
+
       <div className="border border-black/[0.06] dark:border-white/[0.06] rounded-2xl overflow-hidden bg-white dark:bg-[#0a0a0a]">
         <div className="grid grid-cols-[auto_1fr_auto] gap-4 items-center px-6 py-4 border-b border-black/[0.06] dark:border-white/[0.06] bg-[#F8F9FA] dark:bg-[#111111]">
           <p className="font-mono text-[10px] tracking-widest text-black/40 dark:text-white/40 w-12 text-center uppercase">RANK</p>
@@ -45,8 +74,9 @@ export default function LeaderboardPage() {
         </div>
 
         <div className="divide-y divide-black/[0.04] dark:divide-white/[0.04]">
-          {users.map((user, idx) => {
-            const isTop3 = idx < 3;
+          {paginatedUsers.map((user, idx) => {
+            const actualRank = users.findIndex(u => u._id === user._id) + 1;
+            const isTop3 = actualRank <= 3;
             const rankColors = ["text-yellow-500", "text-neutral-400", "text-orange-500"];
             
             return (
@@ -58,8 +88,8 @@ export default function LeaderboardPage() {
                 className="grid grid-cols-[auto_1fr_auto] gap-4 items-center px-6 py-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors group"
               >
                 <div className="w-12 flex justify-center">
-                  <span className={`font-display font-black text-2xl ${isTop3 ? rankColors[idx] : 'text-black/20 dark:text-white/20 group-hover:text-black/40 dark:group-hover:text-white/40'} transition-colors`}>
-                    {idx + 1}
+                  <span className={`font-display font-black text-2xl ${isTop3 ? rankColors[actualRank - 1] : 'text-black/20 dark:text-white/20 group-hover:text-black/40 dark:group-hover:text-white/40'} transition-colors`}>
+                    {actualRank}
                   </span>
                 </div>
                 <div className="flex items-center gap-4">
@@ -95,8 +125,38 @@ export default function LeaderboardPage() {
               </p>
             </div>
           )}
+
+          {users.length > 0 && filteredUsers.length === 0 && (
+            <div className="p-16 text-center">
+              <p className="font-mono text-[10px] text-black/30 dark:text-white/30 tracking-widest uppercase">
+                NO_RESULTS_FOUND
+              </p>
+            </div>
+          )}
         </div>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex justify-between items-center mt-8 px-2 border-t border-black/[0.06] dark:border-white/[0.06] pt-6">
+          <button
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="font-mono text-[10px] uppercase tracking-widest text-black/50 dark:text-white/50 hover:text-black dark:hover:text-white disabled:opacity-30 transition-colors"
+          >
+            &lt; PREVIOUS_PAGE
+          </button>
+          <span className="font-mono text-[10px] tracking-widest text-black/30 dark:text-white/30 uppercase">
+            PAGE {currentPage} OF {totalPages}
+          </span>
+          <button
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="font-mono text-[10px] uppercase tracking-widest text-black/50 dark:text-white/50 hover:text-black dark:hover:text-white disabled:opacity-30 transition-colors"
+          >
+            NEXT_PAGE &gt;
+          </button>
+        </div>
+      )}
     </motion.div>
   );
 }

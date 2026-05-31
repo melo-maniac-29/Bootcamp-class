@@ -44,15 +44,14 @@ export const listSubmissions = query({
         const day = await ctx.db.get(sub.dayId);
         const week = day ? await ctx.db.get(day.weekId) : null;
         const maxPoints = sub.isLate ? (day?.taskPointsLate || 0) : (day?.taskPointsOnTime || 0);
-        return {
-          ...sub,
+        return Object.assign({}, sub, {
           userName: user?.name || user?.email || "Unknown User",
           dayTitle: day?.title || "Unknown Day",
           weekTitle: week?.title || "Unknown Week",
           weekOrder: week?.order ?? 999,
           dayOrder: day?.order ?? 999,
           maxPoints
-        };
+        });
       })
     );
   },

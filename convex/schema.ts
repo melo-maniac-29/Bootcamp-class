@@ -42,6 +42,7 @@ export default defineSchema({
     deadlineAt: v.optional(v.number()), // timestamp
     lateDeadlineAt: v.optional(v.number()), // absolute lock timestamp
     quizPointsOnTime: v.optional(v.number()),
+    quizPointsLate: v.optional(v.number()),
     taskPointsOnTime: v.optional(v.number()),
     taskPointsLate: v.optional(v.number()),
     feedbackEnabled: v.optional(v.boolean()),
@@ -87,5 +88,7 @@ export default defineSchema({
         answerIndex: v.number(),
       })
     ),
+    feedbackEnabled: v.optional(v.boolean()),
+    feedbackQuestion: v.optional(v.string()),
   }).index("by_dayId", ["dayId"]),
 });
