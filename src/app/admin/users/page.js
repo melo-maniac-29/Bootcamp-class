@@ -34,9 +34,23 @@ export default function UsersPage() {
       }
     }
   );
+
+  const deleteUser = useMutation(api.users.deleteUser).withOptimisticUpdate(
+    (localStore, args) => {
+      const existing = localStore.getQuery(api.users.listUsers);
+      if (existing) {
+        localStore.setQuery(
+          api.users.listUsers,
+          {},
+          existing.filter(u => u._id !== args.targetUserId)
+        );
+      }
+    }
+  );
   
   const [successUserId, setSuccessUserId] = useState(null);
   const [resettingUserId, setResettingUserId] = useState(null);
+  const [deletingUser, setDeletingUser] = useState(null);
   const [newPassword, setNewPassword] = useState("");
 
   const [search, setSearch] = useState("");
@@ -63,6 +77,26 @@ export default function UsersPage() {
       setTimeout(() => setSuccessUserId(null), 2000);
     } catch (e) {
       alert("Failed to update role.");
+    }
+  };
+
+  const handleDeleteUser = (userId) => {
+    const userToDelete = users.find(u => u._id === userId);
+    setDeletingUser(userToDelete);
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!deletingUser) return;
+    try {
+      await deleteUser({ targetUserId: deletingUser._id });
+      setDeletingUser(null);
+      
+      const newTotalPages = Math.ceil((filteredUsers.length - 1) / PAGE_SIZE) || 1;
+      if (currentPage > newTotalPages) {
+        setCurrentPage(newTotalPages);
+      }
+    } catch (e) {
+      alert("Failed to delete user.");
     }
   };
 
@@ -167,7 +201,7 @@ export default function UsersPage() {
                     <span className="font-mono text-xs text-black/40 dark:text-white/40">{u.participantId || "NULL"}</span>
                   </td>
                   <td className="px-5 py-4">
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-row flex-wrap items-center gap-4">
                       <div className="flex items-center gap-3">
                         <select
                           value={u.role || "student"}
@@ -189,30 +223,41 @@ export default function UsersPage() {
                         )}
                       </div>
                       
-                      {resettingUserId === u._id ? (
-                        <div className="flex items-center gap-2 mt-2">
-                          <input 
-                            type="text" 
-                            placeholder="New password..."
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                            className="border border-black/[0.12] dark:border-white/[0.12] rounded flex-1 px-2 py-1 font-mono text-[10px] bg-transparent outline-none focus:border-black/30 dark:focus:border-white/30"
-                          />
-                          <button onClick={() => handleResetPassword(u._id)} className="bg-black dark:bg-white text-white dark:text-black px-2 py-1 rounded font-mono text-[9px] tracking-widest uppercase hover:opacity-80">
-                            Save
+                      <div className="flex items-center gap-4">
+                        {resettingUserId === u._id ? (
+                          <div className="flex items-center gap-2">
+                            <input 
+                              type="text" 
+                              placeholder="New password..."
+                              value={newPassword}
+                              onChange={(e) => setNewPassword(e.target.value)}
+                              className="border border-black/[0.12] dark:border-white/[0.12] rounded px-2 py-1 font-mono text-[10px] bg-transparent outline-none focus:border-black/30 dark:focus:border-white/30"
+                            />
+                            <button onClick={() => handleResetPassword(u._id)} className="bg-black dark:bg-white text-white dark:text-black px-2 py-1 rounded font-mono text-[9px] tracking-widest uppercase hover:opacity-80">
+                              Save
+                            </button>
+                            <button onClick={() => setResettingUserId(null)} className="text-black/50 dark:text-white/50 px-2 py-1 rounded font-mono text-[9px] tracking-widest uppercase hover:bg-black/5 dark:hover:bg-white/5">
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <button 
+                            onClick={() => { setResettingUserId(u._id); setNewPassword(""); }}
+                            className="text-[9px] font-mono tracking-widest uppercase text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white transition-colors"
+                          >
+                            + RESET_PASSWORD
                           </button>
-                          <button onClick={() => setResettingUserId(null)} className="text-black/50 dark:text-white/50 px-2 py-1 rounded font-mono text-[9px] tracking-widest uppercase hover:bg-black/5 dark:hover:bg-white/5">
-                            Cancel
+                        )}
+
+                        {u._id !== currentUser?._id && (
+                          <button 
+                            onClick={() => handleDeleteUser(u._id)}
+                            className="text-[9px] font-mono tracking-widest uppercase text-red-500/70 hover:text-red-500 transition-colors"
+                          >
+                            + DELETE
                           </button>
-                        </div>
-                      ) : (
-                        <button 
-                          onClick={() => { setResettingUserId(u._id); setNewPassword(""); }}
-                          className="text-[9px] font-mono tracking-widest uppercase text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white text-left mt-1 w-max"
-                        >
-                          + RESET_PASSWORD
-                        </button>
-                      )}
+                        )}
+                      </div>
                     </div>
                   </td>
                 </motion.tr>
@@ -255,6 +300,49 @@ export default function UsersPage() {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deletingUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 dark:bg-black/80 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="w-full max-w-md bg-white dark:bg-[#111] border border-red-500/20 dark:border-red-500/20 rounded-xl overflow-hidden shadow-2xl"
+          >
+            <div className="p-6 border-b border-black/[0.06] dark:border-white/[0.06]">
+              <h2 className="text-xl font-display font-black tracking-tight text-black dark:text-white uppercase">
+                Delete User Account
+              </h2>
+            </div>
+            
+            <div className="p-6 bg-red-50/50 dark:bg-red-950/20">
+              <p className="text-sm font-mono text-black/70 dark:text-white/70 mb-4 leading-relaxed">
+                This action <strong className="text-red-600 dark:text-red-400">cannot</strong> be undone. This will permanently delete the 
+                user account <strong className="text-black dark:text-white">{deletingUser.name || deletingUser.email}</strong> and remove their access.
+              </p>
+              
+              <div className="p-3 bg-white/50 dark:bg-black/50 border border-black/10 dark:border-white/10 rounded text-xs font-mono text-black/60 dark:text-white/60">
+                Are you absolutely sure?
+              </div>
+            </div>
+
+            <div className="flex gap-3 p-6 border-t border-black/[0.06] dark:border-white/[0.06] bg-gray-50/50 dark:bg-black/20 justify-end">
+              <button 
+                onClick={() => setDeletingUser(null)}
+                className="px-4 py-2 text-xs font-mono font-bold tracking-widest text-black/50 dark:text-white/50 uppercase border border-transparent hover:bg-black/5 dark:hover:bg-white/5 rounded transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmDeleteUser}
+                className="px-6 py-2 text-xs font-mono font-bold tracking-widest text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 uppercase border border-red-200 dark:border-red-900/50 rounded hover:bg-red-600 hover:text-white dark:hover:bg-red-600 dark:hover:text-white transition-colors"
+              >
+                Delete Account
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </motion.div>
   );
 }
