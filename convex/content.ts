@@ -264,3 +264,36 @@ export const getDayProgress = query({
       .first();
   }
 });
+
+export const listFeedbackResponses = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await auth.getUserId(ctx);
+    if (!userId) return [];
+    const user = await ctx.db.get(userId);
+    if (user?.role !== "admin" && user?.role !== "volunteer") return [];
+
+    // Get all progress records that have a feedback response
+    const allProgress = await ctx.db.query("userProgress").collect();
+    const withFeedback = allProgress.filter(p => p.feedbackResponse && p.feedbackResponse.trim());
+
+    // Resolve user, day, week for each
+    return Promise.all(withFeedback.map(async (p) => {
+      const student = await ctx.db.get(p.userId);
+      const day = await ctx.db.get(p.dayId);
+      const week = day ? await ctx.db.get(day.weekId) : null;
+      return {
+        _id: p._id,
+        studentName: student?.name || student?.email || "Unknown Student",
+        dayTitle: day?.title || "Unknown Day",
+        dayId: p.dayId,
+        weekTitle: week?.title || "Unknown Week",
+        weekOrder: week?.order ?? 999,
+        dayOrder: day?.order ?? 999,
+        feedbackResponse: p.feedbackResponse,
+        quizScore: p.quizScore,
+        quizTotal: p.quizTotal,
+      };
+    }));
+  },
+});

@@ -128,6 +128,8 @@ export default function QuizPage() {
     } catch (e) {
       console.error(e);
     }
+    setShowFeedback(false);
+    setScore(pendingScore);
     setFinished(true);
     setSaving(false);
   };

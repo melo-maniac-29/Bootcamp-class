@@ -92,6 +92,16 @@ export default function AdminLayout({ children }) {
         </svg>
       ),
     },
+    {
+      href: "/admin/feedback",
+      label: "FEEDBACK",
+      icon: (
+        <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
+          <path d="M2 3h12a1 1 0 011 1v7a1 1 0 01-1 1H5l-3 2V4a1 1 0 011-1z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+          <path d="M5 7h6M5 9.5h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        </svg>
+      ),
+    },
   ];
 
   // "Return to student view" block injected as topSection
