@@ -43,9 +43,46 @@ export const deleteUser = mutation({
   handler: async (ctx, args) => {
     const userId = await auth.getUserId(ctx);
     if (!userId) throw new Error("Unauthorized");
+    
+    // Prevent self-deletion
+    if (userId === args.targetUserId) {
+      throw new Error("Cannot delete your own account");
+    }
+
     const user = await ctx.db.get(userId);
     if (user?.role !== "admin") throw new Error("Requires admin role");
     
+    // Cascading deletes for userProgress
+    const progressDocs = await ctx.db.query("userProgress")
+      .withIndex("by_userId", (q) => q.eq("userId", args.targetUserId))
+      .collect();
+    for (const doc of progressDocs) {
+      await ctx.db.delete(doc._id);
+    }
+    
+    // Cascading deletes for submissions
+    const submissions = await ctx.db.query("submissions")
+      .withIndex("by_userId", (q) => q.eq("userId", args.targetUserId))
+      .collect();
+    for (const doc of submissions) {
+      await ctx.db.delete(doc._id);
+    }
+
+    // Revoke authentication sessions and accounts
+    const authSessions = await ctx.db.query("authSessions")
+      .withIndex("userId", (q) => q.eq("userId", args.targetUserId))
+      .collect();
+    for (const session of authSessions) {
+      await ctx.db.delete(session._id);
+    }
+
+    const authAccounts = await ctx.db.query("authAccounts")
+      .filter((q) => q.eq(q.field("userId"), args.targetUserId))
+      .collect();
+    for (const account of authAccounts) {
+      await ctx.db.delete(account._id);
+    }
+
     await ctx.db.delete(args.targetUserId);
   },
 });

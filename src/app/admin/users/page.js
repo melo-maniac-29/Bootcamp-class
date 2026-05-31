@@ -90,6 +90,11 @@ export default function UsersPage() {
     try {
       await deleteUser({ targetUserId: deletingUser._id });
       setDeletingUser(null);
+      
+      const newTotalPages = Math.ceil((filteredUsers.length - 1) / PAGE_SIZE) || 1;
+      if (currentPage > newTotalPages) {
+        setCurrentPage(newTotalPages);
+      }
     } catch (e) {
       alert("Failed to delete user.");
     }
@@ -244,12 +249,14 @@ export default function UsersPage() {
                           </button>
                         )}
 
-                        <button 
-                          onClick={() => handleDeleteUser(u._id)}
-                          className="text-[9px] font-mono tracking-widest uppercase text-red-500/70 hover:text-red-500 transition-colors"
-                        >
-                          + DELETE
-                        </button>
+                        {u._id !== currentUser?._id && (
+                          <button 
+                            onClick={() => handleDeleteUser(u._id)}
+                            className="text-[9px] font-mono tracking-widest uppercase text-red-500/70 hover:text-red-500 transition-colors"
+                          >
+                            + DELETE
+                          </button>
+                        )}
                       </div>
                     </div>
                   </td>

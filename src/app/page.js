@@ -568,7 +568,7 @@ export default function LandingPage() {
               </div>
               
               {/* Desktop Footer Embedded in Last Panel - Positioned at bottom of flex column */}
-              <div className="w-full shrink-0 flex flex-col md:flex-row items-center justify-between px-24 xl:px-36 py-8 border-t border-white/10 z-30">
+              <div className="w-full shrink-0 flex flex-col md:flex-row items-center justify-between px-24 xl:px-36 py-8 border-t border-black/10 dark:border-white/10 z-30">
                 <div className="font-mono text-[10px] text-gray-500 uppercase tracking-widest">
                   &copy; 2026 CIRCUITRON. ALL RIGHTS RESERVED.
                 </div>
@@ -597,7 +597,7 @@ export default function LandingPage() {
                     href="https://ieee.ce-kgr.org/"
                     target="_blank"
                     rel="noreferrer"
-                    className="font-mono text-[9px] font-black tracking-widest text-white uppercase flex items-center gap-1.5"
+                    className="font-mono text-[9px] font-black tracking-widest text-black dark:text-white uppercase flex items-center gap-1.5"
                   >
                     <span className="w-1.5 h-1.5 bg-green-500 opacity-40 group-hover:opacity-100 transition-opacity animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.5)]" />
                     <span className="group-hover:text-green-400 transition-colors duration-300">IEEE SB CE KIDANGOOR</span>
@@ -648,17 +648,14 @@ export default function LandingPage() {
               CRAFTED_BY //
             </span>
             <a
-              href="https://itsmeallen.dev"
+              href="https://ieee.ce-kgr.org/"
               target="_blank"
               rel="noreferrer"
               className="font-mono text-[9px] font-black tracking-widest text-white uppercase flex items-center gap-1.5"
             >
               <span className="w-1.5 h-1.5 bg-green-500 opacity-40 group-hover:opacity-100 transition-opacity animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.5)]" />
-              <span className="group-hover:text-green-400 transition-colors duration-300">ALLEN</span>
+              <span className="group-hover:text-green-400 transition-colors duration-300">IEEE SB CE KIDANGOOR</span>
             </a>
-            <span className="font-mono text-[9px] text-gray-500 tracking-widest uppercase transition-colors group-hover:text-gray-400">
-              & KASHINADTH
-            </span>
           </div>
           <div className="font-mono text-[10px] text-gray-500 uppercase tracking-widest text-center">
             &copy; 2026 CIRCUITRON. ALL RIGHTS RESERVED.
