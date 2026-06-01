@@ -206,7 +206,7 @@ export default function DayEditor({ dayId, onClose }) {
       </div>
 
       {/* Scoring & Timing */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <div>
           <label className="block font-mono text-[9px] tracking-[0.2em] text-black/40 dark:text-white/40 uppercase mb-1.5">QUIZ_ON_TIME</label>
           <input type="number" value={formData.quizPointsOnTime} onChange={e => setFormData({...formData, quizPointsOnTime: e.target.value})} className={fieldClass} />
