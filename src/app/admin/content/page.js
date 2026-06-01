@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, Reorder } from "framer-motion";
 import DayEditor from "./DayEditor";
@@ -34,14 +34,19 @@ export default function ContentPage() {
   const [editingDayId, setEditingDayId] = useState(null);
   const [editingWeekId, setEditingWeekId] = useState(null);
   
-  const days = useQuery(api.content.getDays, { weekId: selectedWeek === null ? undefined : selectedWeek }) || [];
+  const rawDays = useQuery(api.content.getDays, { weekId: selectedWeek === null ? undefined : selectedWeek });
+  const days = rawDays || [];
   const reorderDays = useMutation(api.content.reorderDays);
 
   const [localDays, setLocalDays] = useState([]);
   
   useEffect(() => {
-    setLocalDays([...days].sort((a,b) => (a.order || 0) - (b.order || 0)));
-  }, [days]);
+    if (rawDays) {
+      setLocalDays([...rawDays].sort((a,b) => (a.order || 0) - (b.order || 0)));
+    } else {
+      setLocalDays([]);
+    }
+  }, [rawDays]);
 
   const handleReorderEnd = async () => {
     const updates = localDays.map((d, idx) => ({ dayId: d._id, order: idx + 1 }));

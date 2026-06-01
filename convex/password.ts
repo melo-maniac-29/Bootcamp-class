@@ -51,3 +51,39 @@ export const updatePassword = action({
     }
   }
 });
+
+export const adminResetPassword = action({
+  args: { targetUserId: v.id("users"), newPassword: v.string() },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) throw new Error("Unauthorized");
+    
+    const users = await ctx.runQuery(api.users.listUsers);
+    const targetUser = users.find(u => u._id === args.targetUserId);
+    if (!targetUser || !targetUser.email) {
+      throw new Error("Target user not found or has no email");
+    }
+    
+    const hasAccount = await ctx.runQuery(internal.password.hasPasswordAccount, { email: targetUser.email });
+    
+    if (hasAccount) {
+      await modifyAccountCredentials(ctx, {
+        provider: "password",
+        account: {
+          id: targetUser.email,
+          secret: args.newPassword,
+        }
+      });
+    } else {
+      await createAccount(ctx, {
+        provider: "password",
+        account: {
+          id: targetUser.email,
+          secret: args.newPassword,
+        },
+        profile: { email: targetUser.email },
+        shouldLinkViaEmail: true,
+      });
+    }
+  }
+});

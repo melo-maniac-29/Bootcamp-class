@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -47,6 +47,8 @@ export default function UsersPage() {
       }
     }
   );
+  
+  const adminResetPassword = useAction(api.password.adminResetPassword);
   
   const [successUserId, setSuccessUserId] = useState(null);
   const [resettingUserId, setResettingUserId] = useState(null);
@@ -106,13 +108,13 @@ export default function UsersPage() {
       return;
     }
     try {
-      // In a real scenario, this would call a mutation to update authAccounts.
-      // Since @convex-dev/auth encrypts and manages passwords internally, we cannot simply patch it here.
-      alert("Note: To securely reset passwords via admin, you must configure a custom action or use the Forgot Password email flow in Convex Auth. The UI is ready for your integration!");
+      await adminResetPassword({ targetUserId: userId, newPassword });
       setResettingUserId(null);
       setNewPassword("");
+      alert("Password reset successfully.");
     } catch (e) {
-      alert("Failed to reset password.");
+      console.error(e);
+      alert("Failed to reset password. Make sure you are an admin.");
     }
   };
 
