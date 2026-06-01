@@ -4,7 +4,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, Reorder } from "framer-motion";
 import DayEditor from "./DayEditor";
 import WeekEditor from "./WeekEditor";
 
@@ -35,6 +35,31 @@ export default function ContentPage() {
   const [editingWeekId, setEditingWeekId] = useState(null);
   
   const days = useQuery(api.content.getDays, { weekId: selectedWeek === null ? undefined : selectedWeek }) || [];
+  const reorderDays = useMutation(api.content.reorderDays);
+
+  const [localDays, setLocalDays] = useState([]);
+  
+  useEffect(() => {
+    setLocalDays([...days].sort((a,b) => (a.order || 0) - (b.order || 0)));
+  }, [days]);
+
+  const handleReorderEnd = async () => {
+    const updates = localDays.map((d, idx) => ({ dayId: d._id, order: idx + 1 }));
+    let changed = false;
+    for (const update of updates) {
+      const originalDay = days.find(d => d._id === update.dayId);
+      if (originalDay && originalDay.order !== update.order) {
+        changed = true; break;
+      }
+    }
+    if (changed) {
+      try {
+        await reorderDays({ updates });
+      } catch (err) {
+        alert("Failed to save order: " + err.message);
+      }
+    }
+  };
 
   const handleCreateWeek = async (e) => {
     e.preventDefault();
@@ -194,17 +219,26 @@ export default function ContentPage() {
           ) : editingDayId ? (
             <DayEditor dayId={editingDayId} onClose={() => setEditingDayId(null)} />
           ) : (
-            <div className="space-y-2">
-              {days.map((day, idx) => (
-                <div
+            <Reorder.Group axis="y" values={localDays} onReorder={setLocalDays} className="space-y-2">
+              {localDays.map((day, idx) => (
+                <Reorder.Item
                   key={day._id}
-                  className="p-4 rounded-xl border border-black/[0.06] dark:border-white/[0.06] bg-[#F8F9FA] dark:bg-[#111111] flex justify-between items-center group hover:border-black/20 dark:hover:border-white/20 transition-all"
+                  value={day}
+                  onDragEnd={handleReorderEnd}
+                  className="p-4 rounded-xl border border-black/[0.06] dark:border-white/[0.06] bg-[#F8F9FA] dark:bg-[#111111] flex justify-between items-center group hover:border-black/20 dark:hover:border-white/20 transition-all cursor-grab active:cursor-grabbing relative bg-white dark:bg-[#0a0a0a]"
                 >
-                  <div>
-                    <p className="font-mono text-[9px] tracking-[0.2em] text-black/30 dark:text-white/30 uppercase mb-0.5">
-                      DAY_{String(day.order).padStart(2, "0")}
-                    </p>
-                    <p className="font-mono text-sm font-bold text-black dark:text-white uppercase tracking-wider">{day.title}</p>
+                  <div className="flex items-center gap-4">
+                    <div className="text-black/20 dark:text-white/20 cursor-grab active:cursor-grabbing">
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                        <path d="M8 9h8M8 15h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-mono text-[9px] tracking-[0.2em] text-black/30 dark:text-white/30 uppercase mb-0.5">
+                        DAY_{String(idx + 1).padStart(2, "0")}
+                      </p>
+                      <p className="font-mono text-sm font-bold text-black dark:text-white uppercase tracking-wider">{day.title}</p>
+                    </div>
                   </div>
                   <button
                     onClick={() => setEditingDayId(day._id)}
@@ -212,14 +246,14 @@ export default function ContentPage() {
                   >
                     EDIT
                   </button>
-                </div>
+                </Reorder.Item>
               ))}
               {days.length === 0 && (
                 <div className="py-10 text-center border border-dashed border-black/10 dark:border-white/10 rounded-xl">
                   <p className="font-mono text-[10px] tracking-widest text-black/25 dark:text-white/25 uppercase">NO_DAYS // ADD ABOVE</p>
                 </div>
               )}
-            </div>
+            </Reorder.Group>
           )}
         </div>
       </div>

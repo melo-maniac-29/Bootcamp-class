@@ -22,10 +22,11 @@ export const getDays = query({
   args: { weekId: v.optional(v.id("weeks")) },
   handler: async (ctx, args) => {
     if (!args.weekId) return [];
-    return await ctx.db
+    const days = await ctx.db
       .query("days")
       .withIndex("by_weekId", (q) => q.eq("weekId", args.weekId!))
       .collect();
+    return days.sort((a, b) => (a.order || 0) - (b.order || 0));
   },
 });
 
