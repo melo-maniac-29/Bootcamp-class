@@ -90,11 +90,29 @@ export const deleteUser = mutation({
 export const getLeaderboard = query({
   args: {},
   handler: async (ctx) => {
-    // Rank students by totalPoints
+    // Rank students by totalPoints, tiebreak by earliest submission time
     const users = await ctx.db.query("users").collect();
-    return users
-      .filter((u) => u.role === "student" || !u.role)
-      .sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0));
+    const students = users.filter((u) => u.role === "student" || !u.role);
+    
+    const studentsWithTime = await Promise.all(
+      students.map(async (u) => {
+        const submissions = await ctx.db
+          .query("submissions")
+          .withIndex("by_userId", (q) => q.eq("userId", u._id))
+          .collect();
+        const firstSubmissionTime = submissions.length > 0
+          ? Math.min(...submissions.map(s => s.submittedAt))
+          : Infinity;
+        return { ...u, firstSubmissionTime };
+      })
+    );
+
+    return studentsWithTime.sort((a, b) => {
+      const pointsDiff = (b.totalPoints || 0) - (a.totalPoints || 0);
+      if (pointsDiff !== 0) return pointsDiff;
+      // Tiebreaker: earlier submission wins (smaller timestamp)
+      return a.firstSubmissionTime - b.firstSubmissionTime;
+    });
   }
 });
 
