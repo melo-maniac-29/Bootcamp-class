@@ -212,3 +212,16 @@ export const submitTask = mutation({
     return subId;
   },
 });
+
+export const getSubmission = query({
+  args: { dayId: v.id("days") },
+  handler: async (ctx, args) => {
+    const userId = await auth.getUserId(ctx);
+    if (!userId) return null;
+
+    return await ctx.db
+      .query("submissions")
+      .withIndex("by_userId_dayId", (q) => q.eq("userId", userId).eq("dayId", args.dayId))
+      .first();
+  },
+});

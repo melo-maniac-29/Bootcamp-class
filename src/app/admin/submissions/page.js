@@ -215,18 +215,26 @@ export default function SubmissionsPage() {
                   </td>
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleUpdate(sub._id, "Approved", scores[sub._id] !== undefined ? scores[sub._id] : sub.maxPoints)}
-                        className="font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 transition-colors"
-                      >
-                        APPROVE
-                      </button>
-                      <button
-                        onClick={() => handleUpdate(sub._id, "Needs Revision")}
-                        className="font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-colors"
-                      >
-                        REVISE
-                      </button>
+                      {sub.status !== "Approved" ? (
+                        <>
+                          <button
+                            onClick={() => handleUpdate(sub._id, "Approved", scores[sub._id] !== undefined ? scores[sub._id] : sub.maxPoints)}
+                            className="font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 transition-colors"
+                          >
+                            APPROVE
+                          </button>
+                          <button
+                            onClick={() => handleUpdate(sub._id, "Needs Revision")}
+                            className="font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-colors"
+                          >
+                            REVISE
+                          </button>
+                        </>
+                      ) : (
+                        <span className="font-mono text-[9px] text-black/30 dark:text-white/30 uppercase tracking-widest">
+                          REVIEWED
+                        </span>
+                      )}
                       {successId === sub._id && (
                         <motion.span
                           initial={{ opacity: 0, scale: 0.8 }}
