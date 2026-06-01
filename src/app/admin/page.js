@@ -33,6 +33,16 @@ export default function AdminDashboard() {
           </svg>
         ),
       },
+      {
+        href: "/admin/feedback",
+        label: "FEEDBACK",
+        desc: "Review student feedback on curriculum tasks",
+        icon: (
+          <svg className="w-5 h-5" viewBox="0 0 16 16" fill="none">
+            <path d="M4 4h8M4 7h6M2 13.5V3a1 1 0 011-1h10a1 1 0 011 1v8a1 1 0 01-1 1H5.5L2 14.5z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        ),
+      },
     ] : []),
     {
       href: "/admin/submissions",

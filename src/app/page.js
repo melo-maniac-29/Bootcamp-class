@@ -393,11 +393,11 @@ export default function LandingPage() {
       {/* ----------------- DESKTOP ONLY: HORIZONTAL BLUEPRINT TIMELINE (INLINE STYLES FOR ABSOLUTE PINNING) ----------------- */}
       <section 
         ref={timelineRef} 
-        className="hidden lg:block bg-black z-20"
+        className="hidden lg:block bg-white dark:bg-black z-20"
         style={{ height: "300vh", position: "relative" }}
       >
         <div 
-          className="bg-black text-white flex items-center"
+          className="bg-white dark:bg-black text-black dark:text-white flex items-center"
           style={{ 
             position: "sticky", 
             top: 0, 
@@ -411,16 +411,16 @@ export default function LandingPage() {
           <motion.div style={{ x: timelineX }} className="w-[300vw] h-full flex flex-row">
             
             {/* PANEL 01: STRUCTURE */}
-            <div className="w-screen shrink-0 h-full flex flex-row items-center justify-between px-24 xl:px-36 py-20 relative select-none">
+              <div className="w-screen shrink-0 h-full flex flex-row items-center justify-between px-24 xl:px-36 py-20 relative select-none">
               {/* Vertical technical section boundary line */}
-              <div className="absolute top-0 right-0 w-[1px] h-full bg-white/10" />
+              <div className="absolute top-0 right-0 w-[1px] h-full bg-black/10 dark:bg-white/10" />
 
               <div className="w-[40vw] space-y-8 pr-12">
                 <span className="font-mono text-xs uppercase tracking-[0.4em] text-gray-500">OPERATIONAL NODE // 01</span>
                 <h2 className="text-6xl xl:text-7xl font-display font-black tracking-tighter uppercase leading-none">
                   SYSTEM <br />STRUCTURE.
                 </h2>
-                <p className="text-gray-400 text-sm font-sans font-medium leading-relaxed max-w-md">
+                <p className="text-gray-500 dark:text-gray-400 text-sm font-sans font-medium leading-relaxed max-w-md">
                   Follow an uncompromising, day-by-day technical roadmap. Attend rigorous live lectures, solve logical gate challenges, and build physical structural hardware tasks.
                 </p>
               </div>
@@ -428,42 +428,42 @@ export default function LandingPage() {
               {/* Right Side: Timeline Logic Chip SVG illustration */}
               <div className="w-[45vw] flex items-center justify-center">
                 <svg width="100%" height="320" viewBox="0 0 500 320" fill="none" className="max-w-xl w-full">
-                  <rect width="100%" height="100%" rx="12" fill="#111" stroke="#333" strokeWidth="2" />
-                  <path d="M 0 40 H 500 M 0 280 H 500" stroke="#222" strokeWidth="1" strokeDasharray="4 4" />
+                  <rect width="100%" height="100%" rx="12" className="fill-gray-50 dark:fill-[#111] stroke-gray-200 dark:stroke-[#333]" strokeWidth="2" />
+                  <path d="M 0 40 H 500 M 0 280 H 500" className="stroke-gray-200 dark:stroke-[#222]" strokeWidth="1" strokeDasharray="4 4" />
                   
-                  <rect x="150" y="80" width="200" height="140" rx="6" fill="#1A1A1A" stroke="#444" strokeWidth="2" />
-                  <text x="250" y="155" textAnchor="middle" fill="#666" className="font-mono text-[9px] tracking-[0.2em] font-bold">CIRCUITRON_IC_01</text>
+                  <rect x="150" y="80" width="200" height="140" rx="6" className="fill-white dark:fill-[#1A1A1A] stroke-gray-300 dark:stroke-[#444]" strokeWidth="2" />
+                  <text x="250" y="155" textAnchor="middle" className="fill-gray-400 dark:fill-[#666] font-mono text-[9px] tracking-[0.2em] font-bold">CIRCUITRON_IC_01</text>
                   
-                  <path d="M 50 150 H 150 M 350 150 H 450" stroke="#333" strokeWidth="2" />
+                  <path d="M 50 150 H 150 M 350 150 H 450" className="stroke-gray-300 dark:stroke-[#333]" strokeWidth="2" />
                   <path d="M 50 150 H 150" stroke="#4ADE80" strokeWidth="2" strokeDasharray="6 6" className="animate-[dash_1s_linear_infinite]" />
                   
                   <circle cx="50" cy="150" r="6" fill="#4ADE80" />
                   <text x="50" y="132" textAnchor="middle" fill="#4ADE80" className="font-mono text-[8px] tracking-widest">PIN_ACTIVE</text>
                   
-                  <g stroke="#292929" strokeWidth="1">
+                  <g className="stroke-gray-300 dark:stroke-[#292929]" strokeWidth="1">
                     <line x1="200" y1="80" x2="200" y2="220" />
                     <line x1="250" y1="80" x2="250" y2="220" />
                     <line x1="300" y1="80" x2="300" y2="220" />
                     <line x1="150" y1="120" x2="350" y2="120" />
                     <line x1="150" y1="170" x2="350" y2="170" />
                   </g>
-                  <circle cx="200" cy="120" r="4" fill="#555" />
+                  <circle cx="200" cy="120" r="4" className="fill-gray-300 dark:fill-[#555]" />
                   <circle cx="250" cy="170" r="4" fill="#4ADE80" className="animate-pulse" />
-                  <circle cx="300" cy="120" r="4" fill="#555" />
+                  <circle cx="300" cy="120" r="4" className="fill-gray-300 dark:fill-[#555]" />
                 </svg>
               </div>
             </div>
 
             {/* PANEL 02: EVALUATION */}
             <div className="w-screen shrink-0 h-full flex flex-row items-center justify-between px-24 xl:px-36 py-20 relative select-none">
-              <div className="absolute top-0 right-0 w-[1px] h-full bg-white/10" />
+              <div className="absolute top-0 right-0 w-[1px] h-full bg-black/10 dark:bg-white/10" />
 
               <div className="w-[40vw] space-y-8 pr-12">
                 <span className="font-mono text-xs uppercase tracking-[0.4em] text-gray-500">OPERATIONAL NODE // 02</span>
                 <h2 className="text-6xl xl:text-7xl font-display font-black tracking-tighter uppercase leading-none">
                   GRANULAR <br />EVALUATION.
                 </h2>
-                <p className="text-gray-400 text-sm font-sans font-medium leading-relaxed max-w-md">
+                <p className="text-gray-500 dark:text-gray-400 text-sm font-sans font-medium leading-relaxed max-w-md">
                   Your architectural schematic submissions are reviewed by professional engineering mentors. Receive comprehensive line-by-line code optimizations and physical delay debugging.
                 </p>
               </div>
@@ -471,9 +471,9 @@ export default function LandingPage() {
               {/* Right Side: Oscilloscope Waveform Feedback SVG */}
               <div className="w-[45vw] flex items-center justify-center">
                 <svg width="100%" height="320" viewBox="0 0 500 320" fill="none" className="max-w-xl w-full">
-                  <rect width="100%" height="100%" rx="12" fill="#111" stroke="#333" strokeWidth="2" />
+                  <rect width="100%" height="100%" rx="12" className="fill-gray-50 dark:fill-[#111] stroke-gray-200 dark:stroke-[#333]" strokeWidth="2" />
                   
-                  <g stroke="#1F1F1F" strokeWidth="0.5">
+                  <g className="stroke-gray-200 dark:stroke-[#1F1F1F]" strokeWidth="0.5">
                     <line x1="50" y1="0" x2="50" y2="320" />
                     <line x1="100" y1="0" x2="100" y2="320" />
                     <line x1="150" y1="0" x2="150" y2="320" />
@@ -490,7 +490,7 @@ export default function LandingPage() {
                   
                   <path
                     d="M 50 160 Q 100 60 150 160 T 250 160 T 350 160 T 450 160"
-                    stroke="#222"
+                    className="stroke-gray-300 dark:stroke-[#222]"
                     strokeWidth="2"
                     fill="none"
                   />
@@ -505,12 +505,12 @@ export default function LandingPage() {
                   
                   <circle cx="250" cy="160" r="8" stroke="#4ADE80" strokeWidth="2" fill="none" className="animate-ping" />
                   
-                  <text x="40" y="45" fill="#555" className="font-mono text-[8px] tracking-widest uppercase">CH_A: COGNITIVE_FEEDBACK</text>
+                  <text x="40" y="45" className="fill-gray-400 dark:fill-[#555] font-mono text-[8px] tracking-widest uppercase">CH_A: COGNITIVE_FEEDBACK</text>
                   <text x="40" y="65" fill="#4ADE80" className="font-mono text-[9px] font-bold">STATUS: STABLE_PROPAGATION (4.2ns)</text>
                   
-                  <rect x="320" y="35" width="140" height="55" rx="4" fill="#1A1A1A" stroke="#333" strokeWidth="1" />
-                  <text x="335" y="50" fill="#888" className="font-mono text-[7.5px] tracking-widest">FREQ: 144.00MHz</text>
-                  <text x="335" y="65" fill="#888" className="font-mono text-[7.5px] tracking-widest">DEVIATION: 0.02%</text>
+                  <rect x="320" y="35" width="140" height="55" rx="4" className="fill-white dark:fill-[#1A1A1A] stroke-gray-200 dark:stroke-[#333]" strokeWidth="1" />
+                  <text x="335" y="50" className="fill-gray-500 dark:fill-[#888] font-mono text-[7.5px] tracking-widest">FREQ: 144.00MHz</text>
+                  <text x="335" y="65" className="fill-gray-500 dark:fill-[#888] font-mono text-[7.5px] tracking-widest">DEVIATION: 0.02%</text>
                   <text x="335" y="80" fill="#4ADE80" className="font-mono text-[7.5px] tracking-widest font-bold">VERDICT: OPTIMIZED</text>
                 </svg>
               </div>
@@ -526,7 +526,7 @@ export default function LandingPage() {
                   <h2 className="text-6xl xl:text-7xl font-display font-black tracking-tighter uppercase leading-none">
                     PLATFORM <br />CONQUEST.
                   </h2>
-                  <p className="text-gray-400 text-sm font-sans font-medium leading-relaxed max-w-md">
+                  <p className="text-gray-500 dark:text-gray-400 text-sm font-sans font-medium leading-relaxed max-w-md">
                     Establish architectural hierarchy. Compete against global student cohorts in logical speed sprints, secure your streak multiplier, and ascend the ranks.
                   </p>
                 </div>
@@ -568,7 +568,7 @@ export default function LandingPage() {
               </div>
               
               {/* Desktop Footer Embedded in Last Panel - Positioned at bottom of flex column */}
-              <div className="w-full shrink-0 flex flex-col md:flex-row items-center justify-between px-24 xl:px-36 py-8 border-t border-white/10 z-30">
+              <div className="w-full shrink-0 flex flex-col md:flex-row items-center justify-between px-24 xl:px-36 py-8 border-t border-black/10 dark:border-white/10 z-30">
                 <div className="font-mono text-[10px] text-gray-500 uppercase tracking-widest">
                   &copy; 2026 CIRCUITRON. ALL RIGHTS RESERVED.
                 </div>
@@ -597,7 +597,7 @@ export default function LandingPage() {
                     href="https://ieee.ce-kgr.org/"
                     target="_blank"
                     rel="noreferrer"
-                    className="font-mono text-[9px] font-black tracking-widest text-white uppercase flex items-center gap-1.5"
+                    className="font-mono text-[9px] font-black tracking-widest text-black dark:text-white uppercase flex items-center gap-1.5"
                   >
                     <span className="w-1.5 h-1.5 bg-green-500 opacity-40 group-hover:opacity-100 transition-opacity animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.5)]" />
                     <span className="group-hover:text-green-400 transition-colors duration-300">IEEE SB CE KIDANGOOR</span>
@@ -648,17 +648,14 @@ export default function LandingPage() {
               CRAFTED_BY //
             </span>
             <a
-              href="https://itsmeallen.dev"
+              href="https://ieee.ce-kgr.org/"
               target="_blank"
               rel="noreferrer"
               className="font-mono text-[9px] font-black tracking-widest text-white uppercase flex items-center gap-1.5"
             >
               <span className="w-1.5 h-1.5 bg-green-500 opacity-40 group-hover:opacity-100 transition-opacity animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.5)]" />
-              <span className="group-hover:text-green-400 transition-colors duration-300">ALLEN</span>
+              <span className="group-hover:text-green-400 transition-colors duration-300">IEEE SB CE KIDANGOOR</span>
             </a>
-            <span className="font-mono text-[9px] text-gray-500 tracking-widest uppercase transition-colors group-hover:text-gray-400">
-              & KASHINADTH
-            </span>
           </div>
           <div className="font-mono text-[10px] text-gray-500 uppercase tracking-widest text-center">
             &copy; 2026 CIRCUITRON. ALL RIGHTS RESERVED.
