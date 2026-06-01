@@ -14,12 +14,12 @@ export default function DayViewerPage() {
   const day = useQuery(api.content.getDay, { dayId });
   const quiz = useQuery(api.content.getQuiz, { dayId });
   const progress = useQuery(api.content.getDayProgress, { dayId });
+  const submission = useQuery(api.submissions.getSubmission, { dayId });
   const submitTask = useMutation(api.submissions.submitTask);
   
   const [link, setLink] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
-  const [submitted, setSubmitted] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackResponse, setFeedbackResponse] = useState("");
 
@@ -35,7 +35,7 @@ export default function DayViewerPage() {
     setSubmitError("");
     try {
       await submitTask({ dayId, link: hasTask ? link.trim() : undefined });
-      setSubmitted(true);
+      setShowFeedback(false);
     } catch (err) {
       setSubmitError(err.message || "Failed to submit. Please try again.");
     } finally {
@@ -53,7 +53,7 @@ export default function DayViewerPage() {
 
 
 
-  if (day === undefined || quiz === undefined) return (
+  if (day === undefined || quiz === undefined || submission === undefined) return (
     <div className="flex items-center justify-center min-h-[50vh]">
       <p className="font-mono text-[10px] tracking-widest text-black/25 dark:text-white/25 uppercase animate-pulse">LOADING_NODE...</p>
     </div>
@@ -204,19 +204,39 @@ export default function DayViewerPage() {
               {hasTask ? "Submit Work." : "Complete Node."}
             </h2>
 
-              {submitted ? (
+              {submission && submission.status !== "Needs Revision" ? (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="p-4 border border-green-200 bg-green-50 rounded-xl"
+                  className={`p-4 border rounded-xl ${
+                    submission.status === "Approved" ? "border-green-200 bg-green-50" : 
+                    "border-blue-200 bg-blue-50"
+                  }`}
                 >
                   <div className="flex items-center gap-3 mb-2">
-                    <svg className="w-5 h-5 text-green-600 shrink-0" viewBox="0 0 16 16" fill="none">
-                      <path d="M3 8l4 4 6-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-green-700">SUBMITTED</p>
+                    {submission.status === "Approved" ? (
+                      <svg className="w-5 h-5 text-green-600 shrink-0" viewBox="0 0 16 16" fill="none">
+                        <path d="M3 8l4 4 6-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5 text-blue-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                      </svg>
+                    )}
+                    <p className={`font-mono text-[10px] font-bold uppercase tracking-wider ${
+                      submission.status === "Approved" ? "text-green-700" : "text-blue-700"
+                    }`}>
+                      {submission.status === "Approved" ? "APPROVED" : "SUBMITTED"}
+                    </p>
                   </div>
-                  <p className="font-mono text-xs text-green-600">Your work is pending admin review.</p>
+                  <p className={`font-mono text-xs ${
+                    submission.status === "Approved" ? "text-green-600" : "text-blue-600"
+                  }`}>
+                    {submission.status === "Approved" 
+                      ? `Your work was approved! You earned ${submission.awardedScore ?? (submission.isLate ? (day.taskPointsLate || 0) : (day.taskPointsOnTime || 0))} points.` 
+                      : "Your work is pending admin review."}
+                  </p>
                 </motion.div>
               ) : isLockedBefore ? (
                 <div className="p-4 border border-blue-200 bg-blue-50 rounded-xl">
@@ -236,7 +256,7 @@ export default function DayViewerPage() {
                   setSubmitError("");
                   try {
                     await submitTask({ dayId, link: hasTask ? link.trim() : undefined, feedbackResponse });
-                    setSubmitted(true);
+                    setShowFeedback(false);
                   } catch (err) {
                     setSubmitError(err.message || "Failed to submit. Please try again.");
                   } finally {
@@ -266,37 +286,52 @@ export default function DayViewerPage() {
                   </button>
                 </form>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  {hasTask ? (
-                    <>
+                <div className="space-y-4">
+                  {submission?.status === "Needs Revision" && (
+                    <div className="p-4 border border-orange-200 bg-orange-50 rounded-xl mb-4">
+                      <div className="flex items-center gap-3 mb-2">
+                        <svg className="w-5 h-5 text-orange-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <line x1="12" y1="8" x2="12" y2="12"></line>
+                          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-orange-700">NEEDS_REVISION</p>
+                      </div>
+                      <p className="font-mono text-xs text-orange-600">Your submission requires updates. Please revise and resubmit your work.</p>
+                    </div>
+                  )}
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    {hasTask ? (
+                      <>
+                        <p className="font-mono text-xs text-black/40 dark:text-white/40 leading-relaxed">
+                          Paste your drive link or tinkercad link to submit today's task.
+                        </p>
+                        <input
+                          type="url"
+                          value={link}
+                          onChange={(e) => setLink(e.target.value)}
+                          required
+                          placeholder="https://drive.google.com/... or https://www.tinkercad.com/..."
+                          className="w-full border border-black/[0.12] dark:border-white/[0.12] rounded-lg px-4 py-3 font-mono text-sm outline-none focus:border-black dark:focus:border-white transition-colors bg-white dark:bg-[#0a0a0a] placeholder:text-black/20 dark:placeholder:text-white/20 text-black dark:text-white"
+                        />
+                      </>
+                    ) : (
                       <p className="font-mono text-xs text-black/40 dark:text-white/40 leading-relaxed">
-                        Paste your drive link or tinkercad link to submit today's task.
+                        Mark this node as complete to claim your points.
                       </p>
-                      <input
-                        type="url"
-                        value={link}
-                        onChange={(e) => setLink(e.target.value)}
-                        required
-                        placeholder="https://drive.google.com/... or https://www.tinkercad.com/..."
-                        className="w-full border border-black/[0.12] dark:border-white/[0.12] rounded-lg px-4 py-3 font-mono text-sm outline-none focus:border-black dark:focus:border-white transition-colors bg-white dark:bg-[#0a0a0a] placeholder:text-black/20 dark:placeholder:text-white/20 text-black dark:text-white"
-                      />
-                    </>
-                  ) : (
-                    <p className="font-mono text-xs text-black/40 dark:text-white/40 leading-relaxed">
-                      Mark this node as complete to claim your points.
-                    </p>
-                  )}
-                  {submitError && (
-                    <p className="font-mono text-[10px] text-red-500 uppercase tracking-wider">{submitError}</p>
-                  )}
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="w-full bg-black dark:bg-white text-white dark:text-black font-mono text-[10px] uppercase tracking-wider rounded-lg py-3 hover:bg-black/80 dark:hover:bg-white/80 transition-colors disabled:opacity-50"
-                  >
-                    {submitting ? "PROCESSING..." : hasTask ? "SUBMIT_TASK" : "MARK_COMPLETE"}
-                  </button>
-                </form>
+                    )}
+                    {submitError && (
+                      <p className="font-mono text-[10px] text-red-500 uppercase tracking-wider">{submitError}</p>
+                    )}
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="w-full bg-black dark:bg-white text-white dark:text-black font-mono text-[10px] uppercase tracking-wider rounded-lg py-3 hover:bg-black/80 dark:hover:bg-white/80 transition-colors disabled:opacity-50"
+                    >
+                      {submitting ? "PROCESSING..." : hasTask ? "SUBMIT_TASK" : "MARK_COMPLETE"}
+                    </button>
+                  </form>
+                </div>
               )}
             </div>
           </div>
