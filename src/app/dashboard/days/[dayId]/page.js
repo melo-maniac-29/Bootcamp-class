@@ -11,6 +11,7 @@ export default function DayViewerPage() {
   const params = useParams();
   const dayId = params.dayId;
   
+  const currentUser = useQuery(api.users.current);
   const day = useQuery(api.content.getDay, { dayId });
   const quiz = useQuery(api.content.getQuiz, { dayId });
   const progress = useQuery(api.content.getDayProgress, { dayId });
@@ -138,7 +139,12 @@ export default function DayViewerPage() {
             {hasTask ? "Submit Work." : "Complete Node."}
           </h2>
 
-          {submission && submission.status !== "Needs Revision" ? (
+          {currentUser?.role === "volunteer" ? (
+            <div className="p-4 border border-blue-200 bg-blue-50 rounded-xl">
+              <p className="font-mono text-xs text-blue-600 font-bold uppercase mb-1">VOLUNTEER PREVIEW</p>
+              <p className="font-mono text-[10px] text-blue-600/80 uppercase">Submissions are disabled in volunteer view. Students will see the submission form here.</p>
+            </div>
+          ) : submission && submission.status !== "Needs Revision" ? (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -320,7 +326,7 @@ export default function DayViewerPage() {
                   KNOWLEDGE_CHECK
                 </p>
                 <p className="font-mono text-sm font-bold uppercase tracking-wider text-black dark:text-white group-hover:text-white dark:group-hover:text-black transition-colors">
-                  Take the Quiz →
+                  {currentUser?.role === "volunteer" ? "Preview Quiz →" : "Take the Quiz →"}
                 </p>
               </div>
               <svg className="w-4 h-4 text-black/30 dark:text-white/30 group-hover:text-white dark:group-hover:text-black group-hover:translate-x-1 transition-all" viewBox="0 0 16 16" fill="none">

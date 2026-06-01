@@ -20,6 +20,7 @@ export default function QuizPage() {
   const dayId = params.dayId;
   
   const quiz = useQuery(api.content.getQuiz, { dayId });
+  const currentUser = useQuery(api.users.current);
   const saveQuizResult = useMutation(api.content.saveQuizResult);
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -50,13 +51,15 @@ export default function QuizPage() {
   }, [currentIndex, quiz, finished, answered]);
 
   // ── Loading ──
-  if (quiz === undefined) return (
+  if (quiz === undefined || currentUser === undefined) return (
     <div className="flex items-center justify-center min-h-[50vh]">
       <p className="font-mono text-[10px] tracking-widest text-black/25 dark:text-white/25 uppercase animate-pulse">
         LOADING_QUIZ...
       </p>
     </div>
   );
+
+  const isVolunteer = currentUser?.role === "volunteer";
 
   // ── No quiz ──
   if (!quiz || !quiz.questions || quiz.questions.length === 0) {
@@ -74,6 +77,63 @@ export default function QuizPage() {
           </svg>
           BACK_TO_LESSON
         </Link>
+      </div>
+    );
+  }
+
+  // ── Volunteer Preview Mode ──
+  if (isVolunteer) {
+    return (
+      <div className="max-w-2xl mx-auto py-12">
+        <Link
+          href={`/dashboard/days/${dayId}`}
+          className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider text-black/30 dark:text-white/30 hover:text-black dark:hover:text-white transition-colors mb-10"
+        >
+          <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none">
+            <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          BACK_TO_LESSON
+        </Link>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-10 bg-[#F8F9FA] dark:bg-[#111111] text-center"
+        >
+          <p className="font-mono text-[10px] tracking-[0.3em] text-blue-500 uppercase mb-4">VOLUNTEER PREVIEW_MODE</p>
+          <h2 className="font-display font-black text-2xl tracking-tighter uppercase text-black dark:text-white mb-8">
+            Quiz Preview
+          </h2>
+
+          <div className="text-left border-t border-black/[0.06] dark:border-white/[0.06] pt-8">
+            <div className="space-y-4">
+              {quiz.questions.map((q, idx) => (
+                <div key={idx} className="p-5 rounded-xl border border-black/[0.06] dark:border-white/[0.06] bg-white dark:bg-[#0a0a0a]">
+                  <p className="font-mono text-sm font-bold text-black dark:text-white mb-3 leading-relaxed">
+                    {idx + 1}. {q.question}
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-2">
+                      <span className="font-mono text-[10px] text-green-600 dark:text-green-400 uppercase mt-0.5 w-16 shrink-0">Correct:</span>
+                      <span className="font-mono text-sm font-bold text-green-600 dark:text-green-400">
+                        {q.options[q.answerIndex]}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-1 mt-2">
+                      {q.options.map((opt, i) => i !== q.answerIndex && (
+                        <div key={i} className="flex items-start gap-2">
+                          <span className="font-mono text-[10px] text-black/30 dark:text-white/30 uppercase mt-0.5 w-16 shrink-0">Option:</span>
+                          <span className="font-mono text-xs text-black/50 dark:text-white/50">{opt}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
       </div>
     );
   }
