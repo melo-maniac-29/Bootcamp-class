@@ -136,28 +136,6 @@ export default function DayViewerPage() {
             </div>
           )}
 
-          {day.taskDescription && (
-            <div className="border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-6 bg-[#F8F9FA] dark:bg-[#111111]">
-              <p className="font-mono text-[10px] tracking-[0.3em] text-black/30 dark:text-white/30 uppercase mb-4">TASK_BRIEF</p>
-              <p className="font-mono text-sm text-black/60 dark:text-white/60 leading-relaxed whitespace-pre-wrap">{day.taskDescription}</p>
-            </div>
-          )}
-
-          {day.references && day.references.length > 0 && (
-            <div className="border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-6 bg-[#F8F9FA] dark:bg-[#111111]">
-              <p className="font-mono text-[10px] tracking-[0.3em] text-black/30 dark:text-white/30 uppercase mb-4">REFERENCES</p>
-              <ul className="space-y-2">
-                {day.references.map((ref, idx) => (
-                  <li key={idx}>
-                    <a href={ref} target="_blank" rel="noopener noreferrer" className="font-mono text-sm text-blue-600 hover:underline break-all">
-                      {ref}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
           {hasQuiz && !isLockedBefore && (
             progress?.quizCompleted ? (
               <div className="flex items-center justify-between p-5 border border-black/[0.08] dark:border-white/[0.08] rounded-xl bg-[#F8F9FA] dark:bg-[#111111] opacity-70">
@@ -192,6 +170,28 @@ export default function DayViewerPage() {
                 </svg>
               </Link>
             )
+          )}
+
+          {day.taskDescription && (
+            <div className="border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-6 bg-[#F8F9FA] dark:bg-[#111111]">
+              <p className="font-mono text-[10px] tracking-[0.3em] text-black/30 dark:text-white/30 uppercase mb-4">TASK_BRIEF</p>
+              <p className="font-mono text-sm text-black/60 dark:text-white/60 leading-relaxed whitespace-pre-wrap">{day.taskDescription}</p>
+            </div>
+          )}
+
+          {day.references && day.references.length > 0 && (
+            <div className="border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-6 bg-[#F8F9FA] dark:bg-[#111111]">
+              <p className="font-mono text-[10px] tracking-[0.3em] text-black/30 dark:text-white/30 uppercase mb-4">REFERENCES</p>
+              <ul className="space-y-2">
+                {day.references.map((ref, idx) => (
+                  <li key={idx}>
+                    <a href={ref} target="_blank" rel="noopener noreferrer" className="font-mono text-sm text-blue-600 hover:underline break-all">
+                      {ref}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
         </div>
 
@@ -270,14 +270,14 @@ export default function DayViewerPage() {
                   {hasTask ? (
                     <>
                       <p className="font-mono text-xs text-black/40 dark:text-white/40 leading-relaxed">
-                        Paste your GitHub / live project link to submit today's task.
+                        Paste your drive link or tinkercad link to submit today's task.
                       </p>
                       <input
                         type="url"
                         value={link}
                         onChange={(e) => setLink(e.target.value)}
                         required
-                        placeholder="https://github.com/your/repo"
+                        placeholder="https://drive.google.com/... or https://www.tinkercad.com/..."
                         className="w-full border border-black/[0.12] dark:border-white/[0.12] rounded-lg px-4 py-3 font-mono text-sm outline-none focus:border-black dark:focus:border-white transition-colors bg-white dark:bg-[#0a0a0a] placeholder:text-black/20 dark:placeholder:text-white/20 text-black dark:text-white"
                       />
                     </>
