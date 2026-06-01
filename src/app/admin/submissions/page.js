@@ -21,6 +21,7 @@ export default function SubmissionsPage() {
   );
   
   const [successId, setSuccessId] = useState(null);
+  const [editingId, setEditingId] = useState(null);
   const [scores, setScores] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -55,6 +56,13 @@ export default function SubmissionsPage() {
     const matchesWeek = weekFilter === "All" || sub.weekTitle === weekFilter;
     const matchesDay = dayFilter === "All" || sub.dayTitle === dayFilter;
     return matchesSearch && matchesStatus && matchesWeek && matchesDay;
+  }).sort((a, b) => {
+    const statusWeight = { "Pending Review": 0, "Needs Revision": 1, "Approved": 2 };
+    const weightA = statusWeight[a.status || "Pending Review"] ?? 0;
+    const weightB = statusWeight[b.status || "Pending Review"] ?? 0;
+    
+    if (weightA !== weightB) return weightA - weightB;
+    return (b.submittedAt || 0) - (a.submittedAt || 0);
   });
 
   const totalPages = Math.ceil(filteredSubmissions.length / itemsPerPage);
@@ -65,6 +73,7 @@ export default function SubmissionsPage() {
       await updateStatus({ submissionId: id, status, awardedScore });
       setSuccessId(id);
       setTimeout(() => setSuccessId(null), 2000);
+      setEditingId(null);
     } catch (e) {
       alert("Failed to update status.");
     }
@@ -190,7 +199,7 @@ export default function SubmissionsPage() {
                     )}
                   </td>
                   <td className="px-5 py-4">
-                    {sub.status === "Approved" ? (
+                    {sub.status === "Approved" && editingId !== sub._id ? (
                       <span className="font-mono text-[10px] text-black dark:text-white font-bold tracking-widest">
                         {sub.awardedScore !== undefined ? sub.awardedScore : sub.maxPoints} / {sub.maxPoints}
                       </span>
@@ -200,7 +209,7 @@ export default function SubmissionsPage() {
                           type="number"
                           min="0"
                           max={sub.maxPoints}
-                          value={scores[sub._id] !== undefined ? scores[sub._id] : sub.maxPoints}
+                          value={scores[sub._id] !== undefined ? scores[sub._id] : (sub.awardedScore !== undefined ? sub.awardedScore : sub.maxPoints)}
                           onChange={(e) => setScores({ ...scores, [sub._id]: parseInt(e.target.value) || 0 })}
                           className="w-16 bg-transparent border-b border-black/20 dark:border-white/20 font-mono text-[10px] text-center focus:outline-none focus:border-black dark:focus:border-white"
                         />
@@ -215,25 +224,42 @@ export default function SubmissionsPage() {
                   </td>
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-2">
-                      {sub.status !== "Approved" ? (
+                      {sub.status !== "Approved" || editingId === sub._id ? (
                         <>
                           <button
-                            onClick={() => handleUpdate(sub._id, "Approved", scores[sub._id] !== undefined ? scores[sub._id] : sub.maxPoints)}
+                            onClick={() => handleUpdate(sub._id, "Approved", scores[sub._id] !== undefined ? scores[sub._id] : (sub.awardedScore !== undefined ? sub.awardedScore : sub.maxPoints))}
                             className="font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 transition-colors"
                           >
-                            APPROVE
+                            {sub.status === "Approved" ? "SAVE" : "APPROVE"}
                           </button>
-                          <button
-                            onClick={() => handleUpdate(sub._id, "Needs Revision")}
-                            className="font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-colors"
-                          >
-                            REVISE
-                          </button>
+                          {sub.status === "Approved" ? (
+                            <button
+                              onClick={() => setEditingId(null)}
+                              className="font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-black/20 dark:border-white/20 text-black/60 dark:text-white/60 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                            >
+                              CANCEL
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleUpdate(sub._id, "Needs Revision")}
+                              className="font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-colors"
+                            >
+                              REVISE
+                            </button>
+                          )}
                         </>
                       ) : (
-                        <span className="font-mono text-[9px] text-black/30 dark:text-white/30 uppercase tracking-widest">
-                          REVIEWED
-                        </span>
+                        <>
+                          <span className="font-mono text-[9px] text-black/30 dark:text-white/30 uppercase tracking-widest">
+                            REVIEWED
+                          </span>
+                          <button
+                            onClick={() => setEditingId(sub._id)}
+                            className="ml-2 font-mono text-[9px] uppercase tracking-wider px-2 py-1 rounded border border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                          >
+                            EDIT
+                          </button>
+                        </>
                       )}
                       {successId === sub._id && (
                         <motion.span

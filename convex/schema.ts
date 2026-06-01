@@ -20,7 +20,8 @@ export default defineSchema({
     streakCount: v.optional(v.number()),
     lastActiveDate: v.optional(v.string()),
     totalPoints: v.optional(v.number()),
-  }).index("by_email", ["email"]).index("by_participantId", ["participantId"]),
+    assignedVolunteerId: v.optional(v.id("users")),
+  }).index("by_email", ["email"]).index("by_participantId", ["participantId"]).index("by_assignedVolunteerId", ["assignedVolunteerId"]),
 
   weeks: defineTable({
     title: v.string(),
@@ -76,6 +77,8 @@ export default defineSchema({
     pointsAwarded: v.optional(v.boolean()),
     awardedScore: v.optional(v.number()),
     submittedAt: v.number(),
+    reviewedBy: v.optional(v.id("users")),
+    reviewedAt: v.optional(v.number()),
   }).index("by_userId", ["userId"]).index("by_dayId", ["dayId"]).index("by_userId_dayId", ["userId", "dayId"]),
 
   quizzes: defineTable({

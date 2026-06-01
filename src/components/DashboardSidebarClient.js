@@ -1,9 +1,10 @@
 "use client";
 
 import AppSidebar from "@/components/AppSidebar";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import Link from "next/link";
+import { useEffect } from "react";
 
 /**
  * Purpose:
@@ -13,6 +14,14 @@ import Link from "next/link";
  */
 export default function DashboardSidebarClient() {
   const user = useQuery(api.users.current);
+  const generateParticipantId = useMutation(api.users.generateParticipantId);
+
+  useEffect(() => {
+    // Only assign ID if the user is loaded and doesn't have an ID
+    if (user && !user.participantId) {
+      generateParticipantId().catch(console.error);
+    }
+  }, [user, generateParticipantId]);
 
   const navItems = [
     {

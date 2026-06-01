@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -18,7 +18,15 @@ import Topbar from "@/components/Topbar";
  */
 export default function AdminLayout({ children }) {
   const user = useQuery(api.users.current);
+  const generateParticipantId = useMutation(api.users.generateParticipantId);
   const router = useRouter();
+
+  useEffect(() => {
+    // Only assign ID if the user is loaded and doesn't have an ID
+    if (user && !user.participantId) {
+      generateParticipantId().catch(console.error);
+    }
+  }, [user, generateParticipantId]);
 
   useEffect(() => {
     if (user === null) router.push("/login");
@@ -78,6 +86,31 @@ export default function AdminLayout({ children }) {
           <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
             <circle cx="8" cy="5" r="3" stroke="currentColor" strokeWidth="1.5"/>
             <path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+        ),
+      },
+      {
+        href: "/admin/volunteers",
+        label: "VOLUNTEERS",
+        icon: (
+          <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
+            <path d="M8 2a2 2 0 100 4 2 2 0 000-4zM2 14c0-3 3-4 6-4s6 1 6 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="12" cy="11" r="1.5" stroke="currentColor" strokeWidth="1.5" />
+            <circle cx="4" cy="11" r="1.5" stroke="currentColor" strokeWidth="1.5" />
+          </svg>
+        ),
+      },
+    ] : []),
+    ...(!isAdmin ? [
+      {
+        href: "/admin/my-students",
+        label: "MY_STUDENTS",
+        icon: (
+          <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
+            <circle cx="5" cy="5" r="2.5" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M1 14c0-2.5 2-4 4-4s4 1.5 4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="12" cy="7" r="2" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M9 14c0-2 1.5-3 3-3s3 1 3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
         ),
       },

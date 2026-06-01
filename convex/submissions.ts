@@ -34,8 +34,18 @@ async function checkReviewer(ctx: any) {
 export const listSubmissions = query({
   args: {},
   handler: async (ctx) => {
-    await checkReviewer(ctx);
-    const submissions = await ctx.db.query("submissions").collect();
+    const userId = await checkReviewer(ctx);
+    const user = await ctx.db.get(userId);
+    
+    let submissions = await ctx.db.query("submissions").collect();
+    
+    if (user?.role === "volunteer") {
+      const students = await ctx.db.query("users")
+        .withIndex("by_assignedVolunteerId", (q) => q.eq("assignedVolunteerId", userId))
+        .collect();
+      const studentIds = new Set(students.map(s => s._id));
+      submissions = submissions.filter(sub => studentIds.has(sub.userId));
+    }
     
     // We need to resolve users and days for the UI
     return Promise.all(
@@ -76,32 +86,57 @@ export const updateStatus = mutation({
     awardedScore: v.optional(v.number())
   },
   handler: async (ctx, args) => {
-    await checkReviewer(ctx);
+    const userId = await checkReviewer(ctx);
     
     const submission = await ctx.db.get(args.submissionId);
     if (!submission) throw new Error("SUBMISSION_NOT_FOUND");
     
-    // Check if we are approving
-    if (args.status === "Approved" && !submission.pointsAwarded) {
-      const day = await ctx.db.get(submission.dayId);
-      if (!day) throw new Error("DAY_NOT_FOUND");
+    const day = await ctx.db.get(submission.dayId);
+    if (!day) throw new Error("DAY_NOT_FOUND");
+    
+    const user = await ctx.db.get(submission.userId);
+    
+    let pointsDelta = 0;
+
+    if (args.status === "Approved") {
+      const maxPoints = submission.isLate ? (day.taskPointsLate || 0) : (day.taskPointsOnTime || 0);
+      const newScore = args.awardedScore !== undefined ? args.awardedScore : maxPoints;
       
-      const user = await ctx.db.get(submission.userId);
-      if (user) {
-        const maxPoints = submission.isLate ? (day.taskPointsLate || 0) : (day.taskPointsOnTime || 0);
-        const pointsToAdd = args.awardedScore !== undefined ? args.awardedScore : maxPoints;
-        await ctx.db.patch(user._id, { totalPoints: (user.totalPoints || 0) + pointsToAdd });
+      if (submission.pointsAwarded) {
+        // Already approved, updating points
+        const oldScore = submission.awardedScore || 0;
+        pointsDelta = newScore - oldScore;
+      } else {
+        // Newly approved
+        pointsDelta = newScore;
+      }
+      
+      if (user && pointsDelta !== 0) {
+        await ctx.db.patch(user._id, { totalPoints: (user.totalPoints || 0) + pointsDelta });
       }
       
       return await ctx.db.patch(args.submissionId, { 
         status: args.status, 
         pointsAwarded: true,
-        awardedScore: args.awardedScore
+        awardedScore: newScore,
+        reviewedBy: userId,
+        reviewedAt: Date.now(),
+      });
+    } else {
+      // If it WAS previously approved, claw back the points
+      if (submission.pointsAwarded && user) {
+        const oldScore = submission.awardedScore || 0;
+        await ctx.db.patch(user._id, { totalPoints: (user.totalPoints || 0) - oldScore });
+      }
+
+      return await ctx.db.patch(args.submissionId, { 
+        status: args.status,
+        pointsAwarded: false,
+        awardedScore: undefined,
+        reviewedBy: userId,
+        reviewedAt: Date.now(),
       });
     }
-
-    // Standard update if not an approval
-    return await ctx.db.patch(args.submissionId, { status: args.status });
   },
 });
 
