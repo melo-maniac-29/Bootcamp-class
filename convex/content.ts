@@ -248,7 +248,8 @@ export const saveQuizResult = mutation({
     if (!existing || !existing.quizCompleted) {
       const user = await ctx.db.get(userId);
       if (user) {
-        const pointsToAdd = day.quizPointsOnTime || 0;
+        const maxPoints = day.quizPointsOnTime || 0;
+        const pointsToAdd = args.total > 0 ? Math.round((args.score / args.total) * maxPoints) : 0;
         await ctx.db.patch(userId, { totalPoints: (user.totalPoints || 0) + pointsToAdd });
       }
     }

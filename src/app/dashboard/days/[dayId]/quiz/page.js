@@ -24,6 +24,7 @@ export default function QuizPage() {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selected, setSelected] = useState(null);
+  const [userAnswers, setUserAnswers] = useState({});
   const [answered, setAnswered] = useState(false); // means "locked"
   const [score, setScore] = useState(0);
   const [finished, setFinished] = useState(false);
@@ -93,6 +94,8 @@ export default function QuizPage() {
     const isCorrect = selected === current.answerIndex;
     const newScore = score + (isCorrect ? 1 : 0);
     if (isCorrect) setScore(newScore);
+
+    setUserAnswers((prev) => ({ ...prev, [currentIndex]: selected }));
 
     if (isLast) {
       setSaving(true);
@@ -164,13 +167,48 @@ export default function QuizPage() {
             You answered {finalScore} out of {total} questions correctly.
           </p>
 
-          <div className="flex gap-3 justify-center">
+          <div className="flex gap-3 justify-center mb-12">
             <Link
               href={`/dashboard/days/${dayId}`}
               className="font-mono text-[10px] uppercase tracking-wider px-6 py-3 rounded-lg bg-black dark:bg-white text-white dark:text-black hover:bg-black/80 dark:hover:bg-white/80 transition-colors"
             >
               BACK_TO_LESSON
             </Link>
+          </div>
+
+          {/* Review Section */}
+          <div className="mt-8 text-left border-t border-black/[0.06] dark:border-white/[0.06] pt-8">
+            <h3 className="font-display font-black text-xl tracking-tight text-black dark:text-white mb-6 uppercase">Review Answers</h3>
+            <div className="space-y-4">
+              {questions.map((q, idx) => {
+                const userAnswerIdx = userAnswers[idx];
+                const isCorrect = userAnswerIdx === q.answerIndex;
+                
+                return (
+                  <div key={idx} className={`p-5 rounded-xl border ${isCorrect ? 'border-green-200 bg-green-50/50 dark:border-green-900/30 dark:bg-green-900/10' : 'border-red-200 bg-red-50/50 dark:border-red-900/30 dark:bg-red-900/10'}`}>
+                    <p className="font-mono text-sm font-bold text-black dark:text-white mb-3 leading-relaxed">
+                      {idx + 1}. {q.question}
+                    </p>
+                    <div className="space-y-2">
+                      <div className="flex items-start gap-2">
+                        <span className="font-mono text-[10px] text-black/50 dark:text-white/50 uppercase mt-0.5 w-16 shrink-0">Your Answer:</span>
+                        <span className={`font-mono text-sm font-bold ${isCorrect ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                          {userAnswerIdx !== null && userAnswerIdx !== undefined ? q.options[userAnswerIdx] : "No Answer"}
+                        </span>
+                      </div>
+                      {!isCorrect && (
+                        <div className="flex items-start gap-2">
+                          <span className="font-mono text-[10px] text-black/50 dark:text-white/50 uppercase mt-0.5 w-16 shrink-0">Correct:</span>
+                          <span className="font-mono text-sm font-bold text-green-600 dark:text-green-400">
+                            {q.options[q.answerIndex]}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </motion.div>
       </div>
