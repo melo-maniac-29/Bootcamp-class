@@ -76,8 +76,10 @@ export default function DashboardSidebarClient() {
     },
   ];
 
-  // Inject admin portal link as topSection if user is admin
-  const adminSection = (user?.role === "admin")
+  // Inject staff/admin portal link as topSection if user has access
+  const hasStaffAccess = user?.role === "admin" || user?.role === "volunteer";
+  const portalName = user?.role === "admin" ? "ADMIN_PORTAL" : "STAFF_PORTAL";
+  const adminSection = hasStaffAccess
     ? (open) => open ? (
         <div>
           <p className="text-[9px] font-mono tracking-[0.3em] text-black/25 uppercase px-2 pb-2">MANAGEMENT</p>
@@ -88,11 +90,11 @@ export default function DashboardSidebarClient() {
             <svg className="w-4 h-4 shrink-0" viewBox="0 0 16 16" fill="none">
               <path d="M8 1L14 4v4c0 3.5-2.5 6-6 7C2.5 14 0 11.5 0 8V4L8 1z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
             </svg>
-            ADMIN_PORTAL
+            {portalName}
           </Link>
         </div>
       ) : (
-        <Link href="/admin" title="Admin Portal" className="flex justify-center py-2.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+        <Link href="/admin" title={portalName} className="flex justify-center py-2.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
           <svg className="w-4 h-4 text-black/30 dark:text-white/30 hover:text-black dark:hover:text-white" viewBox="0 0 16 16" fill="none">
             <path d="M8 1L14 4v4c0 3.5-2.5 6-6 7C2.5 14 0 11.5 0 8V4L8 1z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
           </svg>
