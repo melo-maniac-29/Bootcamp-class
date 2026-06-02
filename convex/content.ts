@@ -217,7 +217,7 @@ export const getMyProgress = query({
         
         const hasTask = !!day.taskDescription;
         const sub = mySubmissions.find(s => s.dayId === day._id);
-        const taskCompleted = hasTask ? !!sub : (myProgress.find(p => p.dayId === day._id)?.quizCompleted || false);
+        const taskCompleted = hasTask ? !!sub : (!!sub || (myProgress.find(p => p.dayId === day._id)?.quizCompleted || false));
         
         if (!taskCompleted) {
           nextDayId = day._id;
