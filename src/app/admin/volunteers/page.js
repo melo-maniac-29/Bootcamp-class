@@ -15,7 +15,7 @@ export default function VolunteersPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const STUDENTS_PER_PAGE = 5;
+  const STUDENTS_PER_PAGE = 6;
 
   const [volSearchTerm, setVolSearchTerm] = useState("");
   const [volFilter, setVolFilter] = useState("all");
