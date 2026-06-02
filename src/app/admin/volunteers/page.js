@@ -22,12 +22,15 @@ export default function VolunteersPage() {
 
   const students = allUsers.filter(u => u.role === "student" || !u.role);
   
-  const filteredStudents = students.filter(u => 
-    !searchTerm.trim() || 
-    u.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    u.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    u.participantId?.toLowerCase().includes(searchTerm.toLowerCase())
-  ).sort((a, b) => {
+  const filteredStudents = students.filter(u => {
+    if (selectedVolunteer && u.assignedVolunteerId && u.assignedVolunteerId !== selectedVolunteer._id) {
+      return false;
+    }
+    return !searchTerm.trim() || 
+      u.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      u.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.participantId?.toLowerCase().includes(searchTerm.toLowerCase());
+  }).sort((a, b) => {
     if (selectedVolunteer) {
       const aAssigned = a.assignedVolunteerId === selectedVolunteer._id;
       const bAssigned = b.assignedVolunteerId === selectedVolunteer._id;
