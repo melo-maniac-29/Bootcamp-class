@@ -43,7 +43,18 @@ export default function AdminDashboard() {
           </svg>
         ),
       },
-    ] : []),
+    ] : [
+      {
+        href: "/dashboard/days",
+        label: "ROADMAP",
+        desc: "View the student curriculum roadmap",
+        icon: (
+          <svg className="w-5 h-5" viewBox="0 0 16 16" fill="none">
+            <path d="M2 4h12M2 8h8M2 12h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+        ),
+      }
+    ]),
     {
       href: "/admin/submissions",
       label: "REVIEWS",

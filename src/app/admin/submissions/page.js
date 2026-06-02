@@ -210,7 +210,17 @@ export default function SubmissionsPage() {
                           min="0"
                           max={sub.maxPoints}
                           value={scores[sub._id] !== undefined ? scores[sub._id] : (sub.awardedScore !== undefined ? sub.awardedScore : sub.maxPoints)}
-                          onChange={(e) => setScores({ ...scores, [sub._id]: parseInt(e.target.value) || 0 })}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val === "") {
+                              setScores({ ...scores, [sub._id]: "" });
+                              return;
+                            }
+                            const num = parseInt(val);
+                            if (!isNaN(num)) {
+                              setScores({ ...scores, [sub._id]: Math.min(Math.max(num, 0), sub.maxPoints) });
+                            }
+                          }}
                           className="w-16 bg-transparent border-b border-black/20 dark:border-white/20 font-mono text-[10px] text-center focus:outline-none focus:border-black dark:focus:border-white"
                         />
                         <span className="font-mono text-[10px] text-black/50 dark:text-white/50">/ {sub.maxPoints}</span>
