@@ -199,7 +199,8 @@ export const submitTask = mutation({
         link: args.link, 
         isLate, 
         status: initialStatus,
-        pointsAwarded: existing.pointsAwarded || shouldAwardNow
+        pointsAwarded: existing.pointsAwarded || shouldAwardNow,
+        ...(shouldAwardNow ? { awardedScore: isLate ? (day.taskPointsLate || 0) : (day.taskPointsOnTime || 0) } : {})
       });
     }
 
@@ -219,6 +220,7 @@ export const submitTask = mutation({
       isLate,
       pointsAwarded,
       submittedAt: now,
+      awardedScore: pointsAwarded ? (isLate ? (day.taskPointsLate || 0) : (day.taskPointsOnTime || 0)) : undefined,
     });
 
     const progress = await ctx.db

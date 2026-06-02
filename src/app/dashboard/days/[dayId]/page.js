@@ -144,7 +144,7 @@ export default function DayViewerPage() {
               <p className="font-mono text-xs text-blue-600 font-bold uppercase mb-1">VOLUNTEER PREVIEW</p>
               <p className="font-mono text-[10px] text-blue-600/80 uppercase">Submissions are disabled in volunteer view. Students will see the submission form here.</p>
             </div>
-          ) : submission && submission.status !== "Needs Revision" ? (
+          ) : submission && submission.status !== "Needs Revision" && (!hasTask || submission.link) ? (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
