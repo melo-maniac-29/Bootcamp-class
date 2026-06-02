@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function VolunteersPage() {
   const overview = useQuery(api.users.getVolunteersOverview) || [];
   const allUsers = useQuery(api.users.listUsers) || [];
+  const submissions = useQuery(api.submissions.listSubmissions) || [];
   const assignStudents = useMutation(api.users.assignStudentsToVolunteer);
   
   const [selectedVolunteer, setSelectedVolunteer] = useState(null);
@@ -19,6 +20,22 @@ export default function VolunteersPage() {
 
   const [volSearchTerm, setVolSearchTerm] = useState("");
   const [volFilter, setVolFilter] = useState("all");
+  const [weekFilter, setWeekFilter] = useState("All");
+  const [dayFilter, setDayFilter] = useState("All");
+
+  const weeks = Array.from(new Set(submissions.map(s => JSON.stringify({ id: s.weekTitle, order: s.weekOrder }))))
+    .map(w => JSON.parse(w))
+    .sort((a, b) => a.order - b.order)
+    .map(w => w.id);
+
+  const daysInWeek = weekFilter === "All" 
+    ? submissions
+    : submissions.filter(s => s.weekTitle === weekFilter);
+  
+  const days = Array.from(new Set(daysInWeek.map(s => JSON.stringify({ id: s.dayTitle, order: s.dayOrder }))))
+    .map(d => JSON.parse(d))
+    .sort((a, b) => a.order - b.order)
+    .map(d => d.id);
 
   const students = allUsers.filter(u => u.role === "student" || !u.role);
   
@@ -43,7 +60,19 @@ export default function VolunteersPage() {
   const totalPages = Math.ceil(filteredStudents.length / STUDENTS_PER_PAGE);
   const paginatedStudents = filteredStudents.slice((currentPage - 1) * STUDENTS_PER_PAGE, currentPage * STUDENTS_PER_PAGE);
 
-  const filteredVolunteers = overview.filter(vol => {
+  const overviewWithDynamicStats = overview.map(vol => {
+    let volSubs = submissions.filter(s => s.assignedVolunteerId === vol._id);
+    if (weekFilter !== "All") volSubs = volSubs.filter(s => s.weekTitle === weekFilter);
+    if (dayFilter !== "All") volSubs = volSubs.filter(s => s.dayTitle === dayFilter);
+    
+    return {
+      ...vol,
+      pendingReviews: volSubs.filter(s => s.status === "Pending Review").length,
+      reviewsCompleted: volSubs.filter(s => s.reviewedBy === vol._id).length,
+    };
+  });
+
+  const filteredVolunteers = overviewWithDynamicStats.filter(vol => {
     const matchesSearch = !volSearchTerm.trim() || 
       vol.name?.toLowerCase().includes(volSearchTerm.toLowerCase()) || 
       vol.email?.toLowerCase().includes(volSearchTerm.toLowerCase()) ||
@@ -106,30 +135,57 @@ export default function VolunteersPage() {
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <div className="w-full md:w-96 flex gap-3">
+        <div className="w-full md:w-auto flex-1 flex gap-3">
           <input
             type="text"
             placeholder="SEARCH VOLUNTEER..."
             value={volSearchTerm}
             onChange={(e) => setVolSearchTerm(e.target.value)}
-            className="w-full bg-white dark:bg-[#0a0a0a] border border-black/[0.1] dark:border-white/[0.1] rounded-lg px-4 py-3 font-mono text-[10px] uppercase tracking-widest focus:outline-none focus:border-black dark:focus:border-white text-black dark:text-white"
+            className="w-full h-full bg-white dark:bg-[#0a0a0a] border border-black/[0.1] dark:border-white/[0.1] rounded-lg px-4 py-3 font-mono text-[10px] uppercase tracking-widest focus:outline-none focus:border-black dark:focus:border-white text-black dark:text-white"
           />
         </div>
-        <div className="w-full md:w-auto flex items-center gap-2">
-          <div className="relative shrink-0">
-            <select
-              value={volFilter}
-              onChange={(e) => setVolFilter(e.target.value)}
-              className="w-full md:w-[180px] bg-white dark:bg-[#0a0a0a] border border-black/[0.1] dark:border-white/[0.1] rounded-lg pl-4 pr-10 py-3 font-mono text-[10px] uppercase tracking-widest focus:outline-none focus:border-black dark:focus:border-white text-black dark:text-white appearance-none"
-            >
-              <option value="all">ALL VOLUNTEERS</option>
-              <option value="pending">HAS PENDING REVIEWS</option>
-              <option value="completed">ALL REVIEWS DONE</option>
-              <option value="no_students">NO STUDENTS ASSIGNED</option>
-            </select>
-            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-black/30 dark:text-white/30">
-              <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </div>
+        
+        <div className="relative w-full md:w-48 shrink-0">
+          <select
+            value={weekFilter}
+            onChange={(e) => { setWeekFilter(e.target.value); setDayFilter("All"); }}
+            className="w-full h-full bg-white dark:bg-[#0a0a0a] border border-black/[0.1] dark:border-white/[0.1] rounded-lg pl-4 pr-10 py-3 font-mono text-[10px] uppercase tracking-widest focus:outline-none focus:border-black dark:focus:border-white text-black dark:text-white appearance-none"
+          >
+            <option value="All">ALL_WEEKS</option>
+            {weeks.map(w => <option key={w} value={w}>{w}</option>)}
+          </select>
+          <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-black/30 dark:text-white/30">
+            <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </div>
+        </div>
+
+        <div className="relative w-full md:w-48 shrink-0">
+          <select
+            value={dayFilter}
+            onChange={(e) => setDayFilter(e.target.value)}
+            className="w-full h-full bg-white dark:bg-[#0a0a0a] border border-black/[0.1] dark:border-white/[0.1] rounded-lg pl-4 pr-10 py-3 font-mono text-[10px] uppercase tracking-widest focus:outline-none focus:border-black dark:focus:border-white text-black dark:text-white appearance-none"
+          >
+            <option value="All">ALL_DAYS</option>
+            {days.map(d => <option key={d} value={d}>{d}</option>)}
+          </select>
+          <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-black/30 dark:text-white/30">
+            <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </div>
+        </div>
+
+        <div className="relative w-full md:w-48 shrink-0">
+          <select
+            value={volFilter}
+            onChange={(e) => setVolFilter(e.target.value)}
+            className="w-full h-full bg-white dark:bg-[#0a0a0a] border border-black/[0.1] dark:border-white/[0.1] rounded-lg pl-4 pr-10 py-3 font-mono text-[10px] uppercase tracking-widest focus:outline-none focus:border-black dark:focus:border-white text-black dark:text-white appearance-none"
+          >
+            <option value="all">ALL VOLUNTEERS</option>
+            <option value="pending">HAS PENDING REVIEWS</option>
+            <option value="completed">ALL REVIEWS DONE</option>
+            <option value="no_students">NO STUDENTS ASSIGNED</option>
+          </select>
+          <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-black/30 dark:text-white/30">
+            <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </div>
         </div>
       </div>
