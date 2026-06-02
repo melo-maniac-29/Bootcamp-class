@@ -1,12 +1,13 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function QuizResultsPage() {
   const submissions = useQuery(api.content.listQuizSubmissions) || [];
+  const resetSingleQuizAttempt = useMutation(api.content.resetSingleQuizAttempt);
   
   const [expandedId, setExpandedId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -145,12 +146,24 @@ export default function QuizResultsPage() {
                       </span>
                     </td>
                     <td className="px-5 py-4">
-                      <button
-                        onClick={() => toggleExpand(sub._id)}
-                        className="font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-black/20 dark:border-white/20 text-black/60 dark:text-white/60 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                      >
-                        {expandedId === sub._id ? "CLOSE_DETAILS" : "VIEW_DETAILS"}
-                      </button>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={() => toggleExpand(sub._id)}
+                          className="font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-black/20 dark:border-white/20 text-black/60 dark:text-white/60 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                        >
+                          {expandedId === sub._id ? "CLOSE_DETAILS" : "VIEW_DETAILS"}
+                        </button>
+                        <button
+                          onClick={async () => {
+                            if (confirm(`Delete quiz attempt for ${sub.studentName}? Points will be deducted and they can retake it.`)) {
+                              await resetSingleQuizAttempt({ progressId: sub._id });
+                            }
+                          }}
+                          className="font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                        >
+                          DELETE
+                        </button>
+                      </div>
                     </td>
                   </motion.tr>
                   {/* Expanded Details Row */}

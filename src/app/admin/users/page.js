@@ -191,7 +191,7 @@ export default function UsersPage() {
                   className="border-b border-black/[0.04] dark:border-white/[0.04] last:border-0 hover:bg-[#F8F9FA] dark:hover:bg-[#111111] transition-colors"
                 >
                   <td className="px-5 py-4">
-                    <p className="font-mono text-sm font-bold text-black dark:text-white">{u.name || "—"}</p>
+                    <p className="font-mono text-sm font-bold uppercase text-black dark:text-white">{u.name || "—"}</p>
                     <p className="font-mono text-xs text-black/40 dark:text-white/40 mt-0.5">{u.email || "N/A"}</p>
                   </td>
                   <td className="px-5 py-4">

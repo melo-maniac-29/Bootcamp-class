@@ -33,11 +33,12 @@ export default function DayEditor({ dayId, onClose }) {
   const updateDay = useMutation(api.content.updateDay);
   const deleteDay = useMutation(api.content.deleteDay);
   const upsertQuiz = useMutation(api.content.upsertQuiz);
+  const resetAllQuizAttempts = useMutation(api.content.resetAllQuizAttempts);
 
   const [formData, setFormData] = useState({ 
     title: "", description: "", videoUrl: "", taskDescription: "",
     unlockAtStr: "", deadlineAtStr: "", lateDeadlineAtStr: "",
-    quizPointsOnTime: 0, taskPointsOnTime: 0, taskPointsLate: 0
+    quizPointsOnTime: 0, taskPointsOnTime: 0, taskPointsLate: 0, order: 0
   });
   const [questions, setQuestions] = useState([]);
   const [references, setReferences] = useState([]);
@@ -60,7 +61,8 @@ export default function DayEditor({ dayId, onClose }) {
         lateDeadlineAtStr: toDatetimeLocal(day.lateDeadlineAt),
         quizPointsOnTime: day.quizPointsOnTime || 0,
         taskPointsOnTime: day.taskPointsOnTime || 0,
-        taskPointsLate: day.taskPointsLate || 0
+        taskPointsLate: day.taskPointsLate || 0,
+        order: day.order || 0
       });
       setReferences(day.references || []);
       setFeedbackEnabled(day.feedbackEnabled || false);
@@ -93,6 +95,7 @@ export default function DayEditor({ dayId, onClose }) {
         quizPointsOnTime: parseInt(formData.quizPointsOnTime) || 0,
         taskPointsOnTime: parseInt(formData.taskPointsOnTime) || 0,
         taskPointsLate: parseInt(formData.taskPointsLate) || 0,
+        order: parseInt(formData.order) || 0,
         references: references.filter(r => r.trim() !== ""),
         feedbackEnabled,
         feedbackQuestion: feedbackEnabled ? feedbackQuestion : undefined,
@@ -153,9 +156,15 @@ export default function DayEditor({ dayId, onClose }) {
 
       {/* Form fields */}
       <div className="space-y-4 mb-8">
-        <div>
-          <label className="block font-mono text-[9px] tracking-[0.2em] text-black/40 dark:text-white/40 uppercase mb-1.5">TITLE</label>
-          <input type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className={fieldClass} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block font-mono text-[9px] tracking-[0.2em] text-black/40 dark:text-white/40 uppercase mb-1.5">TITLE</label>
+            <input type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className={fieldClass} />
+          </div>
+          <div>
+            <label className="block font-mono text-[9px] tracking-[0.2em] text-black/40 dark:text-white/40 uppercase mb-1.5">DAY_ORDER</label>
+            <input type="number" value={formData.order} onChange={e => setFormData({...formData, order: e.target.value})} className={fieldClass} />
+          </div>
         </div>
         <div>
           <label className="block font-mono text-[9px] tracking-[0.2em] text-black/40 dark:text-white/40 uppercase mb-1.5">DESCRIPTION</label>
@@ -233,14 +242,24 @@ export default function DayEditor({ dayId, onClose }) {
 
       {/* Quiz questions */}
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
           <p className="font-mono text-[10px] tracking-[0.3em] text-black/30 dark:text-white/30 uppercase">QUIZ_QUESTIONS</p>
-          <button onClick={addQuestion} className="font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-black/[0.1] dark:border-white/[0.1] hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black hover:border-black dark:hover:border-white transition-all flex items-center gap-1.5">
-            <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none">
-              <path d="M8 2v12M2 8h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
-            ADD_QUESTION
-          </button>
+          <div className="flex gap-2">
+            <button onClick={async () => {
+              if (confirm("WARNING: This will wipe all existing quiz scores for this day and deduct points from the leaderboard. Students will be able to retake the quiz. Are you absolutely sure?")) {
+                await resetAllQuizAttempts({ dayId });
+                alert("All student attempts for this quiz have been reset.");
+              }
+            }} className="font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-all flex items-center gap-1.5">
+              RESET_ALL_ATTEMPTS
+            </button>
+            <button onClick={addQuestion} className="font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-black/[0.1] dark:border-white/[0.1] hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black hover:border-black dark:hover:border-white transition-all flex items-center gap-1.5">
+              <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none">
+                <path d="M8 2v12M2 8h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+              ADD_QUESTION
+            </button>
+          </div>
         </div>
 
 
@@ -260,7 +279,11 @@ export default function DayEditor({ dayId, onClose }) {
                     onChange={e => { const n = [...questions]; n[qIdx] = {...n[qIdx], question: e.target.value}; setQuestions(n); }}
                     className="flex-1 border-b border-black/[0.12] dark:border-white/[0.12] bg-transparent outline-none font-mono text-sm text-black dark:text-white focus:border-black dark:focus:border-white pb-1 transition-colors"
                   />
-                  <button onClick={() => setQuestions(questions.filter((_, i) => i !== qIdx))} className="p-1 text-black/30 dark:text-white/30 hover:text-red-500 transition-colors shrink-0">
+                  <button onClick={() => {
+                    if (window.confirm("Are you sure you want to delete this question?")) {
+                      setQuestions(questions.filter((_, i) => i !== qIdx));
+                    }
+                  }} className="p-1 text-black/30 dark:text-white/30 hover:text-red-500 transition-colors shrink-0">
                     <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none">
                       <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                     </svg>

@@ -424,3 +424,62 @@ export const listQuizSubmissions = query({
     return results.filter(Boolean);
   },
 });
+
+export const resetAllQuizAttempts = mutation({
+  args: { dayId: v.id("days") },
+  handler: async (ctx, args) => {
+    await checkAdmin(ctx);
+    
+    const allProgress = await ctx.db.query("userProgress").collect();
+    const completions = allProgress.filter(p => p.dayId === args.dayId && p.quizCompleted);
+
+    for (const p of completions) {
+      if (p.quizScore && p.quizScore > 0) {
+        const user = await ctx.db.get(p.userId);
+        if (user) {
+          await ctx.db.patch(user._id, { totalPoints: Math.max(0, (user.totalPoints || 0) - p.quizScore) });
+        }
+      }
+      await ctx.db.patch(p._id, {
+        quizCompleted: false,
+        quizScore: undefined,
+        quizTotal: undefined,
+        quizAnswers: undefined,
+      });
+    }
+  }
+});
+
+export const resetSingleQuizAttempt = mutation({
+  args: { progressId: v.id("userProgress") },
+  handler: async (ctx, args) => {
+    const userId = await auth.getUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
+    const actingUser = await ctx.db.get(userId);
+    if (actingUser?.role !== "admin" && actingUser?.role !== "volunteer") {
+      throw new Error("Requires staff role");
+    }
+
+    const progress = await ctx.db.get(args.progressId);
+    if (!progress || !progress.quizCompleted) return;
+
+    const student = await ctx.db.get(progress.userId);
+    if (actingUser.role === "volunteer" && student?.assignedVolunteerId !== userId) {
+      throw new Error("You can only reset quizzes for your assigned students");
+    }
+
+    if (progress.quizScore && progress.quizScore > 0) {
+      const user = await ctx.db.get(progress.userId);
+      if (user) {
+        await ctx.db.patch(user._id, { totalPoints: Math.max(0, (user.totalPoints || 0) - progress.quizScore) });
+      }
+    }
+
+    await ctx.db.patch(progress._id, {
+      quizCompleted: false,
+      quizScore: undefined,
+      quizTotal: undefined,
+      quizAnswers: undefined,
+    });
+  }
+});
