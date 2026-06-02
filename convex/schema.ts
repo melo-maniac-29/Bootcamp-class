@@ -63,6 +63,17 @@ export default defineSchema({
     overallCompleted: v.boolean(),
     quizScore: v.optional(v.number()),
     quizTotal: v.optional(v.number()),
+    quizAnswers: v.optional(
+      v.array(
+        v.object({
+          question: v.string(),
+          selectedIndex: v.union(v.number(), v.null()),
+          correctIndex: v.number(),
+          isCorrect: v.boolean(),
+          options: v.array(v.string()),
+        })
+      )
+    ),
     feedbackResponse: v.optional(v.string()),
     videoWatchPercent: v.number(),
   }).index("by_userId", ["userId"]).index("by_dayId", ["dayId"]).index("by_userId_dayId", ["userId", "dayId"]),

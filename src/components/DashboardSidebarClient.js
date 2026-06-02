@@ -5,6 +5,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import Link from "next/link";
 import { useEffect } from "react";
+import { useAuthActions } from "@convex-dev/auth/react";
 
 /**
  * Purpose:
@@ -15,13 +16,23 @@ import { useEffect } from "react";
 export default function DashboardSidebarClient() {
   const user = useQuery(api.users.current);
   const generateParticipantId = useMutation(api.users.generateParticipantId);
+  const { signOut } = useAuthActions();
 
   useEffect(() => {
+    // If the Convex session is invalid/deleted but Next.js cookie remains,
+    // user will be null. Force sign out to clear the cookie and redirect.
+    if (user === null) {
+      signOut().then(() => {
+        window.location.href = "/login";
+      });
+      return;
+    }
+
     // Only assign ID if the user is loaded and doesn't have an ID
     if (user && !user.participantId) {
       generateParticipantId().catch(console.error);
     }
-  }, [user, generateParticipantId]);
+  }, [user, generateParticipantId, signOut]);
 
   const navItems = [
     {

@@ -126,6 +126,16 @@ export default function AdminLayout({ children }) {
       ),
     },
     {
+      href: "/admin/quiz-results",
+      label: "QUIZZES",
+      icon: (
+        <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5" />
+          <path d="M5.5 8.5l1.5 1.5 3.5-3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      ),
+    },
+    {
       href: "/admin/feedback",
       label: "FEEDBACK",
       icon: (

@@ -227,12 +227,59 @@ export const getMyProgress = query({
       if (nextDayId) break;
     }
 
-    return { totalDays, submittedDays, approvedDays, quizCompleted, nextDayId };
+    let activePendingTasksCount = 0;
+    for (const week of sortedWeeks) {
+      if (week.unlockAt && now < week.unlockAt) continue;
+      
+      const weekDays = activeDays.filter(d => d.weekId === week._id);
+      for (const day of weekDays) {
+        if (day.unlockAt && now < day.unlockAt) continue;
+        if (day.lateDeadlineAt && now > day.lateDeadlineAt) continue; // Locked, so not "active pending"
+        
+        if (day.taskDescription) {
+          const sub = mySubmissions.find(s => s.dayId === day._id);
+          if (!sub || sub.status === "Needs Revision") {
+            activePendingTasksCount++;
+          }
+        }
+      }
+    }
+
+    const totalTasks = activeDays.filter(d => !!d.taskDescription).length;
+    const allQuizzes = await ctx.db.query("quizzes").collect();
+    const totalQuizzes = allQuizzes.filter(q => activeDays.some(d => d._id === q.dayId) && q.questions && q.questions.length > 0).length;
+
+    return { 
+      totalDays, 
+      totalTasks,
+      totalQuizzes,
+      submittedDays, 
+      approvedDays, 
+      quizCompleted, 
+      nextDayId, 
+      activePendingTasks: activePendingTasksCount 
+    };
   },
 });
 
 export const saveQuizResult = mutation({
-  args: { dayId: v.id("days"), score: v.number(), total: v.number(), feedbackResponse: v.optional(v.string()) },
+  args: { 
+    dayId: v.id("days"), 
+    score: v.number(), 
+    total: v.number(), 
+    feedbackResponse: v.optional(v.string()),
+    quizAnswers: v.optional(
+      v.array(
+        v.object({
+          question: v.string(),
+          selectedIndex: v.union(v.number(), v.null()),
+          correctIndex: v.number(),
+          isCorrect: v.boolean(),
+          options: v.array(v.string()),
+        })
+      )
+    ),
+  },
   handler: async (ctx, args) => {
     const userId = await auth.getUserId(ctx);
     if (!userId) throw new Error("UNAUTHORIZED");
@@ -249,8 +296,8 @@ export const saveQuizResult = mutation({
     if (!existing || !existing.quizCompleted) {
       const user = await ctx.db.get(userId);
       if (user) {
-        const maxPoints = day.quizPointsOnTime || 0;
-        const pointsToAdd = args.total > 0 ? Math.round((args.score / args.total) * maxPoints) : 0;
+        // Award points based on the number of correct answers (score)
+        const pointsToAdd = args.score;
         await ctx.db.patch(userId, { totalPoints: (user.totalPoints || 0) + pointsToAdd });
       }
     }
@@ -260,7 +307,8 @@ export const saveQuizResult = mutation({
         quizCompleted: true,
         quizScore: args.score,
         quizTotal: args.total,
-        ...(args.feedbackResponse !== undefined ? { feedbackResponse: args.feedbackResponse } : {})
+        ...(args.feedbackResponse !== undefined ? { feedbackResponse: args.feedbackResponse } : {}),
+        ...(args.quizAnswers !== undefined ? { quizAnswers: args.quizAnswers } : {})
       });
     } else {
       await ctx.db.insert("userProgress", {
@@ -273,7 +321,8 @@ export const saveQuizResult = mutation({
         quizScore: args.score,
         quizTotal: args.total,
         videoWatchPercent: 0,
-        ...(args.feedbackResponse !== undefined ? { feedbackResponse: args.feedbackResponse } : {})
+        ...(args.feedbackResponse !== undefined ? { feedbackResponse: args.feedbackResponse } : {}),
+        ...(args.quizAnswers !== undefined ? { quizAnswers: args.quizAnswers } : {})
       });
     }
   },
@@ -322,4 +371,115 @@ export const listFeedbackResponses = query({
       };
     }));
   },
+});
+
+export const reorderDays = mutation({
+  args: {
+    updates: v.array(v.object({ dayId: v.id("days"), order: v.number() })),
+  },
+  handler: async (ctx, args) => {
+    await checkAdmin(ctx);
+    for (const update of args.updates) {
+      await ctx.db.patch(update.dayId, { order: update.order });
+    }
+  },
+});
+
+export const listQuizSubmissions = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await auth.getUserId(ctx);
+    if (!userId) return [];
+    const user = await ctx.db.get(userId);
+    if (user?.role !== "admin" && user?.role !== "volunteer") return [];
+
+    const allProgress = await ctx.db.query("userProgress").collect();
+    const withQuiz = allProgress.filter(p => p.quizCompleted);
+
+    const results = await Promise.all(withQuiz.map(async (p) => {
+      const student = await ctx.db.get(p.userId);
+      
+      // If the user is a volunteer, only show their assigned students
+      if (user.role === "volunteer" && student?.assignedVolunteerId !== userId) {
+        return null;
+      }
+
+      const day = await ctx.db.get(p.dayId);
+      const week = day ? await ctx.db.get(day.weekId) : null;
+      return {
+        _id: p._id,
+        studentName: student?.name || student?.email || "Unknown Student",
+        studentEmail: student?.email,
+        dayTitle: day?.title || "Unknown Day",
+        dayId: p.dayId,
+        weekTitle: week?.title || "Unknown Week",
+        weekOrder: week?.order ?? 999,
+        dayOrder: day?.order ?? 999,
+        quizScore: p.quizScore,
+        quizTotal: p.quizTotal,
+        quizAnswers: p.quizAnswers,
+      };
+    }));
+
+    return results.filter(Boolean);
+  },
+});
+
+export const resetAllQuizAttempts = mutation({
+  args: { dayId: v.id("days") },
+  handler: async (ctx, args) => {
+    await checkAdmin(ctx);
+    
+    const allProgress = await ctx.db.query("userProgress").collect();
+    const completions = allProgress.filter(p => p.dayId === args.dayId && p.quizCompleted);
+
+    for (const p of completions) {
+      if (p.quizScore && p.quizScore > 0) {
+        const user = await ctx.db.get(p.userId);
+        if (user) {
+          await ctx.db.patch(user._id, { totalPoints: Math.max(0, (user.totalPoints || 0) - p.quizScore) });
+        }
+      }
+      await ctx.db.patch(p._id, {
+        quizCompleted: false,
+        quizScore: undefined,
+        quizTotal: undefined,
+        quizAnswers: undefined,
+      });
+    }
+  }
+});
+
+export const resetSingleQuizAttempt = mutation({
+  args: { progressId: v.id("userProgress") },
+  handler: async (ctx, args) => {
+    const userId = await auth.getUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
+    const actingUser = await ctx.db.get(userId);
+    if (actingUser?.role !== "admin" && actingUser?.role !== "volunteer") {
+      throw new Error("Requires staff role");
+    }
+
+    const progress = await ctx.db.get(args.progressId);
+    if (!progress || !progress.quizCompleted) return;
+
+    const student = await ctx.db.get(progress.userId);
+    if (actingUser.role === "volunteer" && student?.assignedVolunteerId !== userId) {
+      throw new Error("You can only reset quizzes for your assigned students");
+    }
+
+    if (progress.quizScore && progress.quizScore > 0) {
+      const user = await ctx.db.get(progress.userId);
+      if (user) {
+        await ctx.db.patch(user._id, { totalPoints: Math.max(0, (user.totalPoints || 0) - progress.quizScore) });
+      }
+    }
+
+    await ctx.db.patch(progress._id, {
+      quizCompleted: false,
+      quizScore: undefined,
+      quizTotal: undefined,
+      quizAnswers: undefined,
+    });
+  }
 });

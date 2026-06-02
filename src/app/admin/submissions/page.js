@@ -227,7 +227,11 @@ export default function SubmissionsPage() {
                       {sub.status !== "Approved" || editingId === sub._id ? (
                         <>
                           <button
-                            onClick={() => handleUpdate(sub._id, "Approved", scores[sub._id] !== undefined ? scores[sub._id] : (sub.awardedScore !== undefined ? sub.awardedScore : sub.maxPoints))}
+                            onClick={() => {
+                              if (window.confirm(`Are you sure you want to ${sub.status === "Approved" ? "save changes" : "approve"} this submission?`)) {
+                                handleUpdate(sub._id, "Approved", scores[sub._id] !== undefined ? scores[sub._id] : (sub.awardedScore !== undefined ? sub.awardedScore : sub.maxPoints));
+                              }
+                            }}
                             className="font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 transition-colors"
                           >
                             {sub.status === "Approved" ? "SAVE" : "APPROVE"}
@@ -241,7 +245,11 @@ export default function SubmissionsPage() {
                             </button>
                           ) : (
                             <button
-                              onClick={() => handleUpdate(sub._id, "Needs Revision")}
+                              onClick={() => {
+                                if (window.confirm("Are you sure you want to mark this submission for revision?")) {
+                                  handleUpdate(sub._id, "Needs Revision");
+                                }
+                              }}
                               className="font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-colors"
                             >
                               REVISE
