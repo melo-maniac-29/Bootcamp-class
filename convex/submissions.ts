@@ -56,6 +56,7 @@ export const listSubmissions = query({
         const maxPoints = sub.isLate ? (day?.taskPointsLate || 0) : (day?.taskPointsOnTime || 0);
         return Object.assign({}, sub, {
           userName: user?.name || user?.email || "Unknown User",
+          assignedVolunteerId: user?.assignedVolunteerId,
           dayTitle: day?.title || "Unknown Day",
           weekTitle: week?.title || "Unknown Week",
           weekOrder: week?.order ?? 999,

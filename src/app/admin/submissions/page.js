@@ -6,7 +6,9 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 export default function SubmissionsPage() {
+  const currentUser = useQuery(api.users.current);
   const submissions = useQuery(api.submissions.listSubmissions) || [];
+  const volunteers = useQuery(api.users.getVolunteersOverview) || [];
   const updateStatus = useMutation(api.submissions.updateStatus).withOptimisticUpdate(
     (localStore, args) => {
       const existing = localStore.getQuery(api.submissions.listSubmissions);
@@ -25,6 +27,7 @@ export default function SubmissionsPage() {
   const [scores, setScores] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [volunteerFilter, setVolunteerFilter] = useState("All");
   const [weekFilter, setWeekFilter] = useState("All");
   const [dayFilter, setDayFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
@@ -32,7 +35,7 @@ export default function SubmissionsPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, statusFilter, weekFilter, dayFilter]);
+  }, [searchQuery, statusFilter, volunteerFilter, weekFilter, dayFilter]);
 
   const weeks = Array.from(new Set(submissions.map(s => JSON.stringify({ id: s.weekTitle, order: s.weekOrder }))))
     .map(w => JSON.parse(w))
@@ -53,9 +56,10 @@ export default function SubmissionsPage() {
                           sub.dayTitle?.toLowerCase().includes(searchQuery.toLowerCase());
     const subStatus = sub.status || "Pending Review";
     const matchesStatus = statusFilter === "All" || subStatus === statusFilter;
+    const matchesVolunteer = volunteerFilter === "All" || sub.assignedVolunteerId === volunteerFilter;
     const matchesWeek = weekFilter === "All" || sub.weekTitle === weekFilter;
     const matchesDay = dayFilter === "All" || sub.dayTitle === dayFilter;
-    return matchesSearch && matchesStatus && matchesWeek && matchesDay;
+    return matchesSearch && matchesStatus && matchesVolunteer && matchesWeek && matchesDay;
   }).sort((a, b) => {
     const statusWeight = { "Pending Review": 0, "Needs Revision": 1, "Approved": 2 };
     const weightA = statusWeight[a.status || "Pending Review"] ?? 0;
@@ -129,6 +133,25 @@ export default function SubmissionsPage() {
             <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </div>
         </div>
+        
+        {currentUser?.role === "admin" && (
+          <div className="relative w-full md:w-56 shrink-0">
+            <select
+              value={volunteerFilter}
+              onChange={(e) => setVolunteerFilter(e.target.value)}
+              className="w-full h-full bg-white dark:bg-[#0a0a0a] border border-black/[0.1] dark:border-white/[0.1] rounded-lg pl-4 pr-10 py-3 font-mono text-[10px] uppercase tracking-widest focus:outline-none focus:border-black dark:focus:border-white text-black dark:text-white appearance-none"
+            >
+              <option value="All">ALL_VOLUNTEERS</option>
+              {volunteers.map(v => (
+                <option key={v._id} value={v._id}>{v.name || v.email}</option>
+              ))}
+            </select>
+            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-black/30 dark:text-white/30">
+              <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </div>
+          </div>
+        )}
+
         <div className="relative w-full md:w-48 shrink-0">
           <select
             value={weekFilter}
