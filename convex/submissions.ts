@@ -48,7 +48,7 @@ export const listSubmissions = query({
     }
     
     // We need to resolve users and days for the UI
-    return Promise.all(
+    const resolved = await Promise.all(
       submissions.map(async (sub) => {
         const user = await ctx.db.get(sub.userId);
         const day = await ctx.db.get(sub.dayId);
@@ -60,10 +60,15 @@ export const listSubmissions = query({
           weekTitle: week?.title || "Unknown Week",
           weekOrder: week?.order ?? 999,
           dayOrder: day?.order ?? 999,
-          maxPoints
+          maxPoints,
+          hasTask: !!(day?.taskDescription)
         });
       })
     );
+
+    // Only show submissions that actually have a link to review
+    // (This hides "Node Completion" auto-submissions from the review queue)
+    return resolved.filter(sub => sub.link && sub.link.trim() !== "");
   },
 });
 
