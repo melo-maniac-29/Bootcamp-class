@@ -59,7 +59,7 @@ export default function QuizPage() {
     </div>
   );
 
-  const isVolunteer = currentUser?.role === "volunteer";
+  const isStaff = currentUser?.role === "volunteer" || currentUser?.role === "admin";
 
   // ── No quiz ──
   if (!quiz || !quiz.questions || quiz.questions.length === 0) {
@@ -81,10 +81,10 @@ export default function QuizPage() {
     );
   }
 
-  // ── Volunteer Preview Mode ──
-  if (isVolunteer) {
+  // ── Staff Preview Mode ──
+  if (isStaff) {
     return (
-      <div className="max-w-2xl mx-auto py-12">
+      <div className="max-w-3xl mx-auto py-12">
         <Link
           href={`/dashboard/days/${dayId}`}
           className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider text-black/30 dark:text-white/30 hover:text-black dark:hover:text-white transition-colors mb-10"
@@ -95,45 +95,47 @@ export default function QuizPage() {
           BACK_TO_LESSON
         </Link>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-10 bg-[#F8F9FA] dark:bg-[#111111] text-center"
-        >
-          <p className="font-mono text-[10px] tracking-[0.3em] text-blue-500 uppercase mb-4">VOLUNTEER PREVIEW_MODE</p>
+        <div className="border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-10 bg-[#F8F9FA] dark:bg-[#111111]">
+          <p className="font-mono text-[10px] tracking-[0.3em] text-black/30 dark:text-white/30 uppercase mb-4">STAFF_VIEW // QUIZ_ANSWERS</p>
           <h2 className="font-display font-black text-2xl tracking-tighter uppercase text-black dark:text-white mb-8">
-            Quiz Preview
+            Quiz Answer Key
           </h2>
 
-          <div className="text-left border-t border-black/[0.06] dark:border-white/[0.06] pt-8">
-            <div className="space-y-4">
-              {quiz.questions.map((q, idx) => (
-                <div key={idx} className="p-5 rounded-xl border border-black/[0.06] dark:border-white/[0.06] bg-white dark:bg-[#0a0a0a]">
-                  <p className="font-mono text-sm font-bold text-black dark:text-white mb-3 leading-relaxed">
-                    {idx + 1}. {q.question}
-                  </p>
-                  <div className="space-y-2">
-                    <div className="flex items-start gap-2">
-                      <span className="font-mono text-[10px] text-green-600 dark:text-green-400 uppercase mt-0.5 w-16 shrink-0">Correct:</span>
-                      <span className="font-mono text-sm font-bold text-green-600 dark:text-green-400">
-                        {q.options[q.answerIndex]}
-                      </span>
-                    </div>
-                    <div className="flex flex-col gap-1 mt-2">
-                      {q.options.map((opt, i) => i !== q.answerIndex && (
-                        <div key={i} className="flex items-start gap-2">
-                          <span className="font-mono text-[10px] text-black/30 dark:text-white/30 uppercase mt-0.5 w-16 shrink-0">Option:</span>
-                          <span className="font-mono text-xs text-black/50 dark:text-white/50">{opt}</span>
+          <div className="space-y-6">
+            {quiz.questions.map((q, idx) => (
+              <div key={idx} className="border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-6 bg-white dark:bg-[#0a0a0a]">
+                <p className="font-mono text-[10px] tracking-widest text-black/40 dark:text-white/40 uppercase mb-3">
+                  Question {String(idx + 1).padStart(2, "0")}
+                </p>
+                <p className="font-display font-bold text-lg tracking-tight text-black dark:text-white mb-5 leading-snug">
+                  {q.question}
+                </p>
+                <div className="space-y-2">
+                  {q.options.map((opt, optIdx) => {
+                    const isCorrect = q.answerIndex === optIdx;
+                    let style = "border-black/[0.08] dark:border-white/[0.08] text-black/50 dark:text-white/50";
+                    if (isCorrect) {
+                      style = "border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 font-bold";
+                    }
+                    return (
+                      <div key={optIdx} className={`px-4 py-3 rounded-lg border ${style} flex items-center justify-between transition-colors`}>
+                        <div className="flex items-center gap-4">
+                          <span className={`font-mono text-[9px] font-bold tracking-widest ${isCorrect ? 'opacity-100' : 'opacity-50'}`}>
+                            {String.fromCharCode(65 + optIdx)}
+                          </span>
+                          <span className="font-mono text-sm uppercase tracking-wider">{opt}</span>
                         </div>
-                      ))}
-                    </div>
-                  </div>
+                        {isCorrect && (
+                          <svg className="w-4 h-4 text-green-500 shrink-0" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
-        </motion.div>
+        </div>
       </div>
     );
   }

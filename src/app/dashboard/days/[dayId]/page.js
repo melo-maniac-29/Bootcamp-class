@@ -221,10 +221,10 @@ export default function DayViewerPage() {
                 {hasTask ? "Submit Work." : "Complete Node."}
               </h2>
 
-              {currentUser?.role === "volunteer" ? (
-                <div className="p-4 border border-blue-200 bg-blue-50 rounded-xl">
-                  <p className="font-mono text-xs text-blue-600 font-bold uppercase mb-1">VOLUNTEER PREVIEW</p>
-                  <p className="font-mono text-[10px] text-blue-600/80 uppercase">Submissions are disabled in volunteer view. Students will see the submission form here.</p>
+              {currentUser?.role === "volunteer" || currentUser?.role === "admin" ? (
+                <div className="p-4 border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 rounded-xl">
+                  <p className="font-mono text-xs text-black/60 dark:text-white/60 font-bold uppercase mb-1">STAFF_VIEW</p>
+                  <p className="font-mono text-[10px] text-black/40 dark:text-white/40 uppercase">Submissions are disabled for staff accounts.</p>
                 </div>
               ) : submission && submission.status !== "Needs Revision" && (!hasTask || submission.link) ? (
                   <motion.div
