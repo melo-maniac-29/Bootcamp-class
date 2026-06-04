@@ -11,7 +11,8 @@ export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
     return;
   }
 
-  const isAuthenticated = await convexAuth.isAuthenticated();
+  const token = await convexAuth.getToken();
+  const isAuthenticated = token !== undefined;
 
   if (isSignIn && isAuthenticated) {
     return nextjsMiddlewareRedirect(request, "/dashboard");
