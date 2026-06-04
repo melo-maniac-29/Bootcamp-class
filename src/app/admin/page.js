@@ -4,10 +4,12 @@ import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 export default function AdminDashboard() {
   const user = useQuery(api.users.current);
   const stats = useQuery(api.users.getDashboardStats);
+  const timeSeriesData = useQuery(api.users.getSubmissionTimeSeries) || [];
   const isAdmin = user?.role === "admin";
 
   const modules = [
@@ -106,6 +108,87 @@ export default function AdminDashboard() {
           <div className="p-5 rounded-xl border border-black/[0.06] dark:border-white/[0.06] bg-[#F8F9FA] dark:bg-[#111111]">
             <p className="font-mono text-[10px] tracking-widest text-black/40 dark:text-white/40 uppercase mb-2">TOTAL SUBMISSIONS</p>
             <p className="text-3xl font-display font-black text-black dark:text-white">{stats.totalSubmissions}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Progress Graph */}
+      {timeSeriesData.length > 0 && (
+        <div className="mb-10 p-6 rounded-xl border border-black/[0.06] dark:border-white/[0.06] bg-[#F8F9FA] dark:bg-[#111111]">
+          <div className="mb-6 flex justify-between items-end">
+            <div>
+              <h2 className="font-mono text-xs tracking-[0.2em] text-black dark:text-white font-bold uppercase">Bootcamp Progress</h2>
+              <p className="font-mono text-[10px] tracking-widest text-black/40 dark:text-white/40 uppercase mt-1">Daily Submissions & Quizzes</p>
+            </div>
+            <div className="flex gap-4">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                <span className="font-mono text-[10px] tracking-widest text-black/60 dark:text-white/60 uppercase">Tasks</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-purple-500"></div>
+                <span className="font-mono text-[10px] tracking-widest text-black/60 dark:text-white/60 uppercase">Quizzes</span>
+              </div>
+            </div>
+          </div>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={timeSeriesData} margin={{ top: 5, right: 20, bottom: 5, left: -20 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-black/5 dark:text-white/5" vertical={false} />
+                <XAxis 
+                  dataKey="date" 
+                  stroke="currentColor" 
+                  className="text-[10px] text-black/40 dark:text-white/40" 
+                  tick={{ fontFamily: 'var(--font-outfit), sans-serif', fill: 'currentColor' }}
+                  tickLine={false}
+                  axisLine={false}
+                  dy={10}
+                  tickFormatter={(val) => {
+                    const d = new Date(val);
+                    return `${d.getMonth()+1}/${d.getDate()}`;
+                  }}
+                />
+                <YAxis 
+                  stroke="currentColor" 
+                  className="text-[10px] text-black/40 dark:text-white/40"
+                  tick={{ fontFamily: 'var(--font-outfit), sans-serif', fill: 'currentColor' }}
+                  tickLine={false}
+                  axisLine={false}
+                  dx={-10}
+                  allowDecimals={false}
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: '#111111',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '8px',
+                    color: '#fff',
+                    fontFamily: 'monospace',
+                    fontSize: '12px'
+                  }}
+                  itemStyle={{ color: '#fff' }}
+                  labelStyle={{ color: 'rgba(255,255,255,0.5)', marginBottom: '8px' }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="taskSubmissions" 
+                  name="Task Submissions"
+                  stroke="#3b82f6" 
+                  strokeWidth={2}
+                  dot={{ r: 3, fill: '#3b82f6', strokeWidth: 0 }}
+                  activeDot={{ r: 5 }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="quizzes" 
+                  name="Quiz Completions"
+                  stroke="#a855f7" 
+                  strokeWidth={2}
+                  dot={{ r: 3, fill: '#a855f7', strokeWidth: 0 }}
+                  activeDot={{ r: 5 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         </div>
       )}

@@ -57,6 +57,7 @@ export default function UsersPage() {
 
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("All");
+  const [sortFilter, setSortFilter] = useState("Newest");
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = 10;
 
@@ -67,6 +68,10 @@ export default function UsersPage() {
       u.participantId?.toLowerCase().includes(search.toLowerCase());
     const matchesRole = roleFilter === "All" || (u.role || "student") === roleFilter;
     return matchesSearch && matchesRole;
+  }).sort((a, b) => {
+    if (sortFilter === "Newest") return (b._creationTime || 0) - (a._creationTime || 0);
+    if (sortFilter === "Oldest") return (a._creationTime || 0) - (b._creationTime || 0);
+    return 0;
   });
 
   const totalPages = Math.ceil(filteredUsers.length / PAGE_SIZE) || 1;
@@ -159,6 +164,21 @@ export default function UsersPage() {
             <option value="student">STUDENT</option>
             <option value="volunteer">VOLUNTEER</option>
             <option value="admin">ADMIN</option>
+          </select>
+          <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-black/40 dark:text-white/40">
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
+        <div className="relative w-full md:w-56">
+          <select
+            value={sortFilter}
+            onChange={(e) => { setSortFilter(e.target.value); setCurrentPage(1); }}
+            className="w-full appearance-none bg-white dark:bg-[#0a0a0a] border border-black/[0.1] dark:border-white/[0.1] rounded-lg pl-4 pr-10 py-3 font-mono text-[10px] uppercase tracking-widest focus:outline-none focus:border-black dark:focus:border-white text-black dark:text-white cursor-pointer"
+          >
+            <option value="Newest">SORT: NEWEST FIRST</option>
+            <option value="Oldest">SORT: OLDEST FIRST</option>
           </select>
           <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-black/40 dark:text-white/40">
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
