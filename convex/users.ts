@@ -333,3 +333,42 @@ export const getMyStudents = query({
   }
 });
 
+export const getSubmissionTimeSeries = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await auth.getUserId(ctx);
+    if (!userId) return [];
+    const user = await ctx.db.get(userId);
+    if (user?.role !== "admin" && user?.role !== "volunteer") return [];
+
+    const submissions = await ctx.db.query("submissions").collect();
+    const progress = await ctx.db.query("userProgress").collect();
+
+    const timeSeriesMap = new Map<string, { date: string; taskSubmissions: number; quizzes: number }>();
+
+    // Process submissions
+    for (const sub of submissions) {
+      if (!sub.submittedAt) continue;
+      const date = new Date(sub.submittedAt).toISOString().split("T")[0];
+      if (!timeSeriesMap.has(date)) {
+        timeSeriesMap.set(date, { date, taskSubmissions: 0, quizzes: 0 });
+      }
+      timeSeriesMap.get(date)!.taskSubmissions += 1;
+    }
+
+    // Process quizzes
+    for (const p of progress) {
+      if (!p.quizCompleted || !p._creationTime) continue;
+      // Using _creationTime as a proxy for quiz completion date
+      const date = new Date(p._creationTime).toISOString().split("T")[0];
+      if (!timeSeriesMap.has(date)) {
+        timeSeriesMap.set(date, { date, taskSubmissions: 0, quizzes: 0 });
+      }
+      timeSeriesMap.get(date)!.quizzes += 1;
+    }
+
+    const sortedDates = Array.from(timeSeriesMap.values()).sort((a, b) => a.date.localeCompare(b.date));
+    return sortedDates;
+  }
+});
+
