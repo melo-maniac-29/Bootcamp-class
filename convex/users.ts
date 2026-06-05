@@ -214,8 +214,8 @@ export const getDashboardStats = query({
     const students = users.filter(u => u.role === "student" || !u.role);
     const totalStudents = students.length;
     
-    const todayStr = new Date().toISOString().split("T")[0];
-    const activeStudents = students.filter(u => u.lastActiveDate === todayStr || (u.streakCount && u.streakCount > 0)).length;
+    // Calculate active students as those who have earned at least some points
+    const activeStudents = students.filter(u => (u.totalPoints || 0) > 0).length;
 
     const totalVolunteers = users.filter(u => u.role === "volunteer").length;
 
