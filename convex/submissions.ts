@@ -161,7 +161,7 @@ export const updateStatus = mutation({
  *  - Inserts or patches a row in the submissions table
  */
 export const submitTask = mutation({
-  args: { dayId: v.id("days"), link: v.optional(v.string()), feedbackResponse: v.optional(v.string()) },
+  args: { dayId: v.id("days"), link: v.optional(v.string()), feedbackResponse: v.optional(v.string()), studentRating: v.optional(v.number()) },
   handler: async (ctx, args) => {
     const userId = await auth.getUserId(ctx);
     if (!userId) throw new Error("UNAUTHORIZED");
@@ -240,7 +240,8 @@ export const submitTask = mutation({
     if (progress) {
       await ctx.db.patch(progress._id, {
         submissionCompleted: true,
-        ...(args.feedbackResponse !== undefined ? { feedbackResponse: args.feedbackResponse } : {})
+        ...(args.feedbackResponse !== undefined ? { feedbackResponse: args.feedbackResponse } : {}),
+        ...(args.studentRating !== undefined ? { studentRating: args.studentRating } : {})
       });
     } else {
       await ctx.db.insert("userProgress", {
@@ -251,7 +252,8 @@ export const submitTask = mutation({
         submissionCompleted: true,
         overallCompleted: false,
         videoWatchPercent: 0,
-        ...(args.feedbackResponse !== undefined ? { feedbackResponse: args.feedbackResponse } : {})
+        ...(args.feedbackResponse !== undefined ? { feedbackResponse: args.feedbackResponse } : {}),
+        ...(args.studentRating !== undefined ? { studentRating: args.studentRating } : {})
       });
     }
 

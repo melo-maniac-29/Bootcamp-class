@@ -120,6 +120,7 @@ export const updateDay = mutation({
     taskPointsOnTime: v.optional(v.number()),
     taskPointsLate: v.optional(v.number()),
     feedbackEnabled: v.optional(v.boolean()),
+    starRatingEnabled: v.optional(v.boolean()),
     feedbackQuestion: v.optional(v.string()),
     references: v.optional(v.array(v.string())),
     order: v.optional(v.number()),
@@ -373,6 +374,8 @@ export const listFeedbackResponses = query({
         feedbackResponse: p.feedbackResponse,
         quizScore: p.quizScore,
         quizTotal: p.quizTotal,
+        studentRating: p.studentRating,
+        starRatingEnabled: day?.starRatingEnabled,
       };
     }));
   },
