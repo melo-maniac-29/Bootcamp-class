@@ -109,7 +109,7 @@ export default function StudentDrawer({ isOpen, onClose, userId }) {
                             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-[200px] opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150 z-50">
                               <div className="bg-black dark:bg-white text-white dark:text-black text-[10px] font-mono px-3 py-2 rounded-md shadow-xl text-center">
                                 <span className="font-bold opacity-50 uppercase tracking-widest block mb-1">
-                                  Week {day.weekOrder} // Day {day.dayOrder}
+                                  Week {day.weekOrder} {"//"} Day {day.dayOrder}
                                 </span>
                                 <span className="block font-bold">{day.dayTitle}</span>
                                 <span className="block mt-1 text-green-400 dark:text-green-600">Earned: {day.totalPointsForDay} pts</span>
@@ -138,7 +138,7 @@ export default function StudentDrawer({ isOpen, onClose, userId }) {
                           <div className="w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] ml-12 md:ml-0 p-4 rounded-xl border border-black/[0.06] dark:border-white/[0.06] bg-white dark:bg-[#111] hover:shadow-md transition-shadow">
                             <div className="flex justify-between items-start mb-2">
                               <h5 className="font-mono text-xs font-bold uppercase tracking-wider text-black dark:text-white">
-                                W{day.weekOrder} // D{day.dayOrder} <span className="text-black/60 dark:text-white/60 ml-1.5">{day.dayTitle}</span>
+                                W{day.weekOrder} {"//"} D{day.dayOrder} <span className="text-black/60 dark:text-white/60 ml-1.5">{day.dayTitle}</span>
                               </h5>
                               <span className="font-mono text-sm font-bold text-black dark:text-white">
                                 {day.totalPointsForDay} pts

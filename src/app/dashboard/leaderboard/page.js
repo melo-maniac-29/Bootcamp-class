@@ -123,15 +123,16 @@ export default function LeaderboardPage() {
             const actualRank = users.findIndex(u => u._id === user._id) + 1;
             const isTop3 = actualRank <= 3;
             const rankColors = ["text-yellow-500", "text-neutral-400", "text-orange-500"];
-            
+            const canView = currentUser?.role === "admin" || currentUser?.role === "volunteer" || currentUser?._id === user._id;
+
             return (
               <motion.div
                 key={user._id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: idx * 0.05 }}
-                onClick={() => setSelectedUserId(user._id)}
-                className="grid grid-cols-[auto_1fr_auto] gap-4 items-center px-6 py-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors group cursor-pointer"
+                onClick={() => canView ? setSelectedUserId(user._id) : null}
+                className={`grid grid-cols-[auto_1fr_auto] gap-4 items-center px-6 py-4 transition-colors group ${canView ? 'hover:bg-black/[0.02] dark:hover:bg-white/[0.02] cursor-pointer' : ''}`}
               >
                 <div className="w-12 flex justify-center">
                   <span className={`font-display font-black text-2xl ${isTop3 ? rankColors[actualRank - 1] : 'text-black/20 dark:text-white/20 group-hover:text-black/40 dark:group-hover:text-white/40'} transition-colors`}>

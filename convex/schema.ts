@@ -64,6 +64,12 @@ export default defineSchema({
     overallCompleted: v.boolean(),
     quizScore: v.optional(v.number()),
     quizTotal: v.optional(v.number()),
+    quizState: v.optional(v.object({
+      currentIndex: v.number(),
+      score: v.number(),
+      selections: v.array(v.any()),
+      currentQuestionStartTime: v.number(),
+    })),
     quizAnswers: v.optional(
       v.array(
         v.object({

@@ -334,6 +334,129 @@ export const saveQuizResult = mutation({
   },
 });
 
+export const startOrResumeQuiz = mutation({
+  args: { dayId: v.id("days") },
+  handler: async (ctx, args) => {
+    const userId = await auth.getUserId(ctx);
+    if (!userId) throw new Error("UNAUTHORIZED");
+
+    let existing = await ctx.db
+      .query("userProgress")
+      .withIndex("by_userId_dayId", (q) => q.eq("userId", userId).eq("dayId", args.dayId))
+      .first();
+
+    if (!existing) {
+      const newId = await ctx.db.insert("userProgress", {
+        userId,
+        dayId: args.dayId,
+        videoCompleted: false,
+        quizCompleted: false,
+        submissionCompleted: false,
+        overallCompleted: false,
+        videoWatchPercent: 0,
+        quizState: {
+          currentIndex: 0,
+          score: 0,
+          selections: [],
+          currentQuestionStartTime: Date.now(),
+        }
+      });
+      existing = await ctx.db.get(newId);
+    } else if (!existing.quizCompleted && !existing.quizState) {
+      await ctx.db.patch(existing._id, {
+        quizState: {
+          currentIndex: 0,
+          score: 0,
+          selections: [],
+          currentQuestionStartTime: Date.now(),
+        }
+      });
+      existing = await ctx.db.get(existing._id);
+    }
+
+    return existing?.quizState || null;
+  }
+});
+
+export const submitQuizAnswer = mutation({
+  args: {
+    dayId: v.id("days"),
+    selectedIndex: v.union(v.number(), v.null()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await auth.getUserId(ctx);
+    if (!userId) throw new Error("UNAUTHORIZED");
+
+    const existing = await ctx.db
+      .query("userProgress")
+      .withIndex("by_userId_dayId", (q) => q.eq("userId", userId).eq("dayId", args.dayId))
+      .first();
+
+    if (!existing || !existing.quizState || existing.quizCompleted) return null;
+
+    const quiz = await ctx.db
+      .query("quizzes")
+      .withIndex("by_dayId", (q) => q.eq("dayId", args.dayId))
+      .first();
+
+    if (!quiz || !quiz.questions) return null;
+
+    const state = existing.quizState;
+    const currentQ = quiz.questions[state.currentIndex];
+    if (!currentQ) return null;
+
+    const timeElapsed = Date.now() - state.currentQuestionStartTime;
+    // Buffer of 5s to account for network latency
+    const timeLimitMs = quiz.timeLimit ? quiz.timeLimit * 1000 : Infinity;
+    
+    let isCorrect = false;
+    // If timeLimit is strict, timeout submissions automatically fail
+    if (timeLimitMs === Infinity || timeElapsed <= timeLimitMs + 5000) {
+      if (args.selectedIndex === currentQ.answerIndex) {
+        isCorrect = true;
+      }
+    }
+
+    const newScore = state.score + (isCorrect ? 1 : 0);
+    const newSelection = {
+      question: currentQ.question,
+      options: currentQ.options,
+      selectedIndex: args.selectedIndex,
+      correctIndex: currentQ.answerIndex,
+      isCorrect
+    };
+
+    const newSelections = [...state.selections, newSelection];
+    const isLast = state.currentIndex === quiz.questions.length - 1;
+
+    if (isLast) {
+      // Award points logic
+      const user = await ctx.db.get(userId);
+      if (user) {
+        await ctx.db.patch(userId, { totalPoints: (user.totalPoints || 0) + newScore });
+      }
+
+      await ctx.db.patch(existing._id, {
+        quizCompleted: true,
+        quizScore: newScore,
+        quizTotal: quiz.questions.length,
+        quizAnswers: newSelections,
+        quizState: undefined // Clear state
+      });
+      return { finished: true, score: newScore, selections: newSelections };
+    } else {
+      const newState = {
+        currentIndex: state.currentIndex + 1,
+        score: newScore,
+        selections: newSelections,
+        currentQuestionStartTime: Date.now(),
+      };
+      await ctx.db.patch(existing._id, { quizState: newState });
+      return { finished: false, state: newState };
+    }
+  }
+});
+
 export const getDayProgress = query({
   args: { dayId: v.id("days") },
   handler: async (ctx, args) => {

@@ -214,14 +214,72 @@ export const getDashboardStats = query({
     const students = users.filter(u => u.role === "student" || !u.role);
     const totalStudents = students.length;
     
-    const todayStr = new Date().toISOString().split("T")[0];
-    const activeStudents = students.filter(u => u.lastActiveDate === todayStr || (u.streakCount && u.streakCount > 0)).length;
+    // Determine all currently unlocked days
+    const allDays = await ctx.db.query("days").collect();
+    const activeDaysList = allDays.filter((d) => !d.deleted);
+    const allWeeks = await ctx.db.query("weeks").collect();
+    
+    const now = Date.now();
+    const unlockedDays = [];
+    for (const week of allWeeks) {
+      if (week.unlockAt && now < week.unlockAt) continue;
+      const weekDays = activeDaysList.filter(d => d.weekId === week._id);
+      for (const day of weekDays) {
+        if (day.unlockAt && now < day.unlockAt) continue;
+        unlockedDays.push(day);
+      }
+    }
+
+    const requiredTasks = unlockedDays.filter(d => !!d.taskDescription);
+    const requiredQuizzes = unlockedDays.filter(d => (d.quizPointsOnTime || 0) > 0 || (d.quizPointsLate || 0) > 0);
+
+    const submissions = await ctx.db.query("submissions").collect();
+    const progressDocs = await ctx.db.query("userProgress").collect();
+
+    // Map which user has completed which task/quiz
+    const userCompletedTasks = new Map();
+    for (const sub of submissions) {
+      if (sub.pointsAwarded) {
+        if (!userCompletedTasks.has(sub.userId)) userCompletedTasks.set(sub.userId, new Set());
+        userCompletedTasks.get(sub.userId).add(sub.dayId);
+      }
+    }
+
+    const userCompletedQuizzes = new Map();
+    for (const prog of progressDocs) {
+      if (prog.quizCompleted && (prog.quizScore || 0) > 0) {
+        if (!userCompletedQuizzes.has(prog.userId)) userCompletedQuizzes.set(prog.userId, new Set());
+        userCompletedQuizzes.get(prog.userId).add(prog.dayId);
+      }
+    }
+
+    let activeStudents = 0;
+    for (const student of students) {
+      const completedTasks = userCompletedTasks.get(student._id) || new Set();
+      const completedQuizzes = userCompletedQuizzes.get(student._id) || new Set();
+      
+      let isActive = true;
+      for (const req of requiredTasks) {
+        if (!completedTasks.has(req._id)) {
+          isActive = false;
+          break;
+        }
+      }
+      if (isActive) {
+        for (const req of requiredQuizzes) {
+          if (!completedQuizzes.has(req._id)) {
+            isActive = false;
+            break;
+          }
+        }
+      }
+      if (isActive) activeStudents++;
+    }
 
     const totalVolunteers = users.filter(u => u.role === "volunteer").length;
 
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
-    const submissions = await ctx.db.query("submissions").collect();
     const submissionsToday = submissions.filter(sub => sub.submittedAt >= startOfToday.getTime()).length;
     
     const totalSubmissions = submissions.length;
