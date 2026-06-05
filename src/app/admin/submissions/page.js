@@ -21,6 +21,7 @@ export default function SubmissionsPage() {
       }
     }
   );
+  const deleteSubmission = useMutation(api.submissions.deleteSubmission);
   
   const [successId, setSuccessId] = useState(null);
   const [editingId, setEditingId] = useState(null);
@@ -80,6 +81,14 @@ export default function SubmissionsPage() {
       setEditingId(null);
     } catch (e) {
       alert("Failed to update status.");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteSubmission({ submissionId: id });
+    } catch (e) {
+      alert("Failed to delete submission.");
     }
   };
 
@@ -182,8 +191,9 @@ export default function SubmissionsPage() {
 
       {/* Table */}
       <div className="border border-black/[0.06] dark:border-white/[0.06] rounded-xl overflow-hidden bg-white dark:bg-[#0a0a0a]">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-left whitespace-nowrap min-w-max">
             <thead>
               <tr className="border-b border-black/[0.06] dark:border-white/[0.06] bg-[#F8F9FA] dark:bg-[#111111]">
                 {["STUDENT", "TASK_NODE", "SUBMISSION_LINK", "SCORE", "STATUS", "ACTION"].map(col => (
@@ -311,6 +321,20 @@ export default function SubmissionsPage() {
                           SAVED
                         </motion.span>
                       )}
+                      
+                      {currentUser?.role === "admin" && (
+                        <button
+                          onClick={() => {
+                            if (window.confirm("Are you sure you want to permanently delete this submission? This action cannot be undone and any awarded points will be deducted.")) {
+                              handleDelete(sub._id);
+                            }
+                          }}
+                          className="ml-auto font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-500/80 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                          title="Delete Submission"
+                        >
+                          DELETE
+                        </button>
+                      )}
                     </div>
                   </td>
                 </motion.tr>
@@ -326,6 +350,155 @@ export default function SubmissionsPage() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="block md:hidden flex flex-col divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+          {paginatedSubmissions.map((sub, i) => (
+            <motion.div
+              key={`mobile-sub-${sub._id}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: i * 0.04 }}
+              className="p-5 hover:bg-[#F8F9FA] dark:hover:bg-[#111111] transition-colors"
+            >
+              <div className="flex justify-between items-start mb-3">
+                <span className="font-mono text-sm font-bold text-black dark:text-white uppercase tracking-wider">{sub.userName}</span>
+                <span className={`inline-block font-mono text-[8px] uppercase tracking-widest px-2 py-1 border rounded-full ${statusColor(sub.status)}`}>
+                  {sub.status || "PENDING"}
+                </span>
+              </div>
+
+              <div className="mb-4 p-3 bg-black/5 dark:bg-white/5 rounded-lg border border-black/5 dark:border-white/5">
+                <span className="font-mono text-[9px] text-black/40 dark:text-white/40 uppercase tracking-widest block mb-1">{sub.weekTitle}</span>
+                <span className="font-mono text-xs text-black/80 dark:text-white/80 leading-tight block">{sub.dayTitle}</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <span className="font-mono text-[8px] text-black/30 dark:text-white/30 uppercase tracking-widest block mb-1">LINK</span>
+                  {sub.link ? (
+                    <a href={sub.link} target="_blank" rel="noreferrer" className="font-mono text-xs text-black dark:text-white underline underline-offset-4 hover:text-black/60 dark:hover:text-white/60 transition-colors flex items-center gap-1 w-fit">
+                      VIEW_LINK
+                      <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none">
+                        <path d="M2 10L10 2M5 2h5v5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </a>
+                  ) : (
+                    <span className="font-mono text-[10px] text-black/20 dark:text-white/20">NULL</span>
+                  )}
+                </div>
+                <div>
+                  <span className="font-mono text-[8px] text-black/30 dark:text-white/30 uppercase tracking-widest block mb-1">SCORE</span>
+                  {sub.status === "Approved" && editingId !== sub._id ? (
+                    <span className="font-mono text-xs text-black dark:text-white font-bold tracking-widest">
+                      {sub.awardedScore !== undefined ? sub.awardedScore : sub.maxPoints} / {sub.maxPoints}
+                    </span>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="0"
+                        max={sub.maxPoints}
+                        value={scores[sub._id] !== undefined ? scores[sub._id] : (sub.awardedScore !== undefined ? sub.awardedScore : sub.maxPoints)}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === "") {
+                            setScores({ ...scores, [sub._id]: "" });
+                            return;
+                          }
+                          const num = parseInt(val);
+                          if (!isNaN(num)) {
+                            setScores({ ...scores, [sub._id]: Math.min(Math.max(num, 0), sub.maxPoints) });
+                          }
+                        }}
+                        className="w-12 bg-transparent border-b border-black/20 dark:border-white/20 font-mono text-[10px] text-center focus:outline-none focus:border-black dark:focus:border-white"
+                      />
+                      <span className="font-mono text-[10px] text-black/50 dark:text-white/50">/ {sub.maxPoints}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-black/[0.04] dark:border-white/[0.04]">
+                {sub.status !== "Approved" || editingId === sub._id ? (
+                  <>
+                    <button
+                      onClick={() => {
+                        if (window.confirm(`Are you sure you want to ${sub.status === "Approved" ? "save changes" : "approve"} this submission?`)) {
+                          handleUpdate(sub._id, "Approved", scores[sub._id] !== undefined ? scores[sub._id] : (sub.awardedScore !== undefined ? sub.awardedScore : sub.maxPoints));
+                        }
+                      }}
+                      className="flex-1 font-mono text-[9px] uppercase tracking-wider px-3 py-2 rounded border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 transition-colors text-center"
+                    >
+                      {sub.status === "Approved" ? "SAVE" : "APPROVE"}
+                    </button>
+                    {sub.status === "Approved" ? (
+                      <button
+                        onClick={() => setEditingId(null)}
+                        className="font-mono text-[9px] uppercase tracking-wider px-3 py-2 rounded border border-black/20 dark:border-white/20 text-black/60 dark:text-white/60 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                      >
+                        CANCEL
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          if (window.confirm("Are you sure you want to mark this submission for revision?")) {
+                            handleUpdate(sub._id, "Needs Revision");
+                          }
+                        }}
+                        className="flex-1 font-mono text-[9px] uppercase tracking-wider px-3 py-2 rounded border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-colors text-center"
+                      >
+                        REVISE
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <span className="font-mono text-[9px] text-black/30 dark:text-white/30 uppercase tracking-widest">
+                      REVIEWED
+                    </span>
+                    <button
+                      onClick={() => setEditingId(sub._id)}
+                      className="ml-auto font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                    >
+                      EDIT
+                    </button>
+                  </>
+                )}
+                {successId === sub._id && (
+                  <motion.span
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="ml-auto font-mono text-[9px] text-green-600 dark:text-green-400 uppercase tracking-wider"
+                  >
+                    SAVED
+                  </motion.span>
+                )}
+                
+                {currentUser?.role === "admin" && (
+                  <button
+                    onClick={() => {
+                      if (window.confirm("Are you sure you want to permanently delete this submission? This action cannot be undone and any awarded points will be deducted.")) {
+                        handleDelete(sub._id);
+                      }
+                    }}
+                    className="ml-auto font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-500/80 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                    title="Delete Submission"
+                  >
+                    DELETE
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          ))}
+          {paginatedSubmissions.length === 0 && (
+            <div className="p-10 text-center">
+              <p className="font-mono text-[10px] tracking-widest text-black/20 dark:text-white/20 uppercase">
+                QUEUE_EMPTY
+              </p>
+            </div>
+          )}
         </div>
         
         {totalPages > 1 && (

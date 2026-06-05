@@ -8,6 +8,29 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import LinkifiedText from "@/components/LinkifiedText";
 
+function StarRating({ rating, onRate }) {
+  return (
+    <div className="flex items-center gap-1">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <button
+          key={star}
+          type="button"
+          onClick={() => onRate(star)}
+          className={`focus:outline-none transition-colors ${
+            star <= (rating || 0)
+              ? "text-yellow-500 dark:text-yellow-400"
+              : "text-black/10 dark:text-white/20 hover:text-yellow-500/50 dark:hover:text-yellow-400/50"
+          }`}
+        >
+          <svg className="w-6 h-6 fill-current" viewBox="0 0 20 20">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+          </svg>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function DayViewerPage() {
   const params = useParams();
   const dayId = params.dayId;
@@ -24,6 +47,7 @@ export default function DayViewerPage() {
   const [submitError, setSubmitError] = useState("");
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackResponse, setFeedbackResponse] = useState("");
+  const [studentRating, setStudentRating] = useState(0);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -277,7 +301,12 @@ export default function DayViewerPage() {
                     setSubmitting(true);
                     setSubmitError("");
                     try {
-                      await submitTask({ dayId, link: hasTask ? link.trim() : undefined, feedbackResponse });
+                      await submitTask({ 
+                        dayId, 
+                        link: hasTask ? link.trim() : undefined, 
+                        feedbackResponse,
+                        ...(day.starRatingEnabled && studentRating > 0 ? { studentRating } : {})
+                      });
                       setShowFeedback(false);
                     } catch (err) {
                       setSubmitError(err.message || "Failed to submit. Please try again.");
@@ -296,6 +325,12 @@ export default function DayViewerPage() {
                       placeholder="Type your response here..."
                       className="w-full border border-black/[0.12] dark:border-white/[0.12] rounded-lg px-4 py-3 font-mono text-sm outline-none focus:border-black dark:focus:border-white transition-colors bg-white dark:bg-[#0a0a0a] placeholder:text-black/20 dark:placeholder:text-white/20 text-black dark:text-white resize-none"
                     />
+                    {day.starRatingEnabled && (
+                      <div className="pt-2 flex flex-col items-center gap-2">
+                        <span className="font-mono text-[10px] text-black/50 dark:text-white/50 uppercase">RATE_THIS_SESSION</span>
+                        <StarRating rating={studentRating} onRate={setStudentRating} />
+                      </div>
+                    )}
                     {submitError && (
                       <p className="font-mono text-[10px] text-red-500 uppercase tracking-wider">{submitError}</p>
                     )}

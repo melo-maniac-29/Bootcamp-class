@@ -161,7 +161,7 @@ export const updateStatus = mutation({
  *  - Inserts or patches a row in the submissions table
  */
 export const submitTask = mutation({
-  args: { dayId: v.id("days"), link: v.optional(v.string()), feedbackResponse: v.optional(v.string()) },
+  args: { dayId: v.id("days"), link: v.optional(v.string()), feedbackResponse: v.optional(v.string()), studentRating: v.optional(v.number()) },
   handler: async (ctx, args) => {
     const userId = await auth.getUserId(ctx);
     if (!userId) throw new Error("UNAUTHORIZED");
@@ -240,7 +240,8 @@ export const submitTask = mutation({
     if (progress) {
       await ctx.db.patch(progress._id, {
         submissionCompleted: true,
-        ...(args.feedbackResponse !== undefined ? { feedbackResponse: args.feedbackResponse } : {})
+        ...(args.feedbackResponse !== undefined ? { feedbackResponse: args.feedbackResponse } : {}),
+        ...(args.studentRating !== undefined ? { studentRating: args.studentRating } : {})
       });
     } else {
       await ctx.db.insert("userProgress", {
@@ -251,7 +252,8 @@ export const submitTask = mutation({
         submissionCompleted: true,
         overallCompleted: false,
         videoWatchPercent: 0,
-        ...(args.feedbackResponse !== undefined ? { feedbackResponse: args.feedbackResponse } : {})
+        ...(args.feedbackResponse !== undefined ? { feedbackResponse: args.feedbackResponse } : {}),
+        ...(args.studentRating !== undefined ? { studentRating: args.studentRating } : {})
       });
     }
 
@@ -270,4 +272,40 @@ export const getSubmission = query({
       .withIndex("by_userId_dayId", (q) => q.eq("userId", userId).eq("dayId", args.dayId))
       .first();
   },
+});
+
+export const deleteSubmission = mutation({
+  args: { submissionId: v.id("submissions") },
+  handler: async (ctx, args) => {
+    const userId = await auth.getUserId(ctx);
+    if (!userId) throw new Error("UNAUTHORIZED");
+    
+    const actingUser = await ctx.db.get(userId);
+    if (actingUser?.role !== "admin") {
+      throw new Error("Only admins can delete submissions");
+    }
+    
+    const submission = await ctx.db.get(args.submissionId);
+    if (!submission) throw new Error("SUBMISSION_NOT_FOUND");
+    
+    // Deduct points if they were already awarded
+    if (submission.pointsAwarded && submission.awardedScore !== undefined) {
+      const user = await ctx.db.get(submission.userId);
+      if (user) {
+        await ctx.db.patch(user._id, { totalPoints: Math.max(0, (user.totalPoints || 0) - submission.awardedScore) });
+      }
+    }
+    
+    // Update user progress to reflect submission is no longer completed
+    const progress = await ctx.db
+      .query("userProgress")
+      .withIndex("by_userId_dayId", (q) => q.eq("userId", submission.userId).eq("dayId", submission.dayId))
+      .first();
+      
+    if (progress) {
+      await ctx.db.patch(progress._id, { submissionCompleted: false });
+    }
+    
+    await ctx.db.delete(args.submissionId);
+  }
 });

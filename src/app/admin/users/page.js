@@ -190,8 +190,9 @@ export default function UsersPage() {
 
       {/* Table */}
       <div className="border border-black/[0.06] dark:border-white/[0.06] rounded-xl overflow-hidden bg-white dark:bg-[#0a0a0a]">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-left whitespace-nowrap min-w-max">
             <thead>
               <tr className="border-b border-black/[0.06] dark:border-white/[0.06] bg-[#F8F9FA] dark:bg-[#111111]">
                 {["IDENTITY", "ROLE_NODE", "PARTICIPANT_ID", "ACTIONS"].map(col => (
@@ -295,6 +296,106 @@ export default function UsersPage() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="block md:hidden flex flex-col divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+          {paginatedUsers.map((u, i) => (
+            <motion.div
+              key={`mobile-${u._id}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: i * 0.03 }}
+              className="p-5 hover:bg-[#F8F9FA] dark:hover:bg-[#111111] transition-colors"
+            >
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <p className="font-mono text-sm font-bold uppercase text-black dark:text-white">{u.name || "—"}</p>
+                  <p className="font-mono text-xs text-black/40 dark:text-white/40 mt-0.5">{u.email || "N/A"}</p>
+                </div>
+                <span className={`inline-block font-mono text-[9px] uppercase tracking-widest px-2 py-1 border rounded-full ${roleColor(u.role)}`}>
+                  {u.role || "STUDENT"}
+                </span>
+              </div>
+              
+              <div className="mb-4">
+                <span className="font-mono text-[8px] text-black/30 dark:text-white/30 uppercase tracking-widest block mb-1">PARTICIPANT_ID</span>
+                <span className="font-mono text-xs text-black/40 dark:text-white/40">{u.participantId || "NULL"}</span>
+              </div>
+
+              <div className="flex flex-col gap-3 pt-4 border-t border-black/[0.04] dark:border-white/[0.04]">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[8px] text-black/30 dark:text-white/30 uppercase tracking-widest">ROLE</span>
+                  <div className="flex items-center gap-3">
+                    <select
+                      value={u.role || "student"}
+                      onChange={(e) => handleRoleChange(u._id, e.target.value)}
+                      className="border border-black/[0.12] dark:border-white/[0.12] rounded-lg px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider outline-none focus:border-black dark:focus:border-white transition-colors bg-white dark:bg-[#0a0a0a] cursor-pointer text-black dark:text-white"
+                    >
+                      <option value="student">STUDENT</option>
+                      <option value="volunteer">VOLUNTEER</option>
+                      <option value="admin">ADMIN</option>
+                    </select>
+                    {successUserId === u._id && (
+                      <motion.span
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="font-mono text-[9px] text-green-600 uppercase tracking-wider"
+                      >
+                        SAVED
+                      </motion.span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[8px] text-black/30 dark:text-white/30 uppercase tracking-widest">ACTIONS</span>
+                  <div className="flex items-center gap-4">
+                    {resettingUserId === u._id ? (
+                      <div className="flex items-center gap-2">
+                        <input 
+                          type="text" 
+                          placeholder="Password..."
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          className="w-20 border border-black/[0.12] dark:border-white/[0.12] rounded px-2 py-1 font-mono text-[10px] bg-transparent outline-none focus:border-black/30 dark:focus:border-white/30"
+                        />
+                        <button onClick={() => handleResetPassword(u._id)} className="bg-black dark:bg-white text-white dark:text-black px-2 py-1 rounded font-mono text-[9px] tracking-widest uppercase hover:opacity-80">
+                          Save
+                        </button>
+                        <button onClick={() => setResettingUserId(null)} className="text-black/50 dark:text-white/50 px-2 py-1 rounded font-mono text-[9px] tracking-widest uppercase hover:bg-black/5 dark:hover:bg-white/5">
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button 
+                        onClick={() => { setResettingUserId(u._id); setNewPassword(""); }}
+                        className="text-[9px] font-mono tracking-widest uppercase text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white transition-colors"
+                      >
+                        + RESET_PASS
+                      </button>
+                    )}
+
+                    {u._id !== currentUser?._id && !resettingUserId && (
+                      <button 
+                        onClick={() => handleDeleteUser(u._id)}
+                        className="text-[9px] font-mono tracking-widest uppercase text-red-500/70 hover:text-red-500 transition-colors"
+                      >
+                        + DELETE
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+          {filteredUsers.length === 0 && (
+            <div className="p-10 text-center">
+              <p className="font-mono text-[10px] tracking-widest text-black/20 dark:text-white/20 uppercase">
+                {users.length === 0 ? "NO_USERS_FOUND // REGISTRY_EMPTY" : "NO_RESULTS // TRY_A_DIFFERENT_SEARCH"}
+              </p>
+            </div>
+          )}
         </div>
         
         {/* Pagination */}

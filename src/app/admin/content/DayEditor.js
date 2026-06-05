@@ -47,6 +47,7 @@ export default function DayEditor({ dayId, onClose }) {
   
   const [timeLimit, setTimeLimit] = useState(15);
   const [feedbackEnabled, setFeedbackEnabled] = useState(false);
+  const [starRatingEnabled, setStarRatingEnabled] = useState(false);
   const [feedbackQuestion, setFeedbackQuestion] = useState("What did you think of today's session?");
 
   useEffect(() => {
@@ -66,6 +67,7 @@ export default function DayEditor({ dayId, onClose }) {
       });
       setReferences(day.references || []);
       setFeedbackEnabled(day.feedbackEnabled || false);
+      setStarRatingEnabled(day.starRatingEnabled || false);
       setFeedbackQuestion(day.feedbackQuestion || "What did you think of today's session?");
     }
   }, [day]);
@@ -98,6 +100,7 @@ export default function DayEditor({ dayId, onClose }) {
         order: parseInt(formData.order) || 0,
         references: references.filter(r => r.trim() !== ""),
         feedbackEnabled,
+        starRatingEnabled,
         feedbackQuestion: feedbackEnabled ? feedbackQuestion : undefined,
       };
       await updateDay({ dayId, ...payload });
@@ -342,16 +345,34 @@ export default function DayEditor({ dayId, onClose }) {
           </button>
         </div>
         {feedbackEnabled && (
-          <div className="mt-3 pt-3 border-t border-black/[0.06] dark:border-white/[0.06]">
-            <label className="block font-mono text-[9px] tracking-[0.2em] text-black/40 dark:text-white/40 uppercase mb-1.5">FEEDBACK_QUESTION</label>
-            <textarea
-              value={feedbackQuestion}
-              onChange={e => setFeedbackQuestion(e.target.value)}
-              rows={2}
-              placeholder="e.g. What did you think of today's session?"
-              className="w-full border border-black/[0.1] dark:border-white/[0.1] bg-white dark:bg-[#0a0a0a] rounded-lg px-3 py-2 font-mono text-sm text-black dark:text-white focus:outline-none focus:border-black dark:focus:border-white resize-none"
-            />
-          </div>
+          <>
+            <div className="mt-3 pt-3 border-t border-black/[0.06] dark:border-white/[0.06] flex items-center justify-between">
+              <div>
+                <p className="font-mono text-[10px] tracking-[0.3em] text-black/30 dark:text-white/30 uppercase">STAR_RATING</p>
+                <p className="font-mono text-[9px] text-black/40 dark:text-white/40 mt-0.5">Enable students to give a star rating when submitting task feedback</p>
+              </div>
+              <button
+                onClick={() => setStarRatingEnabled(!starRatingEnabled)}
+                className={`relative w-10 h-5 rounded-full transition-colors duration-200 focus:outline-none shrink-0 ${
+                  starRatingEnabled ? "bg-black dark:bg-white" : "bg-black/10 dark:bg-white/10"
+                }`}
+              >
+                <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white dark:bg-black transition-transform duration-200 ${
+                  starRatingEnabled ? "translate-x-5" : "translate-x-0"
+                }`} />
+              </button>
+            </div>
+            <div className="mt-3 pt-3 border-t border-black/[0.06] dark:border-white/[0.06]">
+              <label className="block font-mono text-[9px] tracking-[0.2em] text-black/40 dark:text-white/40 uppercase mb-1.5">FEEDBACK_QUESTION</label>
+              <textarea
+                value={feedbackQuestion}
+                onChange={e => setFeedbackQuestion(e.target.value)}
+                rows={2}
+                placeholder="e.g. What did you think of today's session?"
+                className="w-full border border-black/[0.1] dark:border-white/[0.1] bg-white dark:bg-[#0a0a0a] rounded-lg px-3 py-2 font-mono text-sm text-black dark:text-white focus:outline-none focus:border-black dark:focus:border-white resize-none"
+              />
+            </div>
+          </>
         )}
       </div>
 

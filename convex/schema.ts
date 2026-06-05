@@ -47,6 +47,7 @@ export default defineSchema({
     taskPointsOnTime: v.optional(v.number()),
     taskPointsLate: v.optional(v.number()),
     feedbackEnabled: v.optional(v.boolean()),
+    starRatingEnabled: v.optional(v.boolean()),
     feedbackQuestion: v.optional(v.string()),
     order: v.number(),
     taskDescription: v.optional(v.string()),
@@ -75,6 +76,7 @@ export default defineSchema({
       )
     ),
     feedbackResponse: v.optional(v.string()),
+    studentRating: v.optional(v.number()),
     videoWatchPercent: v.number(),
   }).index("by_userId", ["userId"]).index("by_dayId", ["dayId"]).index("by_userId_dayId", ["userId", "dayId"]),
 

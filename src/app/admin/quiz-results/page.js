@@ -112,8 +112,9 @@ export default function QuizResultsPage() {
 
       {/* Table */}
       <div className="border border-black/[0.06] dark:border-white/[0.06] rounded-xl overflow-hidden bg-white dark:bg-[#0a0a0a]">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-left whitespace-nowrap min-w-max">
             <thead>
               <tr className="border-b border-black/[0.06] dark:border-white/[0.06] bg-[#F8F9FA] dark:bg-[#111111]">
                 {["STUDENT", "QUIZ_NODE", "SCORE", "ACTION"].map(col => (
@@ -245,6 +246,131 @@ export default function QuizResultsPage() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="block md:hidden flex flex-col divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+          {paginatedSubmissions.map((sub, i) => (
+            <motion.div
+              key={`mobile-${sub._id}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: i * 0.04 }}
+              className="p-5 hover:bg-[#F8F9FA] dark:hover:bg-[#111111] transition-colors"
+            >
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <span className="font-mono text-sm font-bold text-black dark:text-white uppercase tracking-wider block">{sub.studentName}</span>
+                  <span className="font-mono text-[9px] text-black/40 dark:text-white/40 tracking-widest block mt-0.5">{sub.studentEmail}</span>
+                </div>
+                <div className="text-right">
+                  <span className="font-mono text-[11px] text-black dark:text-white font-bold tracking-widest block">
+                    {sub.quizScore !== undefined ? sub.quizScore : 0} / {sub.quizTotal !== undefined ? sub.quizTotal : 0}
+                  </span>
+                  <span className="font-mono text-[8px] text-black/30 dark:text-white/30 uppercase tracking-widest">SCORE</span>
+                </div>
+              </div>
+              
+              <div className="mb-4 p-3 bg-black/5 dark:bg-white/5 rounded-lg border border-black/5 dark:border-white/5">
+                <span className="font-mono text-[9px] text-black/40 dark:text-white/40 uppercase tracking-widest block mb-1">{sub.weekTitle}</span>
+                <span className="font-mono text-xs text-black/80 dark:text-white/80 leading-tight block">{sub.dayTitle}</span>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => toggleExpand(sub._id)}
+                  className="flex-1 font-mono text-[9px] uppercase tracking-wider px-3 py-2 rounded border border-black/20 dark:border-white/20 text-black/60 dark:text-white/60 hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-center"
+                >
+                  {expandedId === sub._id ? "CLOSE_DETAILS" : "VIEW_DETAILS"}
+                </button>
+                <button
+                  onClick={async () => {
+                    if (confirm(`Delete quiz attempt for ${sub.studentName}? Points will be deducted and they can retake it.`)) {
+                      await resetSingleQuizAttempt({ progressId: sub._id });
+                    }
+                  }}
+                  className="font-mono text-[9px] uppercase tracking-wider px-3 py-2 rounded border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                >
+                  DELETE
+                </button>
+              </div>
+
+              {/* Mobile Expanded Details */}
+              <AnimatePresence>
+                {expandedId === sub._id && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                    animate={{ opacity: 1, height: "auto", marginTop: 16 }}
+                    exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="bg-[#fcfcfc] dark:bg-[#0c0c0c] rounded-lg border border-black/[0.06] dark:border-white/[0.06] p-4">
+                      <h3 className="font-display font-bold tracking-tight text-sm uppercase text-black/70 dark:text-white/70 mb-3 border-b border-black/10 dark:border-white/10 pb-2">
+                        Submission Details
+                      </h3>
+                      {sub.quizAnswers && sub.quizAnswers.length > 0 ? (
+                        <div className="space-y-4">
+                          {sub.quizAnswers.map((answer, idx) => (
+                            <div key={idx} className="bg-white dark:bg-[#0a0a0a] rounded border border-black/[0.06] dark:border-white/[0.06] p-3">
+                              <p className="font-mono text-[9px] tracking-widest text-black/40 dark:text-white/40 uppercase mb-1.5">
+                                Q{String(idx + 1).padStart(2, "0")}
+                              </p>
+                              <p className="font-display font-bold text-sm text-black dark:text-white mb-3">
+                                {answer.question}
+                              </p>
+                              <div className="space-y-1.5">
+                                {answer.options.map((opt, optIdx) => {
+                                  const isSelected = answer.selectedIndex === optIdx;
+                                  const isCorrect = answer.correctIndex === optIdx;
+                                  let style = "border-black/[0.06] dark:border-white/[0.06] text-black/40 dark:text-white/40";
+                                  
+                                  if (isCorrect) {
+                                    style = "border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 font-bold";
+                                  } else if (isSelected && !isCorrect) {
+                                    style = "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 font-bold";
+                                  }
+                                  
+                                  return (
+                                    <div key={optIdx} className={`px-3 py-2 rounded border ${style} flex flex-col gap-1`}>
+                                      <div className="flex items-start gap-2">
+                                        <span className={`font-mono text-[9px] font-bold mt-0.5 ${isCorrect || isSelected ? 'opacity-100' : 'opacity-40'}`}>
+                                          {String.fromCharCode(65 + optIdx)}
+                                        </span>
+                                        <span className="font-mono text-[10px] uppercase leading-tight">{opt}</span>
+                                      </div>
+                                      <div className="pl-4">
+                                        {isCorrect && (
+                                          <span className="font-mono text-[8px] uppercase tracking-widest text-green-600 font-bold">CORRECT</span>
+                                        )}
+                                        {isSelected && !isCorrect && (
+                                          <span className="font-mono text-[8px] uppercase tracking-widest text-red-600 font-bold">INCORRECT</span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="font-mono text-[10px] text-black/40 dark:text-white/40 uppercase">
+                          DETAILS_UNAVAILABLE
+                        </p>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          ))}
+          {paginatedSubmissions.length === 0 && (
+            <div className="p-10 text-center">
+              <p className="font-mono text-[10px] tracking-widest text-black/20 dark:text-white/20 uppercase">
+                QUEUE_EMPTY
+              </p>
+            </div>
+          )}
         </div>
         
         {totalPages > 1 && (
