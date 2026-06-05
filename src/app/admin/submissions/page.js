@@ -21,6 +21,7 @@ export default function SubmissionsPage() {
       }
     }
   );
+  const deleteSubmission = useMutation(api.submissions.deleteSubmission);
   
   const [successId, setSuccessId] = useState(null);
   const [editingId, setEditingId] = useState(null);
@@ -80,6 +81,14 @@ export default function SubmissionsPage() {
       setEditingId(null);
     } catch (e) {
       alert("Failed to update status.");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteSubmission({ submissionId: id });
+    } catch (e) {
+      alert("Failed to delete submission.");
     }
   };
 
@@ -312,6 +321,20 @@ export default function SubmissionsPage() {
                           SAVED
                         </motion.span>
                       )}
+                      
+                      {currentUser?.role === "admin" && (
+                        <button
+                          onClick={() => {
+                            if (window.confirm("Are you sure you want to permanently delete this submission? This action cannot be undone and any awarded points will be deducted.")) {
+                              handleDelete(sub._id);
+                            }
+                          }}
+                          className="ml-auto font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-500/80 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                          title="Delete Submission"
+                        >
+                          DELETE
+                        </button>
+                      )}
                     </div>
                   </td>
                 </motion.tr>
@@ -451,6 +474,20 @@ export default function SubmissionsPage() {
                   >
                     SAVED
                   </motion.span>
+                )}
+                
+                {currentUser?.role === "admin" && (
+                  <button
+                    onClick={() => {
+                      if (window.confirm("Are you sure you want to permanently delete this submission? This action cannot be undone and any awarded points will be deducted.")) {
+                        handleDelete(sub._id);
+                      }
+                    }}
+                    className="ml-auto font-mono text-[9px] uppercase tracking-wider px-3 py-1.5 rounded border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-500/80 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                    title="Delete Submission"
+                  >
+                    DELETE
+                  </button>
                 )}
               </div>
             </motion.div>

@@ -5,22 +5,39 @@ import { api } from "../../../../convex/_generated/api";
 import { motion } from "framer-motion";
 import { Skeleton } from "../../../components/ui/skeleton";
 import { useState, useEffect } from "react";
+import StudentDrawer from "../../../components/admin/StudentDrawer";
 
 export default function LeaderboardPage() {
   const users = useQuery(api.users.getLeaderboard);
+  const currentUser = useQuery(api.users.current);
   const [searchQuery, setSearchQuery] = useState("");
+  const [filterOperator, setFilterOperator] = useState("all");
+  const [filterValue, setFilterValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedUserId, setSelectedUserId] = useState(null);
   const itemsPerPage = 20;
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery]);
+  }, [searchQuery, filterOperator, filterValue]);
 
-  const filteredUsers = (users || []).filter(user => 
-    user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.participantId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user._id.includes(searchQuery)
-  );
+  const filteredUsers = (users || []).filter(user => {
+    const matchesSearch = user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          user.participantId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          user._id.includes(searchQuery);
+    
+    let matchesPoints = true;
+    const pts = user.totalPoints || 0;
+    const target = parseInt(filterValue, 10);
+    
+    if (filterOperator !== "all" && !isNaN(target)) {
+      if (filterOperator === "ge") matchesPoints = pts >= target;
+      if (filterOperator === "le") matchesPoints = pts <= target;
+      if (filterOperator === "eq") matchesPoints = pts === target;
+    }
+    
+    return matchesSearch && matchesPoints;
+  });
 
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
   const paginatedUsers = filteredUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -55,7 +72,7 @@ export default function LeaderboardPage() {
       </div>
 
       <div className="mb-6 flex flex-col md:flex-row gap-4 justify-between items-center">
-        <div className="w-full md:w-96">
+        <div className="w-full md:w-96 flex gap-3">
           <input
             type="text"
             placeholder="SEARCH PARTICIPANT..."
@@ -64,6 +81,34 @@ export default function LeaderboardPage() {
             className="w-full bg-white dark:bg-[#0a0a0a] border border-black/[0.1] dark:border-white/[0.1] rounded-lg px-4 py-3 font-mono text-[10px] uppercase tracking-widest focus:outline-none focus:border-black dark:focus:border-white text-black dark:text-white"
           />
         </div>
+        {(currentUser?.role === "admin" || currentUser?.role === "volunteer") && (
+          <div className="w-full md:w-auto flex items-center gap-2">
+            <div className="relative shrink-0">
+              <select
+                value={filterOperator}
+                onChange={(e) => setFilterOperator(e.target.value)}
+                className="w-full md:w-[140px] bg-white dark:bg-[#0a0a0a] border border-black/[0.1] dark:border-white/[0.1] rounded-lg pl-4 pr-10 py-3 font-mono text-[10px] uppercase tracking-widest focus:outline-none focus:border-black dark:focus:border-white text-black dark:text-white appearance-none"
+              >
+                <option value="all">ALL POINTS</option>
+                <option value="ge">&ge; POINTS</option>
+                <option value="le">&le; POINTS</option>
+                <option value="eq">= POINTS</option>
+              </select>
+              <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-black/30 dark:text-white/30">
+                <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </div>
+            </div>
+            {filterOperator !== "all" && (
+              <input
+                type="number"
+                placeholder="VAL"
+                value={filterValue}
+                onChange={(e) => setFilterValue(e.target.value)}
+                className="w-full md:w-[80px] bg-white dark:bg-[#0a0a0a] border border-black/[0.1] dark:border-white/[0.1] rounded-lg px-3 py-3 text-center font-mono text-[10px] uppercase tracking-widest focus:outline-none focus:border-black dark:focus:border-white text-black dark:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+            )}
+          </div>
+        )}
       </div>
 
       <div className="border border-black/[0.06] dark:border-white/[0.06] rounded-2xl overflow-hidden bg-white dark:bg-[#0a0a0a]">
@@ -85,7 +130,8 @@ export default function LeaderboardPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: idx * 0.05 }}
-                className="grid grid-cols-[auto_1fr_auto] gap-4 items-center px-6 py-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors group"
+                onClick={() => setSelectedUserId(user._id)}
+                className="grid grid-cols-[auto_1fr_auto] gap-4 items-center px-6 py-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors group cursor-pointer"
               >
                 <div className="w-12 flex justify-center">
                   <span className={`font-display font-black text-2xl ${isTop3 ? rankColors[actualRank - 1] : 'text-black/20 dark:text-white/20 group-hover:text-black/40 dark:group-hover:text-white/40'} transition-colors`}>
@@ -157,6 +203,12 @@ export default function LeaderboardPage() {
           </button>
         </div>
       )}
+
+      <StudentDrawer 
+        isOpen={!!selectedUserId} 
+        onClose={() => setSelectedUserId(null)} 
+        userId={selectedUserId} 
+      />
     </motion.div>
   );
 }

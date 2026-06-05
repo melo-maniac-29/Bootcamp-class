@@ -45,7 +45,7 @@ async function assignIdForRole(ctx: any, targetUserId: any, newRole: string) {
   if (newRole === "admin") {
     let maxAdminId = 0;
     for (const u of allUsers) {
-      if (u.participantId && u.participantId.startsWith("CTRONADMIN-")) {
+      if (u.participantId && u.participantId.startsWith("BUILDXADMIN-")) {
         const numPart = parseInt(u.participantId.split("-")[1]);
         if (!isNaN(numPart) && numPart > maxAdminId) {
           maxAdminId = numPart;
@@ -53,12 +53,12 @@ async function assignIdForRole(ctx: any, targetUserId: any, newRole: string) {
       }
     }
     const nextNumber = maxAdminId + 1;
-    const newId = `CTRONADMIN-${nextNumber.toString().padStart(3, '0')}`;
+    const newId = `BUILDXADMIN-${nextNumber.toString().padStart(3, '0')}`;
     await ctx.db.patch(targetUserId, { participantId: newId });
   } else if (newRole === "volunteer") {
     let maxVolId = 0;
     for (const u of allUsers) {
-      if (u.participantId && u.participantId.startsWith("CTRONVOL-")) {
+      if (u.participantId && u.participantId.startsWith("BUILDXVOL-")) {
         const numPart = parseInt(u.participantId.split("-")[1]);
         if (!isNaN(numPart) && numPart > maxVolId) {
           maxVolId = numPart;
@@ -66,12 +66,12 @@ async function assignIdForRole(ctx: any, targetUserId: any, newRole: string) {
       }
     }
     const nextNumber = maxVolId + 1;
-    const newId = `CTRONVOL-${nextNumber.toString().padStart(3, '0')}`;
+    const newId = `BUILDXVOL-${nextNumber.toString().padStart(3, '0')}`;
     await ctx.db.patch(targetUserId, { participantId: newId });
   } else {
     let maxStudentId = 100;
     for (const u of allUsers) {
-      if (u.participantId && u.participantId.startsWith("CTRON2026-")) {
+      if (u.participantId && u.participantId.startsWith("BUILDX2026-")) {
         const numPart = parseInt(u.participantId.split("-")[1]);
         if (!isNaN(numPart) && numPart > maxStudentId) {
           maxStudentId = numPart;
@@ -79,7 +79,7 @@ async function assignIdForRole(ctx: any, targetUserId: any, newRole: string) {
       }
     }
     const nextNumber = maxStudentId + 1;
-    const newId = `CTRON2026-${nextNumber}`;
+    const newId = `BUILDX2026-${nextNumber}`;
     await ctx.db.patch(targetUserId, { participantId: newId });
   }
 }
@@ -136,27 +136,28 @@ export const deleteUser = mutation({
 export const getLeaderboard = query({
   args: {},
   handler: async (ctx) => {
-    // Rank students by totalPoints, tiebreak by earliest submission time
     const users = await ctx.db.query("users").collect();
     const students = users.filter((u) => u.role === "student" || !u.role);
     
-    const studentsWithTime = await Promise.all(
-      students.map(async (u) => {
-        const submissions = await ctx.db
-          .query("submissions")
-          .withIndex("by_userId", (q) => q.eq("userId", u._id))
-          .collect();
-        const firstSubmissionTime = submissions.length > 0
-          ? Math.min(...submissions.map(s => s.submittedAt))
-          : Infinity;
-        return { ...u, firstSubmissionTime };
+    // Fetch first submission time for tiebreaker
+    const studentsWithStats = await Promise.all(
+      students.map(async (student) => {
+        const firstSubmission = await ctx.db.query("submissions")
+          .withIndex("by_userId", (q) => q.eq("userId", student._id))
+          .order("asc")
+          .first();
+          
+        return {
+          ...student,
+          firstSubmissionTime: firstSubmission ? firstSubmission.submittedAt : Infinity
+        };
       })
     );
 
-    return studentsWithTime.sort((a, b) => {
+    return studentsWithStats.sort((a, b) => {
       const pointsDiff = (b.totalPoints || 0) - (a.totalPoints || 0);
       if (pointsDiff !== 0) return pointsDiff;
-      // Tiebreaker: earlier submission wins (smaller timestamp)
+      // Tiebreaker: earlier first submission wins
       return a.firstSubmissionTime - b.firstSubmissionTime;
     });
   }
@@ -372,3 +373,99 @@ export const getSubmissionTimeSeries = query({
   }
 });
 
+export const getUserPointsBreakdown = query({
+  args: { targetUserId: v.id("users") },
+  handler: async (ctx, args) => {
+    const userId = await auth.getUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
+    
+    const caller = await ctx.db.get(userId);
+    if (caller?.role !== "admin" && caller?.role !== "volunteer" && userId !== args.targetUserId) {
+      throw new Error("Unauthorized");
+    }
+
+    const targetUser = await ctx.db.get(args.targetUserId);
+    if (!targetUser) throw new Error("User not found");
+
+    const allDays = await ctx.db.query("days").collect();
+    const activeDays = allDays.filter((d) => !d.deleted);
+    const allWeeks = await ctx.db.query("weeks").collect();
+    const sortedWeeks = allWeeks.sort((a, b) => a.order - b.order);
+    
+    const now = Date.now();
+    const unlockedDays = [];
+    
+    for (const week of sortedWeeks) {
+      if (week.unlockAt && now < week.unlockAt) continue;
+      const weekDays = activeDays
+        .filter(d => d.weekId === week._id)
+        .sort((a, b) => (a.order || 0) - (b.order || 0));
+        
+      for (const day of weekDays) {
+        if (day.unlockAt && now < day.unlockAt) continue;
+        unlockedDays.push({ day, week });
+      }
+    }
+
+    const progressDocs = await ctx.db.query("userProgress").withIndex("by_userId", (q) => q.eq("userId", args.targetUserId)).collect();
+    const submissions = await ctx.db.query("submissions").withIndex("by_userId", (q) => q.eq("userId", args.targetUserId)).collect();
+
+    const progressByDay = new Map(progressDocs.map(p => [p.dayId, p]));
+    const submissionsByDay = new Map(submissions.map(s => [s.dayId, s]));
+
+    let totalCalculatedPoints = 0;
+
+    const breakdown = unlockedDays.map(({ day, week }) => {
+      const progress = progressByDay.get(day._id);
+      const submission = submissionsByDay.get(day._id);
+
+      let quizPoints = 0;
+      let quizCompletedAt = null;
+      if (progress && progress.quizCompleted && progress.quizScore !== undefined) {
+        quizPoints = progress.quizScore;
+        quizCompletedAt = progress._creationTime;
+      }
+
+      let taskPoints = 0;
+      let taskCompletedAt = null;
+      if (submission && submission.pointsAwarded) {
+        if (submission.awardedScore !== undefined) {
+          taskPoints = submission.awardedScore;
+        } else {
+          taskPoints = submission.isLate ? (day.taskPointsLate || 0) : (day.taskPointsOnTime || 0);
+        }
+        taskCompletedAt = submission.submittedAt;
+      }
+
+      const totalPointsForDay = quizPoints + taskPoints;
+      totalCalculatedPoints += totalPointsForDay;
+
+      return {
+        dayId: day._id,
+        dayTitle: day.title,
+        dayOrder: day.order,
+        weekTitle: week.title,
+        weekOrder: week.order,
+        quizPoints,
+        maxQuizPoints: day.quizPointsOnTime || 0,
+        quizCompletedAt,
+        taskPoints,
+        maxTaskPoints: day.taskPointsOnTime || 0,
+        taskCompletedAt,
+        totalPointsForDay,
+      };
+    });
+
+    return {
+      user: {
+        _id: targetUser._id,
+        name: targetUser.name,
+        participantId: targetUser.participantId,
+        totalPoints: targetUser.totalPoints,
+        calculatedPoints: totalCalculatedPoints,
+        image: targetUser.image,
+      },
+      breakdown
+    };
+  }
+});
