@@ -298,6 +298,10 @@ export default function DayViewerPage() {
                   <form onSubmit={async (e) => {
                     e.preventDefault();
                     if (!feedbackResponse.trim()) return;
+                    if (day.starRatingEnabled && studentRating === 0) {
+                      setSubmitError("Please provide a star rating before submitting.");
+                      return;
+                    }
                     setSubmitting(true);
                     setSubmitError("");
                     try {
