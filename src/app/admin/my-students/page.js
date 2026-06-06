@@ -112,6 +112,7 @@ export default function MyStudentsPage() {
       </div>
 
       <StudentDrawer 
+        isOpen={!!selectedUserId}
         userId={selectedUserId} 
         onClose={() => setSelectedUserId(null)} 
       />
