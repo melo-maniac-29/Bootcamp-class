@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
 
 function timeAgo(timestamp) {
+  if (!timestamp || isNaN(timestamp)) return "Unknown time";
   const seconds = Math.floor((Date.now() - timestamp) / 1000);
   let interval = seconds / 31536000;
   if (interval > 1) return Math.floor(interval) + " years ago";
@@ -28,7 +29,6 @@ function ProfileContent() {
   const recentActivity = useQuery(api.users.getRecentActivity) || [];
   const breakdownData = useQuery(api.users.getUserPointsBreakdown, user ? { targetUserId: user._id } : "skip");
   const staffStats = useQuery(api.users.getStaffProfileStats);
-  const systemActivity = useQuery(api.users.getSubmissionTimeSeries) || [];
   const updateProfile = useMutation(api.users.updateProfile);
   const updatePassword = useAction(api.password.updatePassword);
 
@@ -284,7 +284,7 @@ function ProfileContent() {
                   Grading Activity
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {staffStats?.activityHeatmap?.map((day, i) => {
+                  {(staffStats?.activityHeatmap || []).map((day, i) => {
                     let bgColor = "bg-black/5 dark:bg-white/5";
                     if (day.count > 5) bgColor = "bg-emerald-500/80 dark:bg-emerald-500/80";
                     else if (day.count > 2) bgColor = "bg-emerald-400/60 dark:bg-emerald-500/60";
@@ -316,7 +316,7 @@ function ProfileContent() {
                     Assigned Students Roster
                   </h3>
                   <div className="space-y-3">
-                    {staffStats.assignedStudents.map(student => (
+                    {(staffStats?.assignedStudents || []).map(student => (
                       <div key={student._id} className="flex justify-between items-center p-3 border border-black/5 dark:border-white/5 rounded-lg bg-black/5 dark:bg-white/5">
                         <span className="text-sm font-bold">{student.name}</span>
                         <span className="text-xs font-mono bg-black dark:bg-white text-white dark:text-black px-2 py-1 rounded-md">{student.totalPoints} PTS</span>
@@ -339,7 +339,7 @@ function ProfileContent() {
               <p className="text-xs text-black/40 dark:text-white/40">No recent activity.</p>
             ) : (
               <div className="space-y-4">
-                {recentActivity.map((activity, index) => (
+                {(recentActivity || []).map((activity, index) => (
                   <div key={index} className="flex justify-between items-center text-sm py-2">
                     <span className="text-black dark:text-white">{activity.description}</span>
                     <span className="text-xs text-black/50 dark:text-white/50 font-mono">{timeAgo(activity.timestamp)}</span>
@@ -357,7 +357,7 @@ function ProfileContent() {
                 Activity Heatmap
               </h3>
               <div className="flex flex-wrap gap-2">
-                {breakdownData.breakdown.map((day) => {
+                {(breakdownData?.breakdown || []).map((day) => {
                   let bgColor = "bg-black/5 dark:bg-white/5";
                   if (day.totalPointsForDay > 0) {
                     const maxPossible = day.maxQuizPoints + day.maxTaskPoints;
@@ -399,7 +399,7 @@ function ProfileContent() {
               </h3>
               <div className="max-h-[500px] overflow-y-auto pr-2 pb-4 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-black/10 dark:[&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full">
                 <div className="space-y-4 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-black/10 dark:before:via-white/10 before:to-transparent">
-                {breakdownData.breakdown.map((day, idx) => (
+                {(breakdownData?.breakdown || []).map((day, idx) => (
                   <div key={day.dayId} className="relative flex items-start justify-between gap-4 md:justify-normal md:odd:flex-row-reverse group is-active">
                     <div className="absolute left-5 md:left-1/2 -translate-x-1/2 flex items-center justify-center w-3 h-3 rounded-full border-2 border-white dark:border-[#0a0a0a] bg-black/20 dark:bg-white/20 group-hover:bg-black group-hover:dark:bg-white transition-colors mt-1.5" />
                     <div className="w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] ml-12 md:ml-0 p-4 rounded-xl border border-black/[0.06] dark:border-white/[0.06] bg-white dark:bg-[#111] hover:shadow-md transition-shadow">
@@ -433,7 +433,7 @@ function ProfileContent() {
                   <div className="relative flex items-center justify-center pt-8 pb-4">
                     <div className="absolute left-5 md:left-1/2 -translate-x-1/2 flex items-center justify-center w-4 h-4 rounded-full border-2 border-white dark:border-[#0a0a0a] bg-black dark:bg-white z-10" />
                     <div className="ml-12 md:ml-0 bg-black text-white dark:bg-white dark:text-black px-6 py-2.5 rounded-full font-mono text-xs font-bold uppercase tracking-widest z-10 shadow-lg">
-                      TOTAL EARNED: {breakdownData.user.calculatedPoints} PTS
+                      TOTAL EARNED: {breakdownData?.user?.calculatedPoints || 0} PTS
                     </div>
                   </div>
                 )}
