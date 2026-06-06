@@ -27,6 +27,8 @@ function ProfileContent() {
   const user = useQuery(api.users.current);
   const recentActivity = useQuery(api.users.getRecentActivity) || [];
   const breakdownData = useQuery(api.users.getUserPointsBreakdown, user ? { targetUserId: user._id } : "skip");
+  const staffStats = useQuery(api.users.getStaffProfileStats);
+  const systemActivity = useQuery(api.users.getSubmissionTimeSeries) || [];
   const updateProfile = useMutation(api.users.updateProfile);
   const updatePassword = useAction(api.password.updatePassword);
 
@@ -246,7 +248,87 @@ function ProfileContent() {
             </div>
           </div>
 
-          {/* Recent Activity */}
+          {user?.role === "volunteer" ? (
+            <>
+              {/* Staff Overview */}
+              <div className="border border-black/10 dark:border-white/10 rounded-2xl p-6">
+                <h3 className="font-bold flex items-center gap-2 mb-6 text-sm">
+                  <svg className="w-4 h-4 text-black/50 dark:text-white/50" viewBox="0 0 24 24" fill="none"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  Caseload Breakdown
+                </h3>
+                
+                {staffStats ? (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-black/5 dark:bg-white/5 rounded-xl p-4 border border-black/5 dark:border-white/5">
+                      <p className="text-[10px] font-mono tracking-widest uppercase text-black/50 dark:text-white/50 mb-1">Assigned Students</p>
+                      <p className="text-3xl font-display font-black">{staffStats.assignedStudentCount}</p>
+                    </div>
+                    <div className="bg-black/5 dark:bg-white/5 rounded-xl p-4 border border-black/5 dark:border-white/5">
+                      <p className="text-[10px] font-mono tracking-widest uppercase text-black/50 dark:text-white/50 mb-1">Pending Reviews</p>
+                      <p className="text-3xl font-display font-black text-orange-500">{staffStats.pendingReviews}</p>
+                    </div>
+                    <div className="bg-black/5 dark:bg-white/5 rounded-xl p-4 border border-black/5 dark:border-white/5 col-span-2">
+                      <p className="text-[10px] font-mono tracking-widest uppercase text-black/50 dark:text-white/50 mb-1">Reviews Completed</p>
+                      <p className="text-3xl font-display font-black text-green-600 dark:text-green-400">{staffStats.reviewsCompleted}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-xs font-mono text-black/40 dark:text-white/40">Loading stats...</div>
+                )}
+              </div>
+
+              {/* System/Grading Heatmap */}
+              <div className="border border-black/10 dark:border-white/10 rounded-2xl p-6">
+                <h3 className="font-bold flex items-center gap-2 mb-6 text-sm">
+                  <svg className="w-4 h-4 text-black/50 dark:text-white/50" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M3 9h18M9 21V9" stroke="currentColor" strokeWidth="1.5"/></svg>
+                  Grading Activity
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {staffStats?.activityHeatmap?.map((day, i) => {
+                    let bgColor = "bg-black/5 dark:bg-white/5";
+                    if (day.count > 5) bgColor = "bg-emerald-500/80 dark:bg-emerald-500/80";
+                    else if (day.count > 2) bgColor = "bg-emerald-400/60 dark:bg-emerald-500/60";
+                    else if (day.count > 0) bgColor = "bg-emerald-300/40 dark:bg-emerald-500/40";
+                    return (
+                      <div key={i} className="relative group cursor-help">
+                        <div className={`w-6 h-6 rounded-sm ${bgColor} border border-black/[0.04] dark:border-white/[0.04] transition-colors group-hover:ring-2 group-hover:ring-black/20 dark:group-hover:ring-white/20`} />
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-[200px] opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150 z-50">
+                          <div className="bg-black dark:bg-white text-white dark:text-black text-[10px] font-mono px-3 py-2 rounded-md shadow-xl text-center">
+                            <span className="font-bold opacity-50 uppercase tracking-widest block mb-1">{day.date}</span>
+                            <span className="block mt-1 text-green-400 dark:text-green-600">{day.count} Reviews</span>
+                          </div>
+                          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-black dark:border-t-white" />
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {staffStats?.activityHeatmap?.length === 0 && (
+                    <p className="font-mono text-[10px] text-black/40 dark:text-white/40 tracking-widest uppercase">No activity data</p>
+                  )}
+                </div>
+              </div>
+              
+              {/* Assigned Students List (Volunteers only) */}
+              {user?.role === "volunteer" && staffStats?.assignedStudents?.length > 0 && (
+                <div className="border border-black/10 dark:border-white/10 rounded-2xl p-6">
+                  <h3 className="font-bold flex items-center gap-2 mb-6 text-sm">
+                    <svg className="w-4 h-4 text-black/50 dark:text-white/50" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    Assigned Students Roster
+                  </h3>
+                  <div className="space-y-3">
+                    {staffStats.assignedStudents.map(student => (
+                      <div key={student._id} className="flex justify-between items-center p-3 border border-black/5 dark:border-white/5 rounded-lg bg-black/5 dark:bg-white/5">
+                        <span className="text-sm font-bold">{student.name}</span>
+                        <span className="text-xs font-mono bg-black dark:bg-white text-white dark:text-black px-2 py-1 rounded-md">{student.totalPoints} PTS</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : user?.role === "admin" ? null : (
+            <>
+              {/* Recent Activity */}
           <div className="border border-black/10 dark:border-white/10 rounded-2xl p-6">
             <h3 className="font-bold flex items-center gap-2 mb-6 text-sm">
               <svg className="w-4 h-4 text-black/50 dark:text-white/50" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" /><path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -358,6 +440,8 @@ function ProfileContent() {
               </div>
               </div>
             </div>
+          )}
+            </>
           )}
 
         </div>

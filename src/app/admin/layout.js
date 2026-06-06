@@ -103,7 +103,7 @@ export default function AdminLayout({ children }) {
     ] : []),
     ...(!isAdmin ? [
       {
-        href: "/dashboard/days",
+        href: "/admin/roadmap",
         label: "ROADMAP",
         icon: (
           <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">

@@ -47,7 +47,7 @@ export default function AdminDashboard() {
       },
     ] : [
       {
-        href: "/dashboard/days",
+        href: "/admin/roadmap",
         label: "ROADMAP",
         desc: "View the student curriculum roadmap",
         icon: (

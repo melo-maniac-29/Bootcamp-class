@@ -578,3 +578,61 @@ export const migrateToCircutron = mutation({
     return updatedCount;
   }
 });
+
+export const getStaffProfileStats = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await auth.getUserId(ctx);
+    if (!userId) return null;
+    const user = await ctx.db.get(userId);
+    if (user?.role !== "admin" && user?.role !== "volunteer") return null;
+
+    if (user.role === "admin") {
+      const users = await ctx.db.query("users").collect();
+      const students = users.filter(u => u.role === "student" || !u.role);
+      const totalVolunteers = users.filter(u => u.role === "volunteer").length;
+      const submissions = await ctx.db.query("submissions").collect();
+      const startOfToday = new Date();
+      startOfToday.setHours(0, 0, 0, 0);
+      const submissionsToday = submissions.filter(sub => sub.submittedAt >= startOfToday.getTime()).length;
+      
+      return {
+        role: "admin",
+        totalStudents: students.length,
+        totalVolunteers,
+        submissionsToday,
+        totalSubmissions: submissions.length,
+      };
+    } else {
+      const users = await ctx.db.query("users").collect();
+      const assignedStudents = users.filter(u => u.assignedVolunteerId === userId);
+      const studentIds = new Set(assignedStudents.map(s => s._id));
+      
+      const submissions = await ctx.db.query("submissions").collect();
+      const volunteerSubmissions = submissions.filter(s => studentIds.has(s.userId));
+      const pendingReviews = volunteerSubmissions.filter(s => s.status === "Pending Review").length;
+      const reviewsCompleted = submissions.filter(s => s.reviewedBy === userId).length;
+
+      const timeSeriesMap = new Map();
+      for (const sub of submissions) {
+        if (!sub.reviewedAt || sub.reviewedBy !== userId) continue;
+        const date = new Date(sub.reviewedAt).toISOString().split("T")[0];
+        if (!timeSeriesMap.has(date)) {
+          timeSeriesMap.set(date, { date, count: 0 });
+        }
+        timeSeriesMap.get(date).count += 1;
+      }
+      const activityHeatmap = Array.from(timeSeriesMap.values()).sort((a, b) => a.date.localeCompare(b.date));
+
+      return {
+        role: "volunteer",
+        assignedStudentCount: assignedStudents.length,
+        assignedStudents: assignedStudents.map(s => ({ _id: s._id, name: s.name, totalPoints: s.totalPoints || 0 })),
+        pendingReviews,
+        reviewsCompleted,
+        activityHeatmap
+      };
+    }
+  }
+});
+
