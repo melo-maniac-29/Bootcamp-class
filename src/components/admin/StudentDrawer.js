@@ -146,18 +146,22 @@ export default function StudentDrawer({ isOpen, onClose, userId }) {
                             </div>
                             
                             <div className="space-y-1.5 mt-3">
-                              <div className="flex justify-between items-center text-[10px] font-mono tracking-widest uppercase">
-                                <span className="text-black/50 dark:text-white/50">Quiz Points</span>
-                                <span className={day.quizPoints > 0 ? "text-green-600 dark:text-green-400 font-bold" : "text-black/30 dark:text-white/30"}>
-                                  {day.quizPoints} / {day.maxQuizPoints}
-                                </span>
-                              </div>
-                              <div className="flex justify-between items-center text-[10px] font-mono tracking-widest uppercase">
-                                <span className="text-black/50 dark:text-white/50">Task Points</span>
-                                <span className={day.taskPoints > 0 ? "text-green-600 dark:text-green-400 font-bold" : "text-black/30 dark:text-white/30"}>
-                                  {day.taskPoints} / {day.maxTaskPoints}
-                                </span>
-                              </div>
+                              {day.maxQuizPoints > 0 && (
+                                <div className="flex justify-between items-center text-[10px] font-mono tracking-widest uppercase">
+                                  <span className="text-black/50 dark:text-white/50">Quiz Points</span>
+                                  <span className={day.quizPoints > 0 ? "text-green-600 dark:text-green-400 font-bold" : "text-black/30 dark:text-white/30"}>
+                                    {day.quizPoints} / {day.maxQuizPoints}
+                                  </span>
+                                </div>
+                              )}
+                              {day.maxTaskPoints > 0 && (
+                                <div className="flex justify-between items-center text-[10px] font-mono tracking-widest uppercase">
+                                  <span className="text-black/50 dark:text-white/50">Task Points</span>
+                                  <span className={day.taskPoints > 0 ? "text-green-600 dark:text-green-400 font-bold" : "text-black/30 dark:text-white/30"}>
+                                    {day.taskPoints} / {day.maxTaskPoints}
+                                  </span>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
