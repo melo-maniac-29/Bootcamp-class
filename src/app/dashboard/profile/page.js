@@ -315,7 +315,8 @@ function ProfileContent() {
                 <svg className="w-4 h-4 text-black/50 dark:text-white/50" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 Points Breakdown
               </h3>
-              <div className="space-y-4 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-black/10 dark:before:via-white/10 before:to-transparent">
+              <div className="max-h-[500px] overflow-y-auto pr-2 pb-4 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-black/10 dark:[&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full">
+                <div className="space-y-4 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-black/10 dark:before:via-white/10 before:to-transparent">
                 {breakdownData.breakdown.map((day, idx) => (
                   <div key={day.dayId} className="relative flex items-start justify-between gap-4 md:justify-normal md:odd:flex-row-reverse group is-active">
                     <div className="absolute left-5 md:left-1/2 -translate-x-1/2 flex items-center justify-center w-3 h-3 rounded-full border-2 border-white dark:border-[#0a0a0a] bg-black/20 dark:bg-white/20 group-hover:bg-black group-hover:dark:bg-white transition-colors mt-1.5" />
@@ -354,6 +355,7 @@ function ProfileContent() {
                     </div>
                   </div>
                 )}
+              </div>
               </div>
             </div>
           )}
