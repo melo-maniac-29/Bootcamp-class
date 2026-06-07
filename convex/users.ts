@@ -139,20 +139,77 @@ export const getLeaderboard = query({
     const users = await ctx.db.query("users").collect();
     const students = users.filter((u) => u.role === "student" || !u.role);
     
-    // Fetch first submission time for tiebreaker
-    const studentsWithStats = await Promise.all(
-      students.map(async (student) => {
-        const firstSubmission = await ctx.db.query("submissions")
-          .withIndex("by_userId", (q) => q.eq("userId", student._id))
-          .order("asc")
-          .first();
-          
-        return {
-          ...student,
-          firstSubmissionTime: firstSubmission ? firstSubmission.submittedAt : Infinity
-        };
-      })
-    );
+    // Fetch unlocked days exactly like getUserPointsBreakdown to ensure points match
+    const allDays = await ctx.db.query("days").collect();
+    const activeDays = allDays.filter((d) => !d.deleted);
+    const allWeeks = await ctx.db.query("weeks").collect();
+    const now = Date.now();
+    
+    const unlockedDayIds = new Set();
+    for (const week of allWeeks) {
+      if (week.unlockAt && now < week.unlockAt) continue;
+      const weekDays = activeDays.filter(d => d.weekId === week._id);
+      for (const day of weekDays) {
+        if (day.unlockAt && now < day.unlockAt) continue;
+        unlockedDayIds.add(day._id);
+      }
+    }
+    
+    // Map active days for points fallback
+    const dayMap = new Map(activeDays.map(d => [d._id, d]));
+
+    const submissions = await ctx.db.query("submissions").collect();
+    const progressDocs = await ctx.db.query("userProgress").collect();
+
+    // Map calculated points for each student
+    const studentPoints = new Map();
+    const studentFirstSubTime = new Map();
+    
+    students.forEach(s => {
+      studentPoints.set(s._id, 0);
+      studentFirstSubTime.set(s._id, Infinity);
+    });
+
+    for (const prog of progressDocs) {
+      if (unlockedDayIds.has(prog.dayId) && prog.quizCompleted && prog.quizScore !== undefined) {
+        if (studentPoints.has(prog.userId)) {
+          studentPoints.set(prog.userId, studentPoints.get(prog.userId) + prog.quizScore);
+        }
+      }
+    }
+
+    for (const sub of submissions) {
+      // Calculate earliest submission for tiebreaker
+      if (studentFirstSubTime.has(sub.userId)) {
+        if (sub.submittedAt && sub.submittedAt < studentFirstSubTime.get(sub.userId)) {
+          studentFirstSubTime.set(sub.userId, sub.submittedAt);
+        }
+      }
+
+      // Calculate points
+      if (unlockedDayIds.has(sub.dayId) && sub.pointsAwarded) {
+        if (studentPoints.has(sub.userId)) {
+          let pts = 0;
+          if (sub.awardedScore !== undefined) {
+            pts = sub.awardedScore;
+          } else {
+            const day = dayMap.get(sub.dayId);
+            if (day) {
+              pts = sub.isLate ? (day.taskPointsLate || 0) : (day.taskPointsOnTime || 0);
+            }
+          }
+          studentPoints.set(sub.userId, studentPoints.get(sub.userId) + pts);
+        }
+      }
+    }
+
+    const studentsWithStats = students.map((student) => {
+      return {
+        ...student,
+        totalPoints: studentPoints.get(student._id) || 0, // Dynamically set totalPoints for leaderboard rendering
+        firstSubmissionTime: studentFirstSubTime.get(student._id)
+      };
+    });
 
     return studentsWithStats.sort((a, b) => {
       const pointsDiff = (b.totalPoints || 0) - (a.totalPoints || 0);
