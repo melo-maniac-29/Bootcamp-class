@@ -202,6 +202,21 @@ export default function DayViewerPage() {
                     <span className="font-display font-black text-xl text-black dark:text-white leading-none">{progress.quizScore || 0}/{progress.quizTotal || quiz.questions.length}</span>
                   </div>
                 </div>
+              ) : isLockedAfter && currentUser?.role !== "admin" && currentUser?.role !== "volunteer" ? (
+                <div className="flex items-center justify-between p-5 border border-red-200 dark:border-red-900/30 rounded-xl bg-red-50/50 dark:bg-red-900/10 opacity-70">
+                  <div>
+                    <p className="font-mono text-[9px] tracking-[0.3em] text-red-600/50 dark:text-red-400/50 uppercase mb-1">
+                      KNOWLEDGE_CHECK
+                    </p>
+                    <p className="font-mono text-sm font-bold uppercase tracking-wider text-red-600/50 dark:text-red-400/50">
+                      Quiz Locked
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-red-600/40 dark:text-red-400/40 block mb-0.5">STATUS</span>
+                    <span className="font-display font-black text-xl text-red-600/50 dark:text-red-400/50 leading-none">MISSED</span>
+                  </div>
+                </div>
               ) : (
                 <Link
                   href={`/dashboard/days/${dayId}/quiz`}
@@ -212,7 +227,7 @@ export default function DayViewerPage() {
                       KNOWLEDGE_CHECK
                     </p>
                     <p className="font-mono text-sm font-bold uppercase tracking-wider text-black dark:text-white group-hover:text-white dark:group-hover:text-black transition-colors">
-                      {currentUser?.role === "volunteer" ? "Preview Quiz →" : "Take the Quiz →"}
+                      {currentUser?.role === "volunteer" || currentUser?.role === "admin" ? "Preview Quiz →" : "Take the Quiz →"}
                     </p>
                   </div>
                   <svg className="w-4 h-4 text-black/30 dark:text-white/30 group-hover:text-white dark:group-hover:text-black group-hover:translate-x-1 transition-all" viewBox="0 0 16 16" fill="none">

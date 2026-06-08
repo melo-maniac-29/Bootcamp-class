@@ -297,10 +297,17 @@ export const saveQuizResult = mutation({
 
     const day = await ctx.db.get(args.dayId);
     if (!day) throw new Error("DAY_NOT_FOUND");
+    
+    const user = await ctx.db.get(userId);
+    const isStaff = user?.role === "admin" || user?.role === "volunteer";
+
+    // Enforce lock deadline for students
+    if (!isStaff && day.lateDeadlineAt && Date.now() > day.lateDeadlineAt) {
+      throw new Error("Quiz is locked. The late deadline has passed.");
+    }
 
     // Only award points the FIRST time they complete the quiz
     if (!existing || !existing.quizCompleted) {
-      const user = await ctx.db.get(userId);
       if (user) {
         // Award points based on the number of correct answers (score)
         const pointsToAdd = args.score;
@@ -339,6 +346,17 @@ export const startOrResumeQuiz = mutation({
   handler: async (ctx, args) => {
     const userId = await auth.getUserId(ctx);
     if (!userId) throw new Error("UNAUTHORIZED");
+
+    const day = await ctx.db.get(args.dayId);
+    if (!day) throw new Error("Day not found");
+    
+    const user = await ctx.db.get(userId);
+    const isStaff = user?.role === "admin" || user?.role === "volunteer";
+
+    // Enforce lock deadline for students
+    if (!isStaff && day.lateDeadlineAt && Date.now() > day.lateDeadlineAt) {
+      throw new Error("Quiz is locked. The late deadline has passed.");
+    }
 
     let existing = await ctx.db
       .query("userProgress")
@@ -405,6 +423,15 @@ export const submitQuizAnswer = mutation({
 
     if (!quiz || !quiz.questions) return null;
 
+    const day = await ctx.db.get(args.dayId);
+    const user = await ctx.db.get(userId);
+    const isStaff = user?.role === "admin" || user?.role === "volunteer";
+
+    // Enforce lock deadline for students
+    if (!isStaff && day?.lateDeadlineAt && Date.now() > day.lateDeadlineAt) {
+      throw new Error("Quiz is locked. The late deadline has passed.");
+    }
+
     const state = existing.quizState;
     const currentQ = quiz.questions[state.currentIndex];
     if (!currentQ) return null;
@@ -435,7 +462,6 @@ export const submitQuizAnswer = mutation({
 
     if (isLast) {
       // Award points logic
-      const user = await ctx.db.get(userId);
       if (user) {
         await ctx.db.patch(userId, { totalPoints: (user.totalPoints || 0) + newScore });
       }
