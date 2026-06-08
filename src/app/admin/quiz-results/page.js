@@ -171,14 +171,14 @@ export default function QuizResultsPage() {
                   <AnimatePresence>
                     {expandedId === sub._id && (
                       <tr>
-                        <td colSpan={4} className="p-0 border-b border-black/[0.06] dark:border-white/[0.06]">
+                        <td colSpan={4} className="p-0 border-b border-black/[0.06] dark:border-white/[0.06] whitespace-normal">
                           <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: "auto" }}
                             exit={{ opacity: 0, height: 0 }}
                             className="overflow-hidden"
                           >
-                            <div className="bg-[#fcfcfc] dark:bg-[#0c0c0c] p-6 lg:p-8">
+                            <div className="bg-[#fcfcfc] dark:bg-[#0c0c0c] p-6 lg:p-8 whitespace-normal break-words">
                               <h3 className="font-display font-bold tracking-tight text-lg uppercase text-black/70 dark:text-white/70 mb-4 border-b border-black/10 dark:border-white/10 pb-2">
                                 Submission Details
                               </h3>
