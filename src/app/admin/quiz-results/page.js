@@ -170,67 +170,83 @@ export default function QuizResultsPage() {
                   {/* Expanded Details Row */}
                   <AnimatePresence>
                     {expandedId === sub._id && (
-                      <motion.tr
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                      >
+                      <tr>
                         <td colSpan={4} className="p-0 border-b border-black/[0.06] dark:border-white/[0.06]">
-                          <div className="bg-[#fcfcfc] dark:bg-[#0c0c0c] p-6 lg:p-8">
-                            <h3 className="font-display font-bold tracking-tight text-lg uppercase text-black/70 dark:text-white/70 mb-4 border-b border-black/10 dark:border-white/10 pb-2">
-                              Submission Details
-                            </h3>
-                            {sub.quizAnswers && sub.quizAnswers.length > 0 ? (
-                              <div className="space-y-6">
-                                {sub.quizAnswers.map((answer, idx) => (
-                                  <div key={idx} className="bg-white dark:bg-[#0a0a0a] rounded-lg border border-black/[0.06] dark:border-white/[0.06] p-5">
-                                    <p className="font-mono text-[10px] tracking-widest text-black/40 dark:text-white/40 uppercase mb-2">
-                                      Question {String(idx + 1).padStart(2, "0")}
-                                    </p>
-                                    <p className="font-display font-bold text-base text-black dark:text-white mb-4">
-                                      {answer.question}
-                                    </p>
-                                    <div className="space-y-2">
-                                      {answer.options.map((opt, optIdx) => {
-                                        const isSelected = answer.selectedIndex === optIdx;
-                                        const isCorrect = answer.correctIndex === optIdx;
-                                        let style = "border-black/[0.06] dark:border-white/[0.06] text-black/40 dark:text-white/40";
-                                        
-                                        if (isCorrect) {
-                                          style = "border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 font-bold";
-                                        } else if (isSelected && !isCorrect) {
-                                          style = "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 font-bold";
-                                        }
-                                        
-                                        return (
-                                          <div key={optIdx} className={`px-4 py-2.5 rounded-md border ${style} flex items-center justify-between`}>
-                                            <div className="flex items-center gap-3">
-                                              <span className={`font-mono text-[9px] font-bold tracking-widest ${isCorrect || isSelected ? 'opacity-100' : 'opacity-40'}`}>
-                                                {String.fromCharCode(65 + optIdx)}
-                                              </span>
-                                              <span className="font-mono text-xs uppercase tracking-wide">{opt}</span>
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="bg-[#fcfcfc] dark:bg-[#0c0c0c] p-6 lg:p-8">
+                              <h3 className="font-display font-bold tracking-tight text-lg uppercase text-black/70 dark:text-white/70 mb-4 border-b border-black/10 dark:border-white/10 pb-2">
+                                Submission Details
+                              </h3>
+                              {sub.quizAnswers && sub.quizAnswers.length > 0 ? (
+                                <div className="space-y-6">
+                                  {sub.quizAnswers.map((answer, idx) => (
+                                    <div key={idx} className="bg-white dark:bg-[#0a0a0a] rounded-lg border border-black/[0.06] dark:border-white/[0.06] p-5">
+                                      <p className="font-mono text-[10px] tracking-widest text-black/40 dark:text-white/40 uppercase mb-2">
+                                        Question {String(idx + 1).padStart(2, "0")}
+                                      </p>
+                                      <p className="font-display font-bold text-base text-black dark:text-white mb-4">
+                                        {answer.question}
+                                      </p>
+                                      <div className="space-y-2">
+                                        {answer.options.map((opt, optIdx) => {
+                                          const isSelected = answer.selectedIndex === optIdx;
+                                          const isCorrect = answer.correctIndex === optIdx;
+                                          let style = "border-black/[0.06] dark:border-white/[0.06] text-black/40 dark:text-white/40";
+                                          
+                                          if (isSelected && isCorrect) {
+                                            style = "border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 font-bold";
+                                          } else if (isSelected && !isCorrect) {
+                                            style = "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 font-bold";
+                                          } else if (!isSelected && isCorrect) {
+                                            style = "border-green-500/50 bg-green-50/50 dark:bg-green-900/10 text-green-700/80 dark:text-green-400/80 border-dashed";
+                                          }
+                                          
+                                          return (
+                                            <div key={optIdx} className={`px-4 py-2.5 rounded-md border ${style} flex items-center justify-between`}>
+                                              <div className="flex items-center gap-3">
+                                                <span className={`font-mono text-[9px] font-bold tracking-widest ${isCorrect || isSelected ? 'opacity-100' : 'opacity-40'}`}>
+                                                  {String.fromCharCode(65 + optIdx)}
+                                                </span>
+                                                <span className="font-mono text-xs uppercase tracking-wide">{opt}</span>
+                                              </div>
+                                              {isSelected && isCorrect && (
+                                                <span className="font-mono text-[8px] uppercase tracking-widest text-green-600 font-bold flex items-center gap-1">
+                                                  <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                                  STUDENT SELECTED (CORRECT)
+                                                </span>
+                                              )}
+                                              {isSelected && !isCorrect && (
+                                                <span className="font-mono text-[8px] uppercase tracking-widest text-red-600 font-bold flex items-center gap-1">
+                                                  <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none"><path d="M12 4L4 12M4 4l8 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                                  STUDENT SELECTED (INCORRECT)
+                                                </span>
+                                              )}
+                                              {!isSelected && isCorrect && (
+                                                <span className="font-mono text-[8px] uppercase tracking-widest text-green-600/80 font-bold">
+                                                  CORRECT ANSWER
+                                                </span>
+                                              )}
                                             </div>
-                                            {isCorrect && (
-                                              <span className="font-mono text-[8px] uppercase tracking-widest text-green-600 font-bold">CORRECT</span>
-                                            )}
-                                            {isSelected && !isCorrect && (
-                                              <span className="font-mono text-[8px] uppercase tracking-widest text-red-600 font-bold">INCORRECT</span>
-                                            )}
-                                          </div>
-                                        );
-                                      })}
+                                          );
+                                        })}
+                                      </div>
                                     </div>
-                                  </div>
-                                ))}
-                              </div>
-                            ) : (
-                              <p className="font-mono text-xs text-black/40 dark:text-white/40 uppercase">
-                                DETAILS_UNAVAILABLE // OLD_SUBMISSION_FORMAT
-                              </p>
-                            )}
-                          </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="font-mono text-xs text-black/40 dark:text-white/40 uppercase">
+                                  DETAILS_UNAVAILABLE // OLD_SUBMISSION_FORMAT
+                                </p>
+                              )}
+                            </div>
+                          </motion.div>
                         </td>
-                      </motion.tr>
+                      </tr>
                     )}
                   </AnimatePresence>
                 </React.Fragment>
@@ -324,31 +340,44 @@ export default function QuizResultsPage() {
                                   const isCorrect = answer.correctIndex === optIdx;
                                   let style = "border-black/[0.06] dark:border-white/[0.06] text-black/40 dark:text-white/40";
                                   
-                                  if (isCorrect) {
+                                  if (isSelected && isCorrect) {
                                     style = "border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 font-bold";
-                                  } else if (isSelected && !isCorrect) {
-                                    style = "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 font-bold";
-                                  }
-                                  
-                                  return (
-                                    <div key={optIdx} className={`px-3 py-2 rounded border ${style} flex flex-col gap-1`}>
-                                      <div className="flex items-start gap-2">
-                                        <span className={`font-mono text-[9px] font-bold mt-0.5 ${isCorrect || isSelected ? 'opacity-100' : 'opacity-40'}`}>
-                                          {String.fromCharCode(65 + optIdx)}
-                                        </span>
-                                        <span className="font-mono text-[10px] uppercase leading-tight">{opt}</span>
+                                    } else if (isSelected && !isCorrect) {
+                                      style = "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 font-bold";
+                                    } else if (!isSelected && isCorrect) {
+                                      style = "border-green-500/50 bg-green-50/50 dark:bg-green-900/10 text-green-700/80 dark:text-green-400/80 border-dashed";
+                                    }
+                                    
+                                    return (
+                                      <div key={optIdx} className={`px-3 py-2 rounded border ${style} flex flex-col gap-1`}>
+                                        <div className="flex items-start gap-2">
+                                          <span className={`font-mono text-[9px] font-bold mt-0.5 ${isCorrect || isSelected ? 'opacity-100' : 'opacity-40'}`}>
+                                            {String.fromCharCode(65 + optIdx)}
+                                          </span>
+                                          <span className="font-mono text-[10px] uppercase leading-tight">{opt}</span>
+                                        </div>
+                                        <div className="pl-4">
+                                          {isSelected && isCorrect && (
+                                            <span className="font-mono text-[8px] uppercase tracking-widest text-green-600 font-bold flex items-center gap-1">
+                                              <svg className="w-2.5 h-2.5" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                              SELECTED (CORRECT)
+                                            </span>
+                                          )}
+                                          {isSelected && !isCorrect && (
+                                            <span className="font-mono text-[8px] uppercase tracking-widest text-red-600 font-bold flex items-center gap-1">
+                                              <svg className="w-2.5 h-2.5" viewBox="0 0 16 16" fill="none"><path d="M12 4L4 12M4 4l8 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                              SELECTED (INCORRECT)
+                                            </span>
+                                          )}
+                                          {!isSelected && isCorrect && (
+                                            <span className="font-mono text-[8px] uppercase tracking-widest text-green-600/80 font-bold">
+                                              CORRECT ANSWER
+                                            </span>
+                                          )}
+                                        </div>
                                       </div>
-                                      <div className="pl-4">
-                                        {isCorrect && (
-                                          <span className="font-mono text-[8px] uppercase tracking-widest text-green-600 font-bold">CORRECT</span>
-                                        )}
-                                        {isSelected && !isCorrect && (
-                                          <span className="font-mono text-[8px] uppercase tracking-widest text-red-600 font-bold">INCORRECT</span>
-                                        )}
-                                      </div>
-                                    </div>
-                                  );
-                                })}
+                                    );
+                                  })}
                               </div>
                             </div>
                           ))}
