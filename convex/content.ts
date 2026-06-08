@@ -374,7 +374,11 @@ export const startOrResumeQuiz = mutation({
       existing = await ctx.db.get(existing._id);
     }
 
-    return existing?.quizState || null;
+    if (!existing || !existing.quizState) return null;
+    return {
+      ...existing.quizState,
+      serverNow: Date.now()
+    };
   }
 });
 
@@ -452,7 +456,7 @@ export const submitQuizAnswer = mutation({
         currentQuestionStartTime: Date.now(),
       };
       await ctx.db.patch(existing._id, { quizState: newState });
-      return { finished: false, state: newState };
+      return { finished: false, state: { ...newState, serverNow: Date.now() } };
     }
   }
 });
