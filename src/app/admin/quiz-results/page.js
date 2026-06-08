@@ -113,12 +113,12 @@ export default function QuizResultsPage() {
       {/* Table */}
       <div className="border border-black/[0.06] dark:border-white/[0.06] rounded-xl overflow-hidden bg-white dark:bg-[#0a0a0a]">
         {/* Desktop Table View */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-left whitespace-nowrap min-w-max">
+        <div className="hidden md:block">
+          <table className="w-full table-fixed text-left">
             <thead>
               <tr className="border-b border-black/[0.06] dark:border-white/[0.06] bg-[#F8F9FA] dark:bg-[#111111]">
                 {["STUDENT", "QUIZ_NODE", "SCORE", "ACTION"].map(col => (
-                  <th key={col} className="px-5 py-4 font-mono text-[9px] tracking-[0.25em] text-black/30 dark:text-white/30 uppercase font-bold">
+                  <th key={col} className={`px-5 py-4 font-mono text-[9px] tracking-[0.25em] text-black/30 dark:text-white/30 uppercase font-bold ${col === 'QUIZ_NODE' ? 'w-1/3' : 'w-1/6'}`}>
                     {col}
                   </th>
                 ))}
@@ -137,16 +137,16 @@ export default function QuizResultsPage() {
                       <span className="font-mono text-sm font-bold text-black dark:text-white uppercase tracking-wider block">{sub.studentName}</span>
                       <span className="font-mono text-[9px] text-black/40 dark:text-white/40 tracking-widest">{sub.studentEmail}</span>
                     </td>
-                    <td className="px-5 py-4">
+                    <td className="px-5 py-4 max-w-[300px]">
                       <span className="font-mono text-[10px] text-black/40 dark:text-white/40 uppercase tracking-widest block mb-0.5">{sub.weekTitle}</span>
-                      <span className="font-mono text-xs text-black/80 dark:text-white/80">{sub.dayTitle}</span>
+                      <span className="font-mono text-xs text-black/80 dark:text-white/80 whitespace-normal break-words">{sub.dayTitle}</span>
                     </td>
                     <td className="px-5 py-4">
                       <span className="font-mono text-[11px] text-black dark:text-white font-bold tracking-widest">
                         {sub.quizScore !== undefined ? sub.quizScore : 0} / {sub.quizTotal !== undefined ? sub.quizTotal : 0}
                       </span>
                     </td>
-                    <td className="px-5 py-4">
+                    <td className="px-5 py-4 whitespace-nowrap">
                       <div className="flex flex-wrap gap-2">
                         <button
                           onClick={() => toggleExpand(sub._id)}
@@ -212,7 +212,7 @@ export default function QuizResultsPage() {
                                                 <span className={`font-mono text-[9px] font-bold tracking-widest mt-0.5 shrink-0 ${isCorrect || isSelected ? 'opacity-100' : 'opacity-40'}`}>
                                                   {String.fromCharCode(65 + optIdx)}
                                                 </span>
-                                                <span className="font-mono text-xs uppercase tracking-wide">{opt}</span>
+                                                <span className="font-mono text-xs uppercase tracking-wide flex-1 whitespace-normal break-words">{opt}</span>
                                               </div>
                                               <div className="pl-6">
                                                 {isSelected && isCorrect && (
