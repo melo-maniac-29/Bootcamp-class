@@ -3,6 +3,7 @@ import "./globals.css";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { Analytics } from "@vercel/analytics/next";
 
 
 const inter = Inter({
@@ -32,6 +33,7 @@ export default function RootLayout({ children }) {
               <div className="flex-1 flex flex-col">{children}</div>
             </ConvexClientProvider>
           </ThemeProvider>
+          <Analytics />
         </body>
       </html>
     </ConvexAuthNextjsServerProvider>

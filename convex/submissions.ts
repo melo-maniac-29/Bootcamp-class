@@ -37,26 +37,37 @@ export const listSubmissions = query({
     const userId = await checkReviewer(ctx);
     const user = await ctx.db.get(userId);
     
-    let submissions = await ctx.db.query("submissions").collect();
+    let submissions = [];
     
     if (user?.role === "volunteer") {
       const students = await ctx.db.query("users")
         .withIndex("by_assignedVolunteerId", (q) => q.eq("assignedVolunteerId", userId))
         .collect();
-      const studentIds = new Set(students.map(s => s._id));
-      submissions = submissions.filter(sub => studentIds.has(sub.userId));
+        
+      for (const student of students) {
+        const studentSubs = await ctx.db.query("submissions")
+          .withIndex("by_userId", (q) => q.eq("userId", student._id))
+          .collect();
+        submissions.push(...studentSubs);
+      }
+    } else {
+      submissions = await ctx.db.query("submissions").collect();
     }
+    
+    // Only show submissions that actually have a link to review
+    // (This hides "Node Completion" auto-submissions from the review queue)
+    const reviewableSubmissions = submissions.filter(sub => sub.link && sub.link.trim() !== "");
     
     // We need to resolve users and days for the UI
     const resolved = await Promise.all(
-      submissions.map(async (sub) => {
-        const user = await ctx.db.get(sub.userId);
+      reviewableSubmissions.map(async (sub) => {
+        const studentUser = await ctx.db.get(sub.userId);
         const day = await ctx.db.get(sub.dayId);
         const week = day ? await ctx.db.get(day.weekId) : null;
         const maxPoints = sub.isLate ? (day?.taskPointsLate || 0) : (day?.taskPointsOnTime || 0);
         return Object.assign({}, sub, {
-          userName: user?.name || user?.email || "Unknown User",
-          assignedVolunteerId: user?.assignedVolunteerId,
+          userName: studentUser?.name || studentUser?.email || "Unknown User",
+          assignedVolunteerId: studentUser?.assignedVolunteerId,
           dayTitle: day?.title || "Unknown Day",
           weekTitle: week?.title || "Unknown Week",
           weekOrder: week?.order ?? 999,
@@ -67,9 +78,7 @@ export const listSubmissions = query({
       })
     );
 
-    // Only show submissions that actually have a link to review
-    // (This hides "Node Completion" auto-submissions from the review queue)
-    return resolved.filter(sub => sub.link && sub.link.trim() !== "");
+    return resolved;
   },
 });
 

@@ -11,6 +11,7 @@
   "dependencies": {
     "@auth/core": "^0.37.4",
     "@convex-dev/auth": "^0.0.92",
+    "@vercel/analytics": "^2.0.1",
     "clsx": "^2.1.1",
     "convex": "^1.40.0",
     "framer-motion": "^12.40.0",

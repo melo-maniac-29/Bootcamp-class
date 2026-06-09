@@ -252,8 +252,15 @@ export const getMyProgress = query({
     }
 
     const totalTasks = unlockedDays.filter(d => !!d.taskDescription).length;
-    const allQuizzes = await ctx.db.query("quizzes").collect();
-    const totalQuizzes = allQuizzes.filter(q => unlockedDays.some(d => d._id === q.dayId) && q.questions && q.questions.length > 0).length;
+    
+    // OPTIMIZED: Query for quizzes individually by dayId to avoid fetching ALL quizzes (and their questions/answers) into memory
+    let totalQuizzes = 0;
+    for (const day of unlockedDays) {
+      const quiz = await ctx.db.query("quizzes").withIndex("by_dayId", q => q.eq("dayId", day._id)).first();
+      if (quiz && quiz.questions && quiz.questions.length > 0) {
+        totalQuizzes++;
+      }
+    }
 
     return { 
       totalDays, 
@@ -297,10 +304,17 @@ export const saveQuizResult = mutation({
 
     const day = await ctx.db.get(args.dayId);
     if (!day) throw new Error("DAY_NOT_FOUND");
+    
+    const user = await ctx.db.get(userId);
+    const isStaff = user?.role === "admin" || user?.role === "volunteer";
+
+    // Enforce lock deadline for students
+    if (!isStaff && day.lateDeadlineAt && Date.now() > day.lateDeadlineAt) {
+      throw new Error("Quiz is locked. The late deadline has passed.");
+    }
 
     // Only award points the FIRST time they complete the quiz
     if (!existing || !existing.quizCompleted) {
-      const user = await ctx.db.get(userId);
       if (user) {
         // Award points based on the number of correct answers (score)
         const pointsToAdd = args.score;
@@ -339,6 +353,17 @@ export const startOrResumeQuiz = mutation({
   handler: async (ctx, args) => {
     const userId = await auth.getUserId(ctx);
     if (!userId) throw new Error("UNAUTHORIZED");
+
+    const day = await ctx.db.get(args.dayId);
+    if (!day) throw new Error("Day not found");
+    
+    const user = await ctx.db.get(userId);
+    const isStaff = user?.role === "admin" || user?.role === "volunteer";
+
+    // Enforce lock deadline for students
+    if (!isStaff && day.lateDeadlineAt && Date.now() > day.lateDeadlineAt) {
+      throw new Error("Quiz is locked. The late deadline has passed.");
+    }
 
     let existing = await ctx.db
       .query("userProgress")
@@ -405,6 +430,15 @@ export const submitQuizAnswer = mutation({
 
     if (!quiz || !quiz.questions) return null;
 
+    const day = await ctx.db.get(args.dayId);
+    const user = await ctx.db.get(userId);
+    const isStaff = user?.role === "admin" || user?.role === "volunteer";
+
+    // Enforce lock deadline for students
+    if (!isStaff && day?.lateDeadlineAt && Date.now() > day.lateDeadlineAt) {
+      throw new Error("Quiz is locked. The late deadline has passed.");
+    }
+
     const state = existing.quizState;
     const currentQ = quiz.questions[state.currentIndex];
     if (!currentQ) return null;
@@ -435,7 +469,6 @@ export const submitQuizAnswer = mutation({
 
     if (isLast) {
       // Award points logic
-      const user = await ctx.db.get(userId);
       if (user) {
         await ctx.db.patch(userId, { totalPoints: (user.totalPoints || 0) + newScore });
       }
@@ -528,17 +561,24 @@ export const listQuizSubmissions = query({
     const user = await ctx.db.get(userId);
     if (user?.role !== "admin" && user?.role !== "volunteer") return [];
 
-    const allProgress = await ctx.db.query("userProgress").collect();
-    const withQuiz = allProgress.filter(p => p.quizCompleted);
+    let withQuiz = [];
+    if (user.role === "volunteer") {
+      const students = await ctx.db.query("users")
+        .withIndex("by_assignedVolunteerId", (q) => q.eq("assignedVolunteerId", userId))
+        .collect();
+      for (const student of students) {
+        const studentProgress = await ctx.db.query("userProgress")
+          .withIndex("by_userId", (q) => q.eq("userId", student._id))
+          .collect();
+        withQuiz.push(...studentProgress.filter(p => p.quizCompleted));
+      }
+    } else {
+      const allProgress = await ctx.db.query("userProgress").collect();
+      withQuiz = allProgress.filter(p => p.quizCompleted);
+    }
 
     const results = await Promise.all(withQuiz.map(async (p) => {
       const student = await ctx.db.get(p.userId);
-      
-      // If the user is a volunteer, only show their assigned students
-      if (user.role === "volunteer" && student?.assignedVolunteerId !== userId) {
-        return null;
-      }
-
       const day = await ctx.db.get(p.dayId);
       const week = day ? await ctx.db.get(day.weekId) : null;
       return {
@@ -556,7 +596,7 @@ export const listQuizSubmissions = query({
       };
     }));
 
-    return results.filter(Boolean);
+    return results;
   },
 });
 

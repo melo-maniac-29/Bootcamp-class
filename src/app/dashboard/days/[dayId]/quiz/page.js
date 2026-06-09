@@ -21,6 +21,8 @@ export default function QuizPage() {
   
   const quiz = useQuery(api.content.getQuiz, { dayId });
   const currentUser = useQuery(api.users.current);
+  const day = useQuery(api.content.getDay, { dayId });
+  const progress = useQuery(api.content.getDayProgress, { dayId });
   const saveQuizResult = useMutation(api.content.saveQuizResult);
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -51,7 +53,7 @@ export default function QuizPage() {
   }, [currentIndex, quiz, finished, answered]);
 
   // ── Loading ──
-  if (quiz === undefined || currentUser === undefined) return (
+  if (quiz === undefined || currentUser === undefined || day === undefined) return (
     <div className="flex items-center justify-center min-h-[50vh]">
       <p className="font-mono text-[10px] tracking-widest text-black/25 dark:text-white/25 uppercase animate-pulse">
         LOADING_QUIZ...
@@ -60,6 +62,35 @@ export default function QuizPage() {
   );
 
   const isStaff = currentUser?.role === "volunteer" || currentUser?.role === "admin";
+
+  // ── Locked ──
+  if (day?.lateDeadlineAt && Date.now() > day.lateDeadlineAt && !isStaff && !progress?.quizCompleted) {
+    return (
+      <div className="max-w-2xl mx-auto py-20 text-center">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-50 dark:bg-red-900/20 text-red-500 mb-6">
+          <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+        </div>
+        <h2 className="font-display font-black text-2xl tracking-tighter uppercase text-black dark:text-white mb-2">
+          Quiz Locked
+        </h2>
+        <p className="font-mono text-[10px] tracking-widest text-black/40 dark:text-white/40 uppercase mb-8">
+          THE_LATE_DEADLINE_HAS_PASSED
+        </p>
+        <Link
+          href={`/dashboard/days/${dayId}`}
+          className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider px-6 py-3 rounded-lg bg-black dark:bg-white text-white dark:text-black hover:bg-black/80 dark:hover:bg-white/80 transition-colors"
+        >
+          <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none">
+            <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          BACK_TO_LESSON
+        </Link>
+      </div>
+    );
+  }
 
   // ── No quiz ──
   if (!quiz || !quiz.questions || quiz.questions.length === 0) {
@@ -144,7 +175,7 @@ export default function QuizPage() {
   const total = questions.length;
   const current = questions[currentIndex];
   const isLast = currentIndex === total - 1;
-  const progress = ((currentIndex) / total) * 100;
+  const progressPct = ((currentIndex) / total) * 100;
 
   const handleSelect = (optIdx) => {
     if (answered) return;
@@ -306,7 +337,7 @@ export default function QuizPage() {
         </div>
         <div className="h-[2px] w-full bg-black/5 dark:bg-white/5 rounded-full overflow-hidden">
           <motion.div
-            animate={{ width: `${progress}%` }}
+            animate={{ width: `${progressPct}%` }}
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="h-full bg-black dark:bg-white rounded-full"
           />
