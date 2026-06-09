@@ -14,6 +14,7 @@ import type * as http from "../http.js";
 import type * as password from "../password.js";
 import type * as recalculatePoints from "../recalculatePoints.js";
 import type * as submissions from "../submissions.js";
+import type * as test from "../test.js";
 import type * as users from "../users.js";
 
 import type {
@@ -29,6 +30,7 @@ declare const fullApi: ApiFromModules<{
   password: typeof password;
   recalculatePoints: typeof recalculatePoints;
   submissions: typeof submissions;
+  test: typeof test;
   users: typeof users;
 }>;
 

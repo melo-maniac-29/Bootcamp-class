@@ -202,7 +202,7 @@ export default function VolunteersPage() {
             <div>
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h3 className="font-mono text-lg font-bold text-black dark:text-white">{vol.name || "Unnamed"}</h3>
+                  <h3 className="font-mono text-lg font-bold text-black dark:text-white uppercase">{vol.name || "Unnamed"}</h3>
                   <p className="font-mono text-[10px] tracking-wider text-black/40 dark:text-white/40 uppercase mt-1">{vol.email}</p>
                 </div>
                 <span className="shrink-0 whitespace-nowrap font-mono text-[9px] px-2 py-1 bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800 rounded uppercase tracking-widest">
