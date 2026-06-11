@@ -139,7 +139,10 @@ export default function QuizResultsPage() {
                     </td>
                     <td className="px-5 py-4 max-w-[300px]">
                       <span className="font-mono text-[10px] text-black/40 dark:text-white/40 uppercase tracking-widest block mb-0.5">{sub.weekTitle}</span>
-                      <span className="font-mono text-xs text-black/80 dark:text-white/80 whitespace-normal break-words">{sub.dayTitle}</span>
+                      <span className="font-mono text-xs text-black/80 dark:text-white/80 whitespace-normal break-words block">{sub.dayTitle}</span>
+                      <span suppressHydrationWarning className="font-mono text-[10px] text-amber-600 dark:text-amber-500 uppercase tracking-widest mt-1.5 block font-bold">
+                        {sub.submittedAt || sub._creationTime ? new Date(sub.submittedAt || sub._creationTime).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : "NO TIMESTAMP"}
+                      </span>
                     </td>
                     <td className="px-5 py-4">
                       <span className="font-mono text-[11px] text-black dark:text-white font-bold tracking-widest">
@@ -186,9 +189,24 @@ export default function QuizResultsPage() {
                                 <div className="space-y-6">
                                   {sub.quizAnswers.map((answer, idx) => (
                                     <div key={idx} className="bg-white dark:bg-[#0a0a0a] rounded-lg border border-black/[0.06] dark:border-white/[0.06] p-5">
-                                      <p className="font-mono text-[10px] tracking-widest text-black/40 dark:text-white/40 uppercase mb-2">
-                                        Question {String(idx + 1).padStart(2, "0")}
-                                      </p>
+                                      <div className="flex items-start justify-between mb-4">
+                                        <p className="font-mono text-[10px] tracking-widest text-black/40 dark:text-white/40 uppercase mt-1">
+                                          Question {String(idx + 1).padStart(2, "0")}
+                                        </p>
+                                        {answer.selectedIndex === null || answer.selectedIndex === undefined ? (
+                                          <span className="font-mono text-[9px] tracking-widest font-bold px-2 py-1 rounded bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 uppercase">
+                                            MISSED
+                                          </span>
+                                        ) : answer.selectedIndex === answer.correctIndex ? (
+                                          <span className="font-mono text-[9px] tracking-widest font-bold px-2 py-1 rounded bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 uppercase">
+                                            CORRECT
+                                          </span>
+                                        ) : (
+                                          <span className="font-mono text-[9px] tracking-widest font-bold px-2 py-1 rounded bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 uppercase">
+                                            INCORRECT
+                                          </span>
+                                        )}
+                                      </div>
                                       <p className="font-display font-bold text-base text-black dark:text-white mb-4">
                                         {answer.question}
                                       </p>
@@ -292,6 +310,9 @@ export default function QuizResultsPage() {
               <div className="mb-4 p-3 bg-black/5 dark:bg-white/5 rounded-lg border border-black/5 dark:border-white/5">
                 <span className="font-mono text-[9px] text-black/40 dark:text-white/40 uppercase tracking-widest block mb-1">{sub.weekTitle}</span>
                 <span className="font-mono text-xs text-black/80 dark:text-white/80 leading-tight block">{sub.dayTitle}</span>
+                <span suppressHydrationWarning className="font-mono text-[10px] text-amber-600 dark:text-amber-500 uppercase tracking-widest mt-2 block pt-2 border-t border-black/5 dark:border-white/5 font-bold">
+                  {sub.submittedAt || sub._creationTime ? new Date(sub.submittedAt || sub._creationTime).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : "NO TIMESTAMP"}
+                </span>
               </div>
 
               <div className="flex flex-wrap gap-2">
@@ -330,9 +351,24 @@ export default function QuizResultsPage() {
                         <div className="space-y-4">
                           {sub.quizAnswers.map((answer, idx) => (
                             <div key={idx} className="bg-white dark:bg-[#0a0a0a] rounded border border-black/[0.06] dark:border-white/[0.06] p-3">
-                              <p className="font-mono text-[9px] tracking-widest text-black/40 dark:text-white/40 uppercase mb-1.5">
-                                Q{String(idx + 1).padStart(2, "0")}
-                              </p>
+                              <div className="flex items-start justify-between mb-3">
+                                <p className="font-mono text-[9px] tracking-widest text-black/40 dark:text-white/40 uppercase mt-0.5">
+                                  Q{String(idx + 1).padStart(2, "0")}
+                                </p>
+                                {answer.selectedIndex === null || answer.selectedIndex === undefined ? (
+                                  <span className="font-mono text-[8px] tracking-widest font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 uppercase">
+                                    MISSED
+                                  </span>
+                                ) : answer.selectedIndex === answer.correctIndex ? (
+                                  <span className="font-mono text-[8px] tracking-widest font-bold px-1.5 py-0.5 rounded bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 uppercase">
+                                    CORRECT
+                                  </span>
+                                ) : (
+                                  <span className="font-mono text-[8px] tracking-widest font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 uppercase">
+                                    INCORRECT
+                                  </span>
+                                )}
+                              </div>
                               <p className="font-display font-bold text-sm text-black dark:text-white mb-3">
                                 {answer.question}
                               </p>

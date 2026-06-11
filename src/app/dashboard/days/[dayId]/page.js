@@ -31,6 +31,62 @@ function StarRating({ rating, onRate }) {
   );
 }
 
+function TimeLeftBadge({ deadlineAt, lateDeadlineAt }) {
+  const [now, setNow] = useState(null);
+
+  useEffect(() => {
+    setNow(Date.now());
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  if (!now) return null;
+
+  if (!deadlineAt && !lateDeadlineAt) return null;
+
+  let target = deadlineAt;
+  let isLate = false;
+
+  if (deadlineAt && now < deadlineAt) {
+    target = deadlineAt;
+    isLate = false;
+  } else if (lateDeadlineAt && now < lateDeadlineAt) {
+    target = lateDeadlineAt;
+    isLate = true;
+  } else {
+    return null; // past both
+  }
+
+  const diff = target - now;
+  if (diff <= 0) return null;
+
+  const totalSeconds = Math.floor(diff / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  const formattedStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+  return (
+    <div className={`px-3 py-1.5 rounded-lg border flex flex-col items-center justify-center min-w-[80px] ${
+      isLate 
+        ? 'border-orange-500/30 text-orange-600 bg-orange-500/10 dark:bg-orange-900/20' 
+        : 'border-green-500/30 text-green-600 bg-green-500/10 dark:bg-green-900/20'
+    }`}>
+      <span className={`font-mono text-[8px] uppercase tracking-widest mb-0.5 ${
+        isLate ? 'text-orange-600/70 dark:text-orange-400/70' : 'text-green-600/70 dark:text-green-400/70'
+      }`}>
+        {isLate ? "LATE_DEADLINE" : "TIME_LEFT"}
+      </span>
+      <span className={`font-mono text-sm font-bold tracking-widest leading-none ${
+        isLate ? 'text-orange-600 dark:text-orange-500' : 'text-green-600 dark:text-green-500'
+      }`}>
+        {formattedStr}
+      </span>
+    </div>
+  );
+}
+
 export default function DayViewerPage() {
   const params = useParams();
   const dayId = params.dayId;
@@ -253,12 +309,19 @@ export default function DayViewerPage() {
             
             {/* 2. Task Submission */}
             <div className="border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-6 bg-[#F8F9FA] dark:bg-[#111111]">
-              <p className="font-mono text-[10px] tracking-[0.3em] text-black/30 dark:text-white/30 uppercase mb-2">
-                {hasTask ? "TASK_SUBMISSION" : "NODE_COMPLETION"}
-              </p>
-              <h2 className="font-display font-black text-xl tracking-tight uppercase text-black dark:text-white mb-6">
-                {hasTask ? "Submit Work." : "Complete Node."}
-              </h2>
+              <div className="flex justify-between items-start mb-6 gap-4">
+                <div>
+                  <p className="font-mono text-[10px] tracking-[0.3em] text-black/30 dark:text-white/30 uppercase mb-2">
+                    {hasTask ? "TASK_SUBMISSION" : "NODE_COMPLETION"}
+                  </p>
+                  <h2 className="font-display font-black text-xl tracking-tight uppercase text-black dark:text-white">
+                    {hasTask ? "Submit Work." : "Complete Node."}
+                  </h2>
+                </div>
+                {(day.deadlineAt || day.lateDeadlineAt) && (
+                  <TimeLeftBadge deadlineAt={day.deadlineAt} lateDeadlineAt={day.lateDeadlineAt} />
+                )}
+              </div>
 
               {currentUser?.role === "volunteer" || currentUser?.role === "admin" ? (
                 <div className="p-4 border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 rounded-xl">

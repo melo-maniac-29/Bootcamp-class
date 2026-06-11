@@ -621,3 +621,107 @@ export const getStaffProfileStats = query({
   }
 });
 
+export const fixEmailCasing = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const users = await ctx.db.query("users").collect();
+    let updatedUsers = 0;
+    for (const user of users) {
+      if (user.email && typeof user.email === "string") {
+        const fixedEmail = user.email.trim().toLowerCase();
+        if (user.email !== fixedEmail) {
+          await ctx.db.patch(user._id, { email: fixedEmail });
+          updatedUsers++;
+        }
+      }
+    }
+
+    const accounts = await ctx.db.query("authAccounts").collect();
+    let updatedAccounts = 0;
+    for (const acc of accounts) {
+      if (
+        acc.provider === "password" &&
+        acc.providerAccountId &&
+        typeof acc.providerAccountId === "string"
+      ) {
+        const fixedAccountId = acc.providerAccountId.trim().toLowerCase();
+        if (acc.providerAccountId !== fixedAccountId) {
+          await ctx.db.patch(acc._id, { providerAccountId: fixedAccountId });
+          updatedAccounts++;
+        }
+      }
+    }
+
+    return { updatedUsers, updatedAccounts };
+  }
+});
+
+export const checkDuplicates = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const accounts = await ctx.db.query("authAccounts").collect();
+    const accountCounts: Record<string, number> = {};
+    for (const acc of accounts) {
+      if (acc.provider === "password" && acc.providerAccountId) {
+        accountCounts[acc.providerAccountId] = (accountCounts[acc.providerAccountId] || 0) + 1;
+      }
+    }
+    const duplicates = Object.entries(accountCounts).filter(([_, count]) => count > 1);
+    
+    const users = await ctx.db.query("users").collect();
+    const userCounts: Record<string, number> = {};
+    for (const user of users) {
+      if (user.email) {
+        userCounts[user.email] = (userCounts[user.email] || 0) + 1;
+      }
+    }
+    const duplicateUsers = Object.entries(userCounts).filter(([_, count]) => count > 1);
+
+    return { duplicates, duplicateUsers };
+  }
+});
+
+export const countUsersAndAccounts = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const users = await ctx.db.query("users").collect();
+    const accounts = await ctx.db.query("authAccounts").collect();
+    return {
+      users: users.length,
+      accounts: accounts.length,
+      usersWithEmail: users.filter(u => u.email).length,
+      passwordAccounts: accounts.filter(a => a.provider === "password").length
+    };
+  }
+});
+
+export const checkMismatchedAccounts = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const users = await ctx.db.query("users").collect();
+    const accounts = await ctx.db.query("authAccounts").collect();
+    const mismatched = [];
+    
+    for (const user of users) {
+      if (!user.email) continue;
+      const account = accounts.find(a => a.provider === "password" && a.providerAccountId === user.email);
+      if (!account) {
+        mismatched.push({ userId: user._id, email: user.email, name: user.name });
+      }
+    }
+
+    return { mismatched };
+  }
+});
+
+export const checkEmailExists = query({
+  args: { email: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", args.email))
+      .first();
+    return !!user;
+  }
+});
+

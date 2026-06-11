@@ -84,7 +84,9 @@ export default defineSchema({
     feedbackResponse: v.optional(v.string()),
     studentRating: v.optional(v.number()),
     videoWatchPercent: v.number(),
+    quizSubmittedAt: v.optional(v.number()),
   }).index("by_userId", ["userId"]).index("by_dayId", ["dayId"]).index("by_userId_dayId", ["userId", "dayId"]),
+
 
   submissions: defineTable({
     userId: v.id("users"),

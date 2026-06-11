@@ -217,7 +217,10 @@ export default function SubmissionsPage() {
                   </td>
                   <td className="px-5 py-4">
                     <span className="font-mono text-[10px] text-black/40 dark:text-white/40 uppercase tracking-widest block mb-0.5">{sub.weekTitle}</span>
-                    <span className="font-mono text-xs text-black/80 dark:text-white/80">{sub.dayTitle}</span>
+                    <span className="font-mono text-xs text-black/80 dark:text-white/80 block">{sub.dayTitle}</span>
+                    <span suppressHydrationWarning className="font-mono text-[10px] text-amber-600 dark:text-amber-500 uppercase tracking-widest mt-1.5 block font-bold">
+                      {sub.submittedAt || sub._creationTime ? new Date(sub.submittedAt || sub._creationTime).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : "NO TIMESTAMP"}
+                    </span>
                   </td>
                   <td className="px-5 py-4">
                     {sub.link ? (
@@ -372,6 +375,9 @@ export default function SubmissionsPage() {
               <div className="mb-4 p-3 bg-black/5 dark:bg-white/5 rounded-lg border border-black/5 dark:border-white/5">
                 <span className="font-mono text-[9px] text-black/40 dark:text-white/40 uppercase tracking-widest block mb-1">{sub.weekTitle}</span>
                 <span className="font-mono text-xs text-black/80 dark:text-white/80 leading-tight block">{sub.dayTitle}</span>
+                <span suppressHydrationWarning className="font-mono text-[10px] text-amber-600 dark:text-amber-500 uppercase tracking-widest mt-2 block pt-2 border-t border-black/5 dark:border-white/5 font-bold">
+                  {sub.submittedAt || sub._creationTime ? new Date(sub.submittedAt || sub._creationTime).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : "NO TIMESTAMP"}
+                </span>
               </div>
 
               <div className="grid grid-cols-2 gap-4 mb-4">

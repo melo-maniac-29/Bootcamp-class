@@ -70,7 +70,7 @@ function ProfileContent() {
     }
     setPasswordFlow("submitting");
     try {
-      await updatePassword({ newPassword });
+      await updatePassword({ newPassword: newPassword.trim() });
       alert("Password updated successfully!");
       setPasswordFlow("idle");
       setNewPassword("");

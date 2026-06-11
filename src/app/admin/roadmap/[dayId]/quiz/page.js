@@ -21,6 +21,7 @@ export default function QuizPage() {
   
   const quiz = useQuery(api.content.getQuiz, { dayId });
   const currentUser = useQuery(api.users.current);
+  const progress = useQuery(api.content.getDayProgress, { dayId });
   const saveQuizResult = useMutation(api.content.saveQuizResult);
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -49,6 +50,21 @@ export default function QuizPage() {
     }, 1000);
     return () => clearInterval(timer);
   }, [currentIndex, quiz, finished, answered]);
+
+  // Load previous quiz results if completed
+  useEffect(() => {
+    if (progress?.quizCompleted && !finished) {
+      setFinished(true);
+      setScore(progress.quizScore || 0);
+      if (progress.quizAnswers) {
+        const pastAnswers = {};
+        progress.quizAnswers.forEach((ans, i) => {
+          pastAnswers[i] = ans.selectedIndex;
+        });
+        setUserAnswers(pastAnswers);
+      }
+    }
+  }, [progress, finished]);
 
   // ── Loading ──
   if (quiz === undefined || currentUser === undefined) return (
@@ -144,7 +160,7 @@ export default function QuizPage() {
   const total = questions.length;
   const current = questions[currentIndex];
   const isLast = currentIndex === total - 1;
-  const progress = ((currentIndex) / total) * 100;
+  const progressPct = ((currentIndex) / total) * 100;
 
   const handleSelect = (optIdx) => {
     if (answered) return;
@@ -157,12 +173,20 @@ export default function QuizPage() {
     const newScore = score + (isCorrect ? 1 : 0);
     if (isCorrect) setScore(newScore);
 
-    setUserAnswers((prev) => ({ ...prev, [currentIndex]: selected }));
+    const newUserAnswers = { ...userAnswers, [currentIndex]: selected };
+    setUserAnswers(newUserAnswers);
 
     if (isLast) {
       setSaving(true);
       try {
-        await saveQuizResult({ dayId, score: newScore, total });
+        const quizAnswers = questions.map((q, i) => ({
+          question: q.question,
+          selectedIndex: newUserAnswers[i] !== undefined ? newUserAnswers[i] : null,
+          correctIndex: q.answerIndex,
+          isCorrect: newUserAnswers[i] === q.answerIndex,
+          options: q.options,
+        }));
+        await saveQuizResult({ dayId, score: newScore, total, quizAnswers });
       } catch (e) {
         console.error(e);
       }
@@ -239,33 +263,67 @@ export default function QuizPage() {
           </div>
 
           {/* Review Section */}
-          <div className="mt-8 text-left border-t border-black/[0.06] dark:border-white/[0.06] pt-8">
-            <h3 className="font-display font-black text-xl tracking-tight text-black dark:text-white mb-6 uppercase">Review Answers</h3>
-            <div className="space-y-4">
+          <div className="mt-12 text-left border-t border-black/[0.06] dark:border-white/[0.06] pt-10">
+            <p className="font-mono text-[10px] tracking-[0.3em] text-black/30 dark:text-white/30 uppercase mb-4">REVIEW_ANSWERS</p>
+            <div className="space-y-6">
               {questions.map((q, idx) => {
                 const userAnswerIdx = userAnswers[idx];
+                const skipped = userAnswerIdx === null || userAnswerIdx === undefined;
                 const isCorrect = userAnswerIdx === q.answerIndex;
                 
                 return (
-                  <div key={idx} className={`p-5 rounded-xl border ${isCorrect ? 'border-green-200 bg-green-50/50 dark:border-green-900/30 dark:bg-green-900/10' : 'border-red-200 bg-red-50/50 dark:border-red-900/30 dark:bg-red-900/10'}`}>
-                    <p className="font-mono text-sm font-bold text-black dark:text-white mb-3 leading-relaxed">
-                      {idx + 1}. {q.question}
-                    </p>
-                    <div className="space-y-2">
-                      <div className="flex items-start gap-2">
-                        <span className="font-mono text-[10px] text-black/50 dark:text-white/50 uppercase mt-0.5 w-16 shrink-0">Your Answer:</span>
-                        <span className={`font-mono text-sm font-bold ${isCorrect ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                          {userAnswerIdx !== null && userAnswerIdx !== undefined ? q.options[userAnswerIdx] : "No Answer"}
+                  <div key={idx} className="border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-8 bg-white dark:bg-[#0a0a0a]">
+                    <div className="flex items-start justify-between mb-4">
+                      <p className="font-mono text-[9px] tracking-[0.3em] text-black/25 dark:text-white/25 uppercase mt-1">
+                        QUESTION_{String(idx + 1).padStart(2, "0")}
+                      </p>
+                      {skipped ? (
+                        <span className="font-mono text-[9px] tracking-widest font-bold px-2 py-1 rounded bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 uppercase">
+                          MISSED
                         </span>
-                      </div>
-                      {!isCorrect && (
-                        <div className="flex items-start gap-2">
-                          <span className="font-mono text-[10px] text-black/50 dark:text-white/50 uppercase mt-0.5 w-16 shrink-0">Correct:</span>
-                          <span className="font-mono text-sm font-bold text-green-600 dark:text-green-400">
-                            {q.options[q.answerIndex]}
-                          </span>
-                        </div>
+                      ) : isCorrect ? (
+                        <span className="font-mono text-[9px] tracking-widest font-bold px-2 py-1 rounded bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 uppercase">
+                          CORRECT
+                        </span>
+                      ) : (
+                        <span className="font-mono text-[9px] tracking-widest font-bold px-2 py-1 rounded bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 uppercase">
+                          INCORRECT
+                        </span>
                       )}
+                    </div>
+                    <h2 className="font-display font-black text-xl tracking-tight text-black dark:text-white mb-8 leading-snug">
+                      {q.question}
+                    </h2>
+                    <div className="space-y-3">
+                      {q.options.map((opt, optIdx) => {
+                        const isThisCorrect = q.answerIndex === optIdx;
+                        const isThisSelected = userAnswerIdx === optIdx;
+                        
+                        let style = "border-black/[0.08] dark:border-white/[0.08] bg-[#F8F9FA] dark:bg-[#111111] text-black/70 dark:text-white/70";
+                        
+                        if (isThisCorrect) {
+                          style = "border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 font-bold";
+                        } else if (isThisSelected) {
+                          style = "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 font-bold";
+                        }
+                        
+                        return (
+                          <div key={optIdx} className={`w-full text-left px-5 py-4 rounded-xl border flex items-center justify-between ${style}`}>
+                            <div className="flex items-center gap-4">
+                              <span className={`font-mono text-[9px] font-bold tracking-widest w-5 shrink-0 ${isThisCorrect || isThisSelected ? 'opacity-100' : 'text-black/25 dark:text-white/25'}`}>
+                                {String.fromCharCode(65 + optIdx)}
+                              </span>
+                              <span className="font-mono text-sm uppercase tracking-wider">{opt}</span>
+                            </div>
+                            {isThisCorrect && (
+                              <svg className="w-4 h-4 text-green-500 shrink-0" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            )}
+                            {isThisSelected && !isThisCorrect && (
+                              <svg className="w-4 h-4 text-red-500 shrink-0" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8m0-8l-8 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 );
@@ -306,7 +364,7 @@ export default function QuizPage() {
         </div>
         <div className="h-[2px] w-full bg-black/5 dark:bg-white/5 rounded-full overflow-hidden">
           <motion.div
-            animate={{ width: `${progress}%` }}
+            animate={{ width: `${progressPct}%` }}
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="h-full bg-black dark:bg-white rounded-full"
           />

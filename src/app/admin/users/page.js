@@ -113,7 +113,7 @@ export default function UsersPage() {
       return;
     }
     try {
-      await adminResetPassword({ targetUserId: userId, newPassword });
+      await adminResetPassword({ targetUserId: userId, newPassword: newPassword.trim() });
       setResettingUserId(null);
       setNewPassword("");
       alert("Password reset successfully.");
