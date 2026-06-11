@@ -160,7 +160,7 @@ export default function QuizPage() {
   const total = questions.length;
   const current = questions[currentIndex];
   const isLast = currentIndex === total - 1;
-  const progress = ((currentIndex) / total) * 100;
+  const progressPct = ((currentIndex) / total) * 100;
 
   const handleSelect = (optIdx) => {
     if (answered) return;
@@ -364,7 +364,7 @@ export default function QuizPage() {
         </div>
         <div className="h-[2px] w-full bg-black/5 dark:bg-white/5 rounded-full overflow-hidden">
           <motion.div
-            animate={{ width: `${progress}%` }}
+            animate={{ width: `${progressPct}%` }}
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="h-full bg-black dark:bg-white rounded-full"
           />
