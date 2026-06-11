@@ -73,7 +73,8 @@ export const listSubmissions = query({
           weekOrder: week?.order ?? 999,
           dayOrder: day?.order ?? 999,
           maxPoints,
-          hasTask: !!(day?.taskDescription)
+          hasTask: !!(day?.taskDescription),
+          submittedAt: sub.submittedAt || sub._creationTime
         });
       })
     );
@@ -218,6 +219,7 @@ export const submitTask = mutation({
         isLate: updatedIsLate, 
         status: initialStatus,
         pointsAwarded: existing.pointsAwarded || shouldAwardNow,
+        submittedAt: now,
         ...(shouldAwardNow ? { awardedScore: updatedIsLate ? (day.taskPointsLate || 0) : (day.taskPointsOnTime || 0) } : {})
       });
     }

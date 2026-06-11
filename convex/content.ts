@@ -327,6 +327,7 @@ export const saveQuizResult = mutation({
         quizCompleted: true,
         quizScore: args.score,
         quizTotal: args.total,
+        quizSubmittedAt: Date.now(),
         ...(args.feedbackResponse !== undefined ? { feedbackResponse: args.feedbackResponse } : {}),
         ...(args.quizAnswers !== undefined ? { quizAnswers: args.quizAnswers } : {})
       });
@@ -340,6 +341,7 @@ export const saveQuizResult = mutation({
         overallCompleted: false,
         quizScore: args.score,
         quizTotal: args.total,
+        quizSubmittedAt: Date.now(),
         videoWatchPercent: 0,
         ...(args.feedbackResponse !== undefined ? { feedbackResponse: args.feedbackResponse } : {}),
         ...(args.quizAnswers !== undefined ? { quizAnswers: args.quizAnswers } : {})
@@ -478,6 +480,7 @@ export const submitQuizAnswer = mutation({
         quizScore: newScore,
         quizTotal: quiz.questions.length,
         quizAnswers: newSelections,
+        quizSubmittedAt: Date.now(),
         quizState: undefined // Clear state
       });
       return { finished: true, score: newScore, selections: newSelections };
@@ -593,6 +596,7 @@ export const listQuizSubmissions = query({
         quizScore: p.quizScore,
         quizTotal: p.quizTotal,
         quizAnswers: p.quizAnswers,
+        submittedAt: p.quizSubmittedAt || p._creationTime,
       };
     }));
 
