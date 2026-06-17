@@ -276,6 +276,10 @@ export default function LoginPage() {
                         onChange={(e) => setEmail(e.target.value)}
                         className="w-full bg-transparent border-b border-gray-200 dark:border-white/20 focus:border-black dark:focus:border-white outline-none px-0 py-3 text-black dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-600 transition-colors text-lg font-medium font-mono"
                         placeholder="student@university.edu"
+                        autoComplete="email"
+                        autoCapitalize="none"
+                        autoCorrect="off"
+                        spellCheck="false"
                         required
                       />
                     </div>
@@ -291,6 +295,10 @@ export default function LoginPage() {
                           onChange={(e) => setPassword(e.target.value)}
                           className="w-full bg-transparent border-b border-gray-200 dark:border-white/20 focus:border-black dark:focus:border-white outline-none px-0 py-3 pr-10 text-black dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-600 transition-colors text-lg font-medium font-mono"
                           placeholder="••••••••"
+                          autoComplete="current-password"
+                          autoCapitalize="none"
+                          autoCorrect="off"
+                          spellCheck="false"
                           required
                         />
                         <button
@@ -364,6 +372,10 @@ export default function LoginPage() {
                         onChange={(e) => setEmail(e.target.value)}
                         className="w-full bg-transparent border-b border-gray-200 dark:border-white/20 focus:border-black dark:focus:border-white outline-none px-0 py-3 text-black dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-600 transition-colors text-lg font-medium font-mono"
                         placeholder="architect@circuitron.net"
+                        autoComplete="email"
+                        autoCapitalize="none"
+                        autoCorrect="off"
+                        spellCheck="false"
                         required
                       />
                     </div>
@@ -402,6 +414,10 @@ export default function LoginPage() {
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           className="w-full bg-transparent border-b border-gray-200 dark:border-white/20 focus:border-black dark:focus:border-white outline-none px-0 py-3 pr-10 text-black dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-600 transition-colors text-lg font-medium font-mono"
                           placeholder="••••••••"
+                          autoComplete="new-password"
+                          autoCapitalize="none"
+                          autoCorrect="off"
+                          spellCheck="false"
                           required
                         />
                         <button
